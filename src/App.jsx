@@ -31,14 +31,21 @@ Use sufixo RS quando houver adaptação gaúcha (ex: EF06LI01RS).
 RESTRIÇÃO 5 — APRENDE BRASIL:
 Indique Volume/Unidade do Sistema Aprende Brasil nas Referências.
 
+RESTRIÇÃO 6 — BNCC NO ENSINO FUNDAMENTAL I (Pré-Escola ao 5º Ano):
+A BNCC NÃO prevê códigos específicos de Língua Inglesa para os anos iniciais (Pré-Escola, 1º, 2º, 3º, 4º e 5º anos).
+NUNCA invente ou use códigos EFxxLIxx para esses anos.
+Neste caso, substitua a seção "Habilidades BNCC Alinhadas" por "Habilidades Trabalhadas", descrevendo em português as competências desenvolvidas (ex: reconhecimento de vocabulário oral, familiarização com sons da língua inglesa, etc.), sempre inspiradas no espírito das habilidades da BNCC de Língua Inglesa dos anos finais, mas SEM usar códigos.
+Para o ${ano}, verifique: se for Pré-Escola, 1º, 2º, 3º, 4º ou 5º Ano → use descrição livre. Se for 6º ao 9º Ano → use códigos BNCC exatos.
+
 Crie o plano exatamente neste formato:
 
 # Plano de Aula — Língua Inglesa
 **Tema:** ${tema}
 **Série:** ${ano} | **Duração:** 40 minutos | **Componente:** Língua Inglesa
 
-## Habilidades BNCC Alinhadas
-[2–4 habilidades com código exato e descrição verbatim]
+## Habilidades BNCC Alinhadas OU Habilidades Trabalhadas
+[Se ${ano} for 6º ao 9º Ano: liste 2–4 habilidades com código exato e descrição verbatim da BNCC de Língua Inglesa.
+Se ${ano} for Pré-Escola, 1º, 2º, 3º, 4º ou 5º Ano: use o título "Habilidades Trabalhadas" e descreva 2–4 competências em português, inspiradas na BNCC, SEM usar códigos.]
 
 ## Objetivos de Aprendizagem
 • [Objetivo 1]
