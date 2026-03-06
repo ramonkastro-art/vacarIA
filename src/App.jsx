@@ -83,7 +83,6 @@ async function callGrok(ano, tema) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "grok-4-latest",
       messages: [
         {
           role: "system",
@@ -101,10 +100,10 @@ async function callGrok(ano, tema) {
     const msg = data?.error?.message || data?.error || response.statusText;
     throw new Error(`Erro da API: ${msg}`);
   }
-  const content = data.choices?.[0]?.message?.content;
-  if (!content || content.trim().length === 0)
+  const text = data.choices?.[0]?.message?.content;
+  if (!text || text.trim().length === 0)
     throw new Error("A API retornou uma resposta vazia.");
-  return content;
+  return { text, provider: data._provider || 'ia' };
 }
 
 function renderLines(text) {
@@ -188,11 +187,16 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [provider, setProvider] = useState('');
 
   const handleGenerate = async () => {
     if (!ano || !tema.trim()) { setError("Selecione o ano e digite o tema da aula."); return; }
     setLoading(true); setResult(null); setError(null);
-    try { setResult(await callGrok(ano, tema)); }
+    try {
+      const res = await callGrok(ano, tema);
+      setResult(res.text);
+      setProvider(res.provider);
+    }
     catch (e) { setError(e.message); }
     finally { setLoading(false); }
   };
@@ -308,7 +312,7 @@ export default function App() {
             <div className="result-header">
               <div className="result-header-left">
                 <span className="result-tag">Plano Gerado</span>
-                <span className="grok-badge">Grok-4</span>
+                {provider && <span className="grok-badge">{provider === "groq" ? "Groq · LLaMA 3.3" : provider === "gemini" ? "Gemini · Fallback" : "IA"}</span>}
               </div>
               <div className="result-actions">
                 <button className="action-btn" onClick={handleCopy}>{copied ? "✓ Copiado!" : "Copiar"}</button>

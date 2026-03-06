@@ -55,7 +55,8 @@ git push -u origin main
 
 1. No painel do projeto no Vercel, vá em **Settings → Environment Variables**
 2. Adicione:
-   - **Name:** `GROK_API_KEY`
+   - **Name:** `GROQ_API_KEY` → sua chave Groq (gsk_...)
+   - **Name:** `GEMINI_API_KEY` → sua chave Gemini (AIza...)
    - **Value:** `SUA_CHAVE_AQUI`
    - **Environments:** ✅ Production ✅ Preview ✅ Development
 3. Clique em **Save**
