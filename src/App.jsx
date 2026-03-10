@@ -3,10 +3,11 @@ import { useState } from "react";
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
 const NIVEIS = ["Básico","Intermediário","Avançado"];
-const RECURSOS = ["Quadro negro apenas","Cards / Flashcards","Notebook / Computador"];
+const RECURSOS = ["Quadro negro apenas","Cards / Flashcards","Notebook / Computador","Ar livre 🌿"];
 
 function buildPrompt(ano, tema, duracao, nivel, recursos) {
   const temNotebook = recursos.includes("Notebook / Computador");
+  const temArLivre = recursos.includes("Ar livre 🌿");
   const duracaoMin = duracao === "2 períodos (80 min)" ? "80 minutos" : "40 minutos";
   const recursosStr = recursos.join(", ");
 
@@ -50,6 +51,16 @@ ${temNotebook
 Sugira ferramentas gratuitas online (ex: Wordwall, Quizlet, Google Slides, YouTube, Kahoot, Duolingo for Schools, Padlet, Mentimeter) com links ou instruções de uso direto em sala.
 Descreva passo a passo como o professor conduz a atividade digital.`
   : `Adapte todas as atividades para uso ${recursos.includes("Cards / Flashcards") ? "de cards e flashcards físicos" : "do quadro negro"}, sem dependência de tecnologia digital.`}
+${temArLivre
+  ? `RESTRIÇÃO 7B — AR LIVRE (OBRIGATÓRIO):
+A aula será realizada em espaço externo (quadra poliesportiva ou gramado).
+TODAS as atividades devem ser lúdicas, dinâmicas e adequadas ao espaço aberto.
+Obrigatoriamente sugira jogos e brincadeiras que ensinem o conteúdo de inglês de forma corporal, colaborativa e divertida.
+Use materiais simples: bola, placas/cartazes com palavras ou imagens, giz no chão, cones, bambolês, fitas coloridas, cartões plastificados.
+Para cada atividade, descreva: nome do jogo/brincadeira, objetivo linguístico, materiais necessários, organização do espaço, regras passo a passo e como o professor media em inglês/português.
+Exemplos de dinâmicas possíveis: caça ao vocabulário (word hunt), corrida com placas de palavras, jogo da memória gigante no chão, bingo em movimento, passa-a-bola com perguntas, circuito de estações com desafios de inglês, mímica de vocabulário, corrida de revezamento com frases.
+Priorize atividades que gerem movimento, interação e uso oral da língua inglesa.`
+  : ``}
 
 RESTRIÇÃO 8 — NÍVEL DA TURMA:
 Nível: ${nivel}.
@@ -75,45 +86,45 @@ ${efI
 • [Objetivo 3 — opcional]
 
 ## Materiais Necessários
-• [Liste apenas os materiais condizentes com os recursos disponíveis: ${recursosStr}]
+• [Liste apenas os materiais condizentes com os recursos: ${recursosStr}${temArLivre ? ". Inclua: bola, placas/cartões plastificados, giz para chão, cones, bambolês ou fitas coloridas conforme necessário" : ""}]
 
 ## Estrutura da Aula (${duracaoMin})
 ${duracao === "2 períodos (80 min)"
   ? `### PERÍODO 1 (40 min)
 
 ### 1. Aquecimento — Warm Up (8–10 min)
-[Descrição passo a passo]
+[${temArLivre ? "Dinâmica de movimento no espaço externo para ativar o vocabulário — ex: corrida de nomes, bola com perguntas, aquecimento corporal em inglês" : "Descrição passo a passo"}]
 
 ### 2. Apresentação — Presentation (15 min)
-[Introdução do conteúdo${temNotebook ? " com atividade digital" : ""}]
+[${temNotebook ? "Introdução do conteúdo com atividade digital" : temArLivre ? "Apresentação lúdica no espaço externo: placas/cartazes dispostos pela quadra/gramado, professor apresenta estrutura em inglês de forma oral e gestual" : "Introdução do conteúdo"}]
 
 ### 3. Prática Guiada — Guided Practice (15 min)
-[Atividade de prática${temNotebook ? " usando ferramenta digital (indique qual e como)" : ""}]
+[${temArLivre ? "JOGO/BRINCADEIRA 1: nome da dinâmica, como organizar o espaço, regras passo a passo, como o professor media em inglês/português" : temNotebook ? "Atividade digital (indique ferramenta e como usar)" : "Atividade de prática guiada"}]
 
 ### PERÍODO 2 (40 min)
 
 ### 4. Prática Livre — Free Practice (20 min)
-[Atividade de produção${temNotebook ? " com recurso digital (indique qual e como)" : ""}]
+[${temArLivre ? "JOGO/BRINCADEIRA 2 (mais desafiador): nome da dinâmica, organização, regras e como estimular produção oral em inglês durante a atividade" : temNotebook ? "Atividade com recurso digital (indique qual e como)" : "Atividade de produção"}]
 
 ### 5. Produção — Production (12 min)
-[Atividade de produção final]
+[${temArLivre ? "Desafio final em equipe no espaço externo — atividade que exige uso oral da estrutura aprendida para vencer" : "Atividade de produção final"}]
 
 ### 6. Fechamento — Wrap Up (8 min)
-[Encerramento, recapitulação e avaliação informal]`
+[${temArLivre ? "Roda final: alunos sentados no gramado/quadra, professor recapitula vocabulário com perguntas rápidas, alunos respondem em inglês" : "Encerramento, recapitulação e avaliação informal"}]`
   : `### 1. Aquecimento — Warm Up (5–8 min)
-[Descrição passo a passo]
+[Descrição passo a passo${temArLivre ? " — dinâmica de movimento para engajar no espaço externo" : ""}]
 
 ### 2. Apresentação — Presentation (10–12 min)
-[Introdução do conteúdo${temNotebook ? " com atividade digital (indique ferramenta e como usar)" : ""}]
+[Introdução do conteúdo${temNotebook ? " com atividade digital (indique ferramenta e como usar)" : temArLivre ? " — apresentação lúdica no espaço externo usando placas/cartazes" : ""}]
 
 ### 3. Prática — Practice (12–15 min)
-[Atividade de prática guiada${temNotebook ? " usando ferramenta digital (indique qual e como)" : ""}]
+[${temArLivre ? "JOGO/BRINCADEIRA PRINCIPAL: nome da dinâmica, organização do espaço, regras detalhadas passo a passo, como o professor conduz em inglês/português" : temNotebook ? "Atividade digital (indique ferramenta e como usar)" : "Atividade de prática guiada"}]
 
 ### 4. Produção — Production (5–8 min)
-[Atividade de produção]
+[${temArLivre ? "Atividade de produção oral em movimento — desafio final no espaço externo" : "Atividade de produção"}]
 
 ### 5. Fechamento — Wrap Up (3–5 min)
-[Encerramento e recapitulação]`}
+[${temArLivre ? "Reunir os alunos em roda, recapitulação oral do vocabulário/estrutura trabalhada" : "Encerramento e recapitulação"}]`}
 
 ## Avaliação
 [2–4 linhas com critérios observáveis adequados ao nível ${nivel}]
@@ -236,7 +247,7 @@ function CheckboxGroup({ label, options, value, onChange }) {
       <div className="checkbox-group">
         {options.map(opt => (
           <button key={opt} type="button"
-            className={`chip${value.includes(opt) ? " chip-active" : ""}`}
+            className={`chip${opt.includes("Ar livre") ? " chip-verde" : ""}${value.includes(opt) ? " chip-active" : ""}`}
             onClick={() => toggle(opt)}>
             {opt}
           </button>
@@ -351,6 +362,8 @@ export default function App() {
         .chip{padding:8px 16px;border-radius:100px;border:1.5px solid #fde68a;background:#fffbeb;color:#78716c;font-family:'IBM Plex Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .18s;white-space:nowrap}
         .chip:hover{border-color:#d97706;color:#92400e}
         .chip-active{background:#d97706;border-color:#d97706;color:#fff;font-weight:600}
+        .chip-verde{border-color:#16a34a!important;color:#15803d!important}
+        .chip-verde.chip-active{background:#16a34a!important;border-color:#16a34a!important;color:#fff!important}
         .chip-active:hover{background:#b45309;border-color:#b45309;color:#fff}
 
         .divider{border:none;border-top:1px solid #fde68a;margin:4px 0 20px}
