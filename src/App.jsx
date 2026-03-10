@@ -275,6 +275,23 @@ export default function App() {
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
+
+  // Captura o evento de instalação PWA
+  useState(() => {
+    const handler = (e) => { e.preventDefault(); setInstallPrompt(e); setShowInstall(true); };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  });
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setShowInstall(false);
+    setInstallPrompt(null);
+  };
 
   const handleGenerate = async () => {
     if (!ano || !tema.trim()) { setError("Selecione o ano e digite o tema da aula."); return; }
@@ -374,6 +391,17 @@ export default function App() {
         .spinner{width:36px;height:36px;border:3px solid #fde68a;border-top-color:#d97706;border-radius:50%;animation:spin .8s linear infinite}
         @keyframes spin{to{transform:rotate(360deg)}}
 
+        .install-banner{width:100%;max-width:600px;margin-top:20px;background:#fff;border:1.5px solid #d97706;border-radius:14px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 16px rgba(180,83,9,.1);animation:fadeIn .4s ease}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .install-banner-left{display:flex;align-items:center;gap:12px}
+        .install-icon{width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0}
+        .install-text strong{display:block;font-size:14px;color:#92400e;font-weight:700}
+        .install-text span{font-size:12px;color:#78716c}
+        .install-actions{display:flex;gap:8px;flex-shrink:0}
+        .install-btn{padding:8px 18px;background:#d97706;border:none;border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
+        .install-btn:hover{background:#b45309}
+        .install-dismiss{padding:8px 12px;background:transparent;border:1.5px solid #fde68a;border-radius:8px;color:#a16207;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s}
+        .install-dismiss:hover{border-color:#d97706;color:#92400e}
         .footer{margin-top:48px;text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:#d4c4a0;letter-spacing:.05em}
 
         @media(max-width:640px){
@@ -394,6 +422,22 @@ export default function App() {
           <div className="title">Vacar<span>IA</span></div>
           <p className="subtitle">Assistente pedagógico com IA para planejamento de aulas de Língua Inglesa</p>
         </header>
+
+        {showInstall && (
+          <div className="install-banner">
+            <div className="install-banner-left">
+              <img src="/icon-192.png" alt="VacarIA" className="install-icon" />
+              <div className="install-text">
+                <strong>Instalar VacarIA</strong>
+                <span>Adicione à tela inicial do seu celular</span>
+              </div>
+            </div>
+            <div className="install-actions">
+              <button className="install-btn" onClick={handleInstall}>Instalar</button>
+              <button className="install-dismiss" onClick={() => setShowInstall(false)}>✕</button>
+            </div>
+          </div>
+        )}
 
         <div className="card">
 
