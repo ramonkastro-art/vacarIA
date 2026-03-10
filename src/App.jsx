@@ -223,19 +223,7 @@ ${printEl.innerHTML}
   setTimeout(() => win.print(), 600);
 }
 
-function handleWhatsApp(result) {
-  const texto = encodeURIComponent(
-    `📚 *Plano de Aula gerado pelo VacarIA*\n\n${result.slice(0, 1000)}...\n\n_Gerado em ${new Date().toLocaleDateString("pt-BR")}_`
-  );
-  window.open(`https://wa.me/?text=${texto}`, "_blank");
-}
 
-function handleShareLink(result, params) {
-  const payload = btoa(encodeURIComponent(JSON.stringify({ result, params, date: new Date().toISOString() })));
-  const url = `${window.location.origin}${window.location.pathname}?plano=${payload}`;
-  navigator.clipboard.writeText(url);
-  return url;
-}
 
 function CheckboxGroup({ label, options, value, onChange }) {
   const toggle = (opt) => {
@@ -285,8 +273,6 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [provider, setProvider] = useState("");
   const [error, setError] = useState(null);
-  const [copied, setCopied] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstall, setShowInstall] = useState(false);
 
@@ -317,12 +303,6 @@ export default function App() {
     finally { setLoading(false); }
   };
 
-  const handleCopy = () => {
-    if (!result) return;
-    navigator.clipboard.writeText(result);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleLink = () => {
     handleShareLink(result, { ano, tema, duracao, nivel, recursos });
@@ -385,10 +365,6 @@ export default function App() {
         .action-btn:hover{background:#fef3c7;border-color:#d97706}
         .action-btn.pdf{background:#b45309;border-color:#b45309;color:#fff}
         .action-btn.pdf:hover{background:#92400e;border-color:#92400e}
-        .action-btn.whats{background:#16a34a;border-color:#16a34a;color:#fff}
-        .action-btn.whats:hover{background:#15803d;border-color:#15803d}
-        .action-btn.link{background:#0e7490;border-color:#0e7490;color:#fff}
-        .action-btn.link:hover{background:#0c6476;border-color:#0c6476}
 
         .result-body{padding:28px 32px}
         .md-h1{font-size:20px;font-weight:800;color:#b45309;font-family:'Space Mono',monospace;margin:8px 0 12px;border-bottom:2px solid #fde68a;padding-bottom:8px}
@@ -515,12 +491,7 @@ export default function App() {
                   </span>
                 )}
               </div>
-              <div className="result-actions">
-                <button className="action-btn" onClick={handleCopy}>{copied ? "✓ Copiado!" : "Copiar"}</button>
-                <button className="action-btn link" onClick={handleLink}>{linkCopied ? "✓ Link copiado!" : "🔗 Compartilhar"}</button>
-                <button className="action-btn whats" onClick={() => handleWhatsApp(result)}>WhatsApp</button>
-                <button className="action-btn pdf" onClick={() => handlePrint({ ano, tema })}>↓ PDF</button>
-              </div>
+              <button className="action-btn pdf" onClick={() => handlePrint({ ano, tema })}>↓ Salvar PDF</button>
             </div>
             <div className="result-body">
               <div id="plano-para-pdf">{renderLines(result)}</div>
