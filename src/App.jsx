@@ -214,6 +214,7 @@ body{font-family:'IBM Plex Sans',sans-serif;font-size:11pt;color:#1e293b;backgro
 ${printEl.innerHTML}
 <div class="pdf-footer">
   <span>VacarIA · Assistente Pedagógico para Professores de Inglês</span>
+  <span style="font-size:7.5pt;color:#c4b5a0">Desenvolvido por Ramon Castro</span>
   <span>${new Date().toLocaleDateString("pt-BR")}</span>
 </div>
 </body></html>`);
@@ -527,7 +528,7 @@ export default function App() {
           </div>
         )}
 
-        <footer className="footer">VacarIA · Secretaria Municipal de Educação · Vacaria/RS</footer>
+        <footer className="footer">VacarIA · Desenvolvido por Ramon Castro</footer>
       </div>
     </>
   );
