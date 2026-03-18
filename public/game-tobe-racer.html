@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verb Racer – To Be</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0a0a14; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:'Exo 2',sans-serif; overflow:hidden; }
+  #wrapper { position:relative; width:540px; height:680px; }
+  canvas { display:block; border-radius:16px; }
+
+  #screen-choose {
+    position:absolute; inset:0; background:#0d0d1e;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:16px; gap:16px;
+  }
+  #screen-choose h1 { font-family:'Orbitron',sans-serif; font-size:22px; color:#e0e0ff; letter-spacing:3px; }
+  #screen-choose p { font-size:13px; color:#888aaa; letter-spacing:1px; }
+  .pronoun-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:0 24px; width:100%; }
+  .pronoun-btn {
+    background:#16162a; border:1.5px solid #2a2a4a; border-radius:10px;
+    padding:10px 6px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px;
+    transition:all .15s; pointer-events:auto;
+  }
+  .pronoun-btn:hover { border-color:#5f8fff; background:#1e1e38; transform:translateY(-2px); }
+  .pronoun-btn canvas { border-radius:6px; }
+  .pronoun-btn span { font-family:'Orbitron',sans-serif; font-size:11px; color:#ccd; }
+  .top-scores-mini { font-size:10px; color:#444; font-family:'Orbitron',sans-serif; cursor:pointer; text-decoration:underline; pointer-events:auto; }
+  .top-scores-mini:hover { color:#5f8fff; }
+
+  #screen-tense {
+    position:absolute; inset:0; background:#0d0d1e;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:16px; gap:18px;
+  }
+  #screen-tense h2 { font-family:'Orbitron',sans-serif; font-size:16px; color:#e0e0ff; letter-spacing:2px; }
+  #tense-chosen-label { font-size:13px; color:#5f8fff; }
+  .tense-btns { display:flex; flex-direction:column; gap:10px; width:80%; }
+  .tense-btn {
+    background:#16162a; border:1.5px solid #2a2a4a; border-radius:10px;
+    padding:14px 20px; cursor:pointer; font-family:'Orbitron',sans-serif;
+    font-size:13px; color:#ccd; letter-spacing:1px;
+    transition:all .15s; pointer-events:auto; text-align:center;
+  }
+  .tense-btn:hover { border-color:#5f8fff; background:#1e1e38; }
+
+  #hud {
+    position:absolute; top:10px; left:0; right:0;
+    display:none; justify-content:space-between; align-items:center;
+    padding:0 14px;
+  }
+  #hud-pronoun { font-family:'Orbitron',sans-serif; font-size:13px; color:#fff; background:#1a1a30cc; padding:5px 12px; border-radius:20px; border:1px solid #2a2a55; }
+  #hud-score { font-family:'Orbitron',sans-serif; font-size:15px; color:#ffe040; }
+  #hud-lives { font-size:16px; letter-spacing:2px; }
+
+  #flash { position:absolute; inset:0; border-radius:16px; pointer-events:none; opacity:0; transition:opacity .15s; }
+
+  /* GAME OVER / NAME ENTRY */
+  #screen-over {
+    position:absolute; inset:0; background:#0d0d1eee;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:16px; gap:12px; backdrop-filter:blur(4px);
+  }
+  #screen-over h2 { font-family:'Orbitron',sans-serif; font-size:22px; color:#ff4466; }
+  #screen-over .final-score { font-family:'Orbitron',sans-serif; font-size:40px; color:#ffe040; }
+  #screen-over p { color:#aaa; font-size:13px; }
+  #name-entry-area { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  #name-entry-area label { font-size:12px; color:#888; font-family:'Orbitron',sans-serif; letter-spacing:1px; }
+  #player-name-input {
+    background:#16162a; border:1.5px solid #5f8fff; border-radius:8px;
+    padding:8px 16px; font-family:'Orbitron',sans-serif; font-size:14px;
+    color:#fff; text-align:center; width:220px; outline:none; pointer-events:auto;
+  }
+  #btn-save-score {
+    background:#5f8fff; border:none; border-radius:8px; padding:10px 24px;
+    font-family:'Orbitron',sans-serif; font-size:12px; color:#fff;
+    cursor:pointer; pointer-events:auto; transition:all .15s;
+  }
+  #btn-save-score:hover { background:#7aaafF; }
+  .over-btns { display:flex; gap:10px; }
+  .over-btn {
+    background:#1e1e38; border:1.5px solid #2a2a55; border-radius:8px; padding:10px 20px;
+    font-family:'Orbitron',sans-serif; font-size:11px; color:#aaa;
+    cursor:pointer; pointer-events:auto; transition:all .15s;
+  }
+  .over-btn:hover { border-color:#5f8fff; color:#5f8fff; }
+
+  /* RANKING SCREEN */
+  #screen-ranking {
+    position:absolute; inset:0; background:#0d0d1e;
+    display:none; flex-direction:column; align-items:center;
+    border-radius:16px; padding:24px 20px; gap:12px;
+  }
+  #screen-ranking h2 { font-family:'Orbitron',sans-serif; font-size:16px; color:#ffe040; letter-spacing:2px; }
+  #ranking-list { width:100%; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; }
+  .rank-row {
+    display:flex; align-items:center; gap:10px;
+    background:#16162a; border:0.5px solid #2a2a4a; border-radius:8px;
+    padding:8px 14px;
+  }
+  .rank-pos { font-family:'Orbitron',sans-serif; font-size:13px; color:#556; min-width:24px; }
+  .rank-pos.gold { color:#ffe040; }
+  .rank-pos.silver { color:#b0bec5; }
+  .rank-pos.bronze { color:#cd7f32; }
+  .rank-medal { font-size:16px; }
+  .rank-name { font-family:'Orbitron',sans-serif; font-size:12px; color:#ccd; flex:1; }
+  .rank-pronoun { font-size:10px; color:#556; font-family:'Orbitron',sans-serif; }
+  .rank-score { font-family:'Orbitron',sans-serif; font-size:14px; color:#ffe040; }
+  .rank-tense { font-size:9px; color:#334; font-family:'Orbitron',sans-serif; }
+  #btn-close-ranking {
+    background:#1e1e38; border:1.5px solid #2a2a55; border-radius:8px;
+    padding:10px 28px; font-family:'Orbitron',sans-serif; font-size:12px;
+    color:#aaa; cursor:pointer; pointer-events:auto; transition:all .15s;
+  }
+  #btn-close-ranking:hover { border-color:#5f8fff; color:#5f8fff; }
+  .rank-diff { font-size:9px; font-family:'Orbitron',sans-serif; padding:1px 6px; border-radius:8px; }
+  .rank-diff.easy { background:#0a2018; color:#00ff88; }
+  .rank-diff.hard { background:#220a14; color:#ff4466; }
+  #ranking-empty { font-size:13px; color:#334; font-family:'Orbitron',sans-serif; text-align:center; margin-top:40px; }
+
+  #tense-badge { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); font-size:11px; color:#334; font-family:'Orbitron',sans-serif; letter-spacing:1px; display:none; }
+
+  /* mute button — agora dentro do HUD */
+  #btn-mute { background:transparent; border:none; border-radius:6px; padding:2px 4px; font-size:16px; cursor:pointer; pointer-events:auto; color:#aaa; z-index:10; line-height:1; }
+  #btn-mute:hover { color:#fff; }
+
+  /* DIFFICULTY SCREEN */
+  #screen-difficulty {
+    position:absolute; inset:0; background:#0d0d1e;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:16px; gap:20px;
+  }
+  #screen-difficulty h2 { font-family:'Orbitron',sans-serif; font-size:16px; color:#e0e0ff; letter-spacing:2px; }
+  #diff-chosen-label { font-size:12px; color:#5f8fff; font-family:'Orbitron',sans-serif; }
+  .diff-cards { display:flex; gap:16px; padding:0 24px; }
+  .diff-card {
+    flex:1; background:#16162a; border:1.5px solid #2a2a4a; border-radius:14px;
+    padding:22px 14px; cursor:pointer; display:flex; flex-direction:column;
+    align-items:center; gap:12px; transition:all .18s; pointer-events:auto;
+  }
+  .diff-card:hover { transform:translateY(-3px); }
+  .diff-card.easy:hover { border-color:#00ff88; background:#0a2018; }
+  .diff-card.hard:hover { border-color:#ff4466; background:#220a14; }
+  .diff-icon { font-size:32px; }
+  .diff-title { font-family:'Orbitron',sans-serif; font-size:15px; letter-spacing:2px; }
+  .diff-card.easy .diff-title { color:#00ff88; }
+  .diff-card.hard .diff-title { color:#ff4466; }
+  .diff-desc { font-size:11px; color:#667; line-height:1.6; text-align:center; font-family:'Exo 2',sans-serif; }
+  .diff-tag { font-size:10px; font-family:'Orbitron',sans-serif; padding:3px 10px; border-radius:20px; }
+  .diff-card.easy .diff-tag { background:#0a2018; color:#00ff88; border:1px solid #00ff8844; }
+  .diff-card.hard .diff-tag { background:#220a14; color:#ff4466; border:1px solid #ff446644; }
+  /* HUD difficulty badge */
+  #hud-diff { font-family:'Orbitron',sans-serif; font-size:9px; padding:2px 7px; border-radius:10px; margin-left:4px; vertical-align:middle; }
+  #hud-diff.easy { background:#0a2018; color:#00ff88; border:1px solid #00ff8833; }
+  #hud-diff.hard { background:#220a14; color:#ff4466; border:1px solid #ff446633; }
+
+  /* PAUSE BUTTON */
+  #btn-pause {
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    background:#16162a; border:1px solid #2a2a4a; border-radius:6px;
+    padding:4px 12px; font-size:13px; cursor:pointer; pointer-events:auto;
+    color:#aaa; z-index:10; display:none; font-family:'Orbitron',sans-serif;
+    letter-spacing:1px; transition:all .15s;
+  }
+  #btn-pause:hover { border-color:#5f8fff; color:#fff; }
+
+  /* PAUSE / MENU SCREEN */
+  #screen-pause {
+    position:absolute; inset:0; background:#0a0a14cc;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:16px; gap:14px; backdrop-filter:blur(6px);
+  }
+  #screen-pause .pause-title {
+    font-family:'Orbitron',sans-serif; font-size:26px; color:#e0e0ff;
+    letter-spacing:4px; margin-bottom:4px;
+  }
+  #screen-pause .pause-info {
+    font-size:12px; color:#445; font-family:'Orbitron',sans-serif; letter-spacing:1px;
+    margin-bottom:8px;
+  }
+  .pause-btn {
+    width:240px; background:#16162a; border:1.5px solid #2a2a4a; border-radius:10px;
+    padding:13px 20px; cursor:pointer; font-family:'Orbitron',sans-serif;
+    font-size:12px; color:#ccd; letter-spacing:1px;
+    transition:all .15s; pointer-events:auto; text-align:center;
+  }
+  .pause-btn:hover { background:#1e1e38; }
+  .pause-btn.resume { border-color:#00ff88; color:#00ff88; }
+  .pause-btn.resume:hover { background:#0a2018; }
+  .pause-btn.restart { border-color:#5f8fff; color:#5f8fff; }
+  .pause-btn.restart:hover { background:#0a1228; }
+  .pause-btn.quit { border-color:#ff4466; color:#ff4466; }
+  .pause-btn.quit:hover { background:#220a14; }
+</style>
+</head>
+<body>
+<div id="wrapper">
+  <canvas id="gameCanvas" width="540" height="680"></canvas>
+  <div id="flash"></div>
+  <button id="btn-pause" onclick="togglePause()">⏸ PAUSE</button>
+
+  <!-- PAUSE SCREEN -->
+  <div id="screen-pause">
+    <div class="pause-title">PAUSED</div>
+    <div class="pause-info" id="pause-info"></div>
+    <button class="pause-btn resume" onclick="togglePause()">▶  Resume</button>
+    <button class="pause-btn restart" onclick="pauseRestart()">↺  Restart</button>
+    <button class="pause-btn" onclick="pauseChangeCar()">🚗  Change car</button>
+    <button class="pause-btn quit" onclick="pauseQuit()">✕  Quit to menu</button>
+  </div>
+
+  <!-- CHOOSE PRONOUN -->
+  <div id="screen-choose">
+    <h1>Verb Racer</h1>
+    <p>choose your pronoun car</p>
+    <div class="pronoun-grid" id="pronoun-grid"></div>
+    <span class="top-scores-mini" onclick="showRanking()">🏆 Top Scores</span>
+    <div style="margin-top:4px;text-align:center;line-height:1.8;">
+      <div style="font-size:10px;color:#334;font-family:'Exo 2',sans-serif;letter-spacing:1px;">desenvolvido por</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:12px;color:#7aaaff;letter-spacing:1px;">Prof. Ramon Castro</div>
+      <div style="font-size:10px;color:#334;font-family:'Exo 2',sans-serif;letter-spacing:1px;">ft.</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:12px;background:linear-gradient(90deg,#c77dff,#5f8fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px;">Claude IA ✦ Anthropic</div>
+    </div>
+  </div>
+
+  <!-- CHOOSE TENSE -->
+  <div id="screen-tense">
+    <div id="tense-chosen-label"></div>
+    <h2>Choose tense</h2>
+    <div class="tense-btns">
+      <button class="tense-btn" onclick="selectTense('present')">Present — am / is / are</button>
+      <button class="tense-btn" onclick="selectTense('past')">Past — was / were</button>
+      <button class="tense-btn" onclick="selectTense('future')">Future — will be</button>
+      <button class="tense-btn" onclick="selectTense('mixed')">Mixed — all tenses</button>
+    </div>
+  </div>
+
+  <!-- CHOOSE DIFFICULTY -->
+  <div id="screen-difficulty">
+    <div id="diff-chosen-label"></div>
+    <h2>Choose difficulty</h2>
+    <div class="diff-cards">
+      <div class="diff-card easy" onclick="selectDifficulty('easy')">
+        <div class="diff-icon">🟢</div>
+        <div class="diff-title">EASY</div>
+        <div class="diff-desc">Correct gate glows <span style="color:#00ff88">green</span>.<br>Wrong gates glow red.<br>Gates appear at steady pace.</div>
+        <div class="diff-tag">+10 pts / gate</div>
+      </div>
+      <div class="diff-card hard" onclick="selectDifficulty('hard')">
+        <div class="diff-icon">🔴</div>
+        <div class="diff-title">HARD</div>
+        <div class="diff-desc">All gates look the same.<br>No color hints — think fast!<br>Spacing varies randomly.</div>
+        <div class="diff-tag">+20 pts / gate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div style="display:flex;align-items:center;gap:6px">
+      <div id="hud-pronoun"></div>
+      <span id="hud-diff" class="easy">EASY</span>
+    </div>
+    <div id="hud-score">0</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="hud-lives" style="font-size:20px;letter-spacing:3px;">❤️❤️❤️</div>
+      <button id="btn-mute" onclick="toggleMute()" title="Toggle sound">🔊</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="screen-over">
+    <h2>GAME OVER</h2>
+    <div class="final-score" id="final-score">0</div>
+    <p id="final-msg"></p>
+    <div id="name-entry-area">
+      <label>enter your name</label>
+      <input id="player-name-input" type="text" maxlength="16" placeholder="Player" autocomplete="off" />
+      <button id="btn-save-score" onclick="saveScore()">Save to Ranking 🏆</button>
+    </div>
+    <div class="over-btns">
+      <button class="over-btn" onclick="restartGame()">Play again</button>
+      <button class="over-btn" onclick="showRanking()">Rankings</button>
+      <button class="over-btn" onclick="goHome()">Change car</button>
+    </div>
+  </div>
+
+  <!-- RANKING -->
+  <div id="screen-ranking">
+    <h2>🏆 Top Scores</h2>
+    <div id="ranking-list"></div>
+    <button id="btn-close-ranking" onclick="closeRanking()">Back</button>
+  </div>
+
+  <div id="tense-badge"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  AUDIO ENGINE — chiptune Mario Kart-style
+// ════════════════════════════════════════════════════════════
+let audioCtx = null;
+let masterGain = null;
+let muted = false;
+let bgmRunning = false;
+let bgmTimeoutId = null;
+
+function getAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 1;
+    masterGain.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+
+function toggleMute(){
+  muted = !muted;
+  document.getElementById('btn-mute').textContent = muted ? '🔇' : '🔊';
+  // Instantly silence/restore via master gain — no need to stop/restart BGM
+  if(masterGain) masterGain.gain.value = muted ? 0 : 1;
+}
+
+// Simple beep — all sound routed through masterGain
+function playTone(freq, type, duration, vol=0.18, delay=0){
+  const ac = getAudio();
+  const osc = ac.createOscillator();
+  const gain = ac.createGain();
+  osc.connect(gain); gain.connect(masterGain);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ac.currentTime+delay);
+  gain.gain.setValueAtTime(0, ac.currentTime+delay);
+  gain.gain.linearRampToValueAtTime(vol, ac.currentTime+delay+0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+delay+duration);
+  osc.start(ac.currentTime+delay);
+  osc.stop(ac.currentTime+delay+duration+0.05);
+}
+
+// Correct sound — ascending fanfare
+function sfxCorrect(){
+  [523,659,784,1047].forEach((f,i) => playTone(f,'square',0.12,0.15,i*0.07));
+}
+
+// Wrong sound — descending buzz
+function sfxWrong(){
+  [330,277,220].forEach((f,i) => playTone(f,'sawtooth',0.14,0.18,i*0.07));
+}
+
+// Game over jingle
+function sfxGameOver(){
+  const seq = [392,370,349,330,294];
+  seq.forEach((f,i) => playTone(f,'square',0.22,0.2,i*0.13));
+}
+
+// Start race countdown beeps
+function sfxStart(){
+  [440,440,880].forEach((f,i) => playTone(f,'square',0.1,0.25,i*0.35));
+}
+
+// BGM — Mario Kart-inspired chiptune loop
+const BGM_TEMPO = 0.18; // seconds per beat
+const BGM_MELODY = [
+  // bar 1
+  [659,0],[0,0],[523,0],[0,0],[587,0],[0,0],[659,0],[0,0],
+  // bar 2
+  [698,0],[0,0],[659,0],[0,0],[587,0],[0,0],[523,0],[0,0],
+  // bar 3
+  [440,0],[0,0],[494,0],[0,0],[523,0],[0,0],[587,0],[0,0],
+  // bar 4
+  [659,0],[659,0],[0,0],[0,0],[784,0],[0,0],[698,0],[0,0],
+  // bar 5
+  [659,0],[0,0],[523,0],[0,0],[587,0],[0,0],[659,0],[0,0],
+  // bar 6
+  [698,0],[0,0],[880,0],[0,0],[784,0],[0,0],[698,0],[0,0],
+  // bar 7
+  [659,0],[0,0],[523,0],[0,0],[440,0],[0,0],[494,0],[0,0],
+  // bar 8
+  [523,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],
+];
+const BGM_BASS = [
+  [131,0],[0,0],[0,0],[0,0],[131,0],[0,0],[0,0],[0,0],
+  [147,0],[0,0],[0,0],[0,0],[130,0],[0,0],[0,0],[0,0],
+  [110,0],[0,0],[0,0],[0,0],[110,0],[0,0],[0,0],[0,0],
+  [131,0],[0,0],[0,0],[0,0],[196,0],[0,0],[0,0],[0,0],
+  [131,0],[0,0],[0,0],[0,0],[131,0],[0,0],[0,0],[0,0],
+  [175,0],[0,0],[0,0],[0,0],[196,0],[0,0],[0,0],[0,0],
+  [131,0],[0,0],[0,0],[0,0],[110,0],[0,0],[0,0],[0,0],
+  [130,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],
+];
+
+function startBGM(){
+  if(bgmRunning) return;
+  bgmRunning = true;
+  scheduleBGM();
+}
+
+function scheduleBGM(){
+  if(!bgmRunning) return;
+  const totalSteps = BGM_MELODY.length;
+  for(let i=0; i<totalSteps; i++){
+    const [mf] = BGM_MELODY[i];
+    const [bf] = BGM_BASS[i];
+    if(mf > 0) playTone(mf,'square', BGM_TEMPO*0.7, 0.08, i*BGM_TEMPO);
+    if(bf > 0) playTone(bf,'triangle', BGM_TEMPO*1.2, 0.06, i*BGM_TEMPO);
+    if(i%2===0) playTone(800+(i%8)*100,'square',0.03,0.04,i*BGM_TEMPO);
+  }
+  bgmTimeoutId = setTimeout(scheduleBGM, totalSteps * BGM_TEMPO * 1000 - 50);
+}
+
+function stopBGM(){
+  bgmRunning = false;
+  if(bgmTimeoutId) clearTimeout(bgmTimeoutId);
+}
+
+// ════════════════════════════════════════════════════════════
+//  RANKING (localStorage)
+// ════════════════════════════════════════════════════════════
+const RANKING_KEY = 'verbRacerScores_v1';
+let rankingFrom = 'home'; // track where to go back
+
+function loadScores(){
+  try { return JSON.parse(localStorage.getItem(RANKING_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveScores(arr){
+  try { localStorage.setItem(RANKING_KEY, JSON.stringify(arr)); } catch(e){}
+}
+function addScore(name, sc, p, t, d){
+  const scores = loadScores();
+  scores.push({ name: name.trim()||'Player', score:sc, pronoun:p, tense:t, diff:d, date: new Date().toLocaleDateString('pt-BR') });
+  scores.sort((a,b)=>b.score-a.score);
+  scores.splice(15);
+  saveScores(scores);
+}
+
+function saveScore(){
+  const name = document.getElementById('player-name-input').value.trim() || 'Player';
+  addScore(name, score, pronoun, tense, difficulty);
+  document.getElementById('name-entry-area').style.display='none';
+  document.getElementById('btn-save-score').textContent='Saved! ✓';
+  rankingFrom = 'over';
+}
+
+function showRanking(){
+  rankingFrom = gameRunning ? 'game' : 
+                document.getElementById('screen-over').style.display==='flex' ? 'over' : 'home';
+  document.getElementById('screen-choose').style.display='none';
+  document.getElementById('screen-over').style.display='none';
+  const scores = loadScores();
+  const list = document.getElementById('ranking-list');
+  list.innerHTML = '';
+  if(scores.length===0){
+    list.innerHTML='<div id="ranking-empty">No scores yet.<br>Be the first!</div>';
+  } else {
+    scores.forEach((s,i)=>{
+      const medals = ['🥇','🥈','🥉'];
+      const posClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+      const div = document.createElement('div');
+      div.className='rank-row';
+      div.innerHTML=`
+        <span class="rank-pos ${posClass}">#${i+1}</span>
+        <span class="rank-medal">${medals[i]||''}</span>
+        <span class="rank-name">${s.name}</span>
+        <span class="rank-pronoun">${s.pronoun}</span>
+        <span class="rank-diff ${s.diff||'easy'}">${(s.diff||'easy').toUpperCase()}</span>
+        <span class="rank-score">${s.score}</span>
+      `;
+      list.appendChild(div);
+    });
+  }
+  document.getElementById('screen-ranking').style.display='flex';
+}
+
+function closeRanking(){
+  document.getElementById('screen-ranking').style.display='none';
+  if(rankingFrom==='over'){
+    document.getElementById('screen-over').style.display='flex';
+  } else {
+    document.getElementById('screen-choose').style.display='flex';
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  GAME ENGINE
+// ════════════════════════════════════════════════════════════
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+const CORRECT = {
+  present: { I:'AM', YOU:'ARE', HE:'IS', SHE:'IS', IT:'IS', WE:'ARE', THEY:'ARE' },
+  past:    { I:'WAS', YOU:'WERE', HE:'WAS', SHE:'WAS', IT:'WAS', WE:'WERE', THEY:'WERE' },
+  future:  { I:'WILL BE', YOU:'WILL BE', HE:'WILL BE', SHE:'WILL BE', IT:'WILL BE', WE:'WILL BE', THEY:'WILL BE' }
+};
+const POOL = {
+  present: ['AM','IS','ARE'],
+  past:    ['WAS','WERE'],
+  future:  ['WILL BE','WAS','ARE']
+};
+const MIXED_TENSES = ['present','past','future'];
+const PRONOUNS = ['I','YOU','HE','SHE','IT','WE','THEY'];
+const CAR_COLORS = {
+  I:    { body:'#e63946', trim:'#ff8fa3', glow:'#ff000055' },
+  YOU:  { body:'#457b9d', trim:'#90caf9', glow:'#2196f355' },
+  HE:   { body:'#2d6a4f', trim:'#95d5b2', glow:'#00ff8855' },
+  SHE:  { body:'#c77dff', trim:'#f3ccff', glow:'#c77dff55' },
+  IT:   { body:'#e76f51', trim:'#ffd166', glow:'#ff990055' },
+  WE:   { body:'#ffd166', trim:'#fff',    glow:'#ffdd0055' },
+  THEY: { body:'#7209b7', trim:'#b5838d', glow:'#7209b755' }
+};
+
+let pronoun=null, tense=null, difficulty='easy';
+let paused=false;
+let score=0, lives=3, gameRunning=false;
+let speed=2.2, frameCount=0, distance=0;
+let roadLines=[], bgStars=[];
+let car={ x:W/2, y:H-150, w:44, h:72, vx:0 };
+const CAR_SPEED=5.5;
+let keys={};
+let gates=[], nextGateDist=300, gateSpacing=420;
+let particles=[];
+let touchStartX=null;
+let feedbackMsg=null;
+
+function rand(a,b){ return a+Math.random()*(b-a); }
+
+function getTenseForGate(){
+  return tense==='mixed' ? MIXED_TENSES[Math.floor(Math.random()*3)] : tense;
+}
+function getAnswers(t,p){
+  const correct=CORRECT[t][p];
+  const pool=[...POOL[t]];
+  if(!pool.includes(correct)) pool.push(correct);
+  let wrong=pool.filter(x=>x!==correct);
+  let choices=[correct];
+  while(choices.length<Math.min(3,pool.length)){
+    let w=wrong[Math.floor(Math.random()*wrong.length)];
+    if(!choices.includes(w)) choices.push(w);
+  }
+  return choices.sort(()=>Math.random()-.5);
+}
+
+// ── BG ──────────────────────────────────────────────────────
+function initBg(){
+  bgStars=[];
+  for(let i=0;i<80;i++) bgStars.push({x:rand(0,W),y:rand(0,H),r:rand(.5,2),s:rand(.3,1.2)});
+  roadLines=[];
+  for(let i=0;i<12;i++) roadLines.push({y:i*(H/6)});
+}
+
+function drawBg(){
+  ctx.fillStyle='#0a0a14'; ctx.fillRect(0,0,W,H);
+  bgStars.forEach(s=>{
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(200,210,255,${s.s*.5})`; ctx.fill();
+  });
+  const rL=90, rR=W-90;
+  ctx.fillStyle='#11111e'; ctx.fillRect(rL,0,rR-rL,H);
+  ctx.strokeStyle='#ff6b3588'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(rL,0); ctx.lineTo(rL,H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(rR,0); ctx.lineTo(rR,H); ctx.stroke();
+  ctx.strokeStyle='#ffffff22'; ctx.lineWidth=2; ctx.setLineDash([30,30]);
+  ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
+  ctx.setLineDash([]);
+  roadLines.forEach(l=>{
+    ctx.strokeStyle='#ffffff15'; ctx.lineWidth=1; ctx.setLineDash([20,20]);
+    ctx.beginPath(); ctx.moveTo(rL+(rR-rL)/3,l.y); ctx.lineTo(rL+(rR-rL)/3,l.y+H/6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rL+2*(rR-rL)/3,l.y); ctx.lineTo(rL+2*(rR-rL)/3,l.y+H/6); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+  drawScenery();
+}
+
+// ── BILLBOARDS ──────────────────────────────────────────────
+// Each billboard: { y, side:'left'|'right', type:0-4, pole drawn }
+// Types: 0=Catedral, 1=Ginete, 2=SMED, 3=CEPE, 4=Prefeitura Vacaria
+
+const BB_W = 72, BB_H = 52; // billboard face size
+const BB_SIDE_L = 44;  // center x on left side
+const BB_SIDE_R = W - 44; // center x on right side
+let billboards = [];
+let bbNextY = -300;
+let bbSpawnDist = 0;
+const BB_GAP = 340;
+
+function initScenery(){
+  billboards = [];
+  bbNextY = -BB_H;
+  bbSpawnDist = 0;
+  // seed a few immediately
+  for(let i=0;i<4;i++){
+    billboards.push(makeBillboard(-BB_H - i*BB_GAP, i%2===0?'left':'right', i%5));
+  }
+}
+
+function makeBillboard(y, side, type){
+  return { y, side, type };
+}
+
+function updateScenery(){
+  bbSpawnDist += speed;
+  if(bbSpawnDist > BB_GAP){
+    bbSpawnDist = 0;
+    const lastTypes = billboards.slice(-2).map(b=>b.type);
+    let t; do { t=Math.floor(Math.random()*5); } while(lastTypes.includes(t));
+    const side = billboards.length%2===0?'left':'right';
+    billboards.push(makeBillboard(-BB_H-10, side, t));
+  }
+  for(let i=billboards.length-1;i>=0;i--){
+    billboards[i].y += speed*0.82;
+    if(billboards[i].y > H+80) billboards.splice(i,1);
+  }
+}
+
+function drawScenery(){
+  billboards.forEach(b => drawBillboard(b));
+}
+
+function drawBillboard(b){
+  const cx = b.side==='left' ? BB_SIDE_L : BB_SIDE_R;
+  const cy = b.y;
+  const w = BB_W, h = BB_H;
+  const x = cx - w/2, y = cy - h/2;
+
+  ctx.save();
+
+  // pole
+  ctx.fillStyle='#555566';
+  ctx.fillRect(cx-3, cy+h/2, 6, 28);
+  ctx.fillRect(cx-8, cy+h/2+24, 16, 5);
+
+  // billboard frame shadow
+  ctx.fillStyle='#00000055';
+  ctx.fillRect(x+3, y+3, w, h);
+
+  // billboard bg (white)
+  ctx.fillStyle='#f0f0ee';
+  ctx.fillRect(x, y, w, h);
+
+  // border
+  ctx.strokeStyle='#333344'; ctx.lineWidth=2;
+  ctx.strokeRect(x, y, w, h);
+
+  // draw content based on type
+  ctx.save();
+  ctx.rect(x+1, y+1, w-2, h-2);
+  ctx.clip();
+
+  switch(b.type){
+    case 0: drawBbCatedral(ctx, x, y, w, h); break;
+    case 1: drawBbGinete(ctx, x, y, w, h); break;
+    case 2: drawBbSMED(ctx, x, y, w, h); break;
+    case 3: drawBbCEPE(ctx, x, y, w, h); break;
+    case 4: drawBbVacaria(ctx, x, y, w, h); break;
+  }
+
+  ctx.restore();
+  ctx.restore();
+}
+
+// ── Billboard 0: Catedral de Vacaria ──────────────────────────
+function drawBbCatedral(c, x, y, w, h){
+  // sky gradient
+  c.fillStyle='#5ba3d9'; c.fillRect(x,y,w,h);
+  c.fillStyle='#8ec5e8'; c.fillRect(x,y,w,h*0.55);
+
+  // ground
+  c.fillStyle='#4a7c3f'; c.fillRect(x, y+h*0.78, w, h*0.22);
+
+  const bx = x+w*0.12, by = y+h*0.18, bw = w*0.76, bh = h*0.62;
+
+  // main body — stone brown
+  c.fillStyle='#7a5c3a'; c.fillRect(bx, by+bh*0.15, bw, bh*0.85);
+
+  // roof / gable center
+  c.fillStyle='#8b3a2a';
+  c.beginPath(); c.moveTo(bx+bw*0.5,by+bh*0.05); c.lineTo(bx+bw*0.28,by+bh*0.28); c.lineTo(bx+bw*0.72,by+bh*0.28); c.closePath(); c.fill();
+
+  // left tower
+  c.fillStyle='#7a5c3a'; c.fillRect(bx, by+bh*0.05, bw*0.22, bh*0.88);
+  // right tower
+  c.fillStyle='#7a5c3a'; c.fillRect(bx+bw*0.78, by+bh*0.05, bw*0.22, bh*0.88);
+
+  // spires
+  c.fillStyle='#c0c8d0';
+  // left spire
+  c.beginPath(); c.moveTo(bx+bw*0.11,by); c.lineTo(bx+bw*0.04,by+bh*0.12); c.lineTo(bx+bw*0.18,by+bh*0.12); c.closePath(); c.fill();
+  // right spire
+  c.beginPath(); c.moveTo(bx+bw*0.89,by); c.lineTo(bx+bw*0.82,by+bh*0.12); c.lineTo(bx+bw*0.96,by+bh*0.12); c.closePath(); c.fill();
+
+  // rose window
+  c.fillStyle='#c0392b'; c.beginPath(); c.arc(bx+bw*0.5,by+bh*0.48,bw*0.1,0,Math.PI*2); c.fill();
+  c.strokeStyle='#ffe'; c.lineWidth=1; c.beginPath(); c.arc(bx+bw*0.5,by+bh*0.48,bw*0.1,0,Math.PI*2); c.stroke();
+  // spokes
+  for(let i=0;i<6;i++){
+    const a=i*Math.PI/3;
+    c.beginPath();
+    c.moveTo(bx+bw*0.5,by+bh*0.48);
+    c.lineTo(bx+bw*0.5+Math.cos(a)*bw*0.1,by+bh*0.48+Math.sin(a)*bw*0.1);
+    c.stroke();
+  }
+
+  // door
+  c.fillStyle='#4a2a1a';
+  c.beginPath(); c.arc(bx+bw*0.5,by+bh*0.82,bw*0.08,Math.PI,0); c.lineTo(bx+bw*0.58,by+bh*0.95); c.lineTo(bx+bw*0.42,by+bh*0.95); c.closePath(); c.fill();
+
+  // label
+  c.fillStyle='#ffffffcc'; c.font=`bold ${w*0.1}px sans-serif`;
+  c.textAlign='center'; c.textBaseline='bottom';
+  c.fillStyle='#1a1a2a';
+  c.fillRect(x, y+h*0.88, w, h*0.12);
+  c.fillStyle='#ffe'; c.font=`bold ${w*0.09}px sans-serif`;
+  c.fillText('Catedral de Vacaria', x+w/2, y+h*0.99);
+}
+
+// ── Billboard 1: Ginete (gaúcho a cavalo) ─────────────────────
+function drawBbGinete(c, x, y, w, h){
+  // blue sky
+  c.fillStyle='#4a9ad4'; c.fillRect(x,y,w,h);
+  // clouds
+  c.fillStyle='rgba(255,255,255,0.7)';
+  c.beginPath(); c.arc(x+w*0.2,y+h*0.18,w*0.09,0,Math.PI*2); c.fill();
+  c.beginPath(); c.arc(x+w*0.3,y+h*0.14,w*0.07,0,Math.PI*2); c.fill();
+  c.beginPath(); c.arc(x+w*0.75,y+h*0.22,w*0.08,0,Math.PI*2); c.fill();
+  // ground
+  c.fillStyle='#3a6b30'; c.fillRect(x,y+h*0.78,w,h*0.22);
+  c.fillStyle='#4a8040'; c.fillRect(x,y+h*0.78,w,h*0.04);
+
+  // statue base
+  c.fillStyle='#888'; c.fillRect(x+w*0.38,y+h*0.72,w*0.24,h*0.07);
+
+  // bronze color
+  const bronze='#8b5e2a';
+  // horse body (rearing)
+  c.fillStyle=bronze;
+  // back legs
+  c.fillRect(x+w*0.42,y+h*0.55,w*0.07,h*0.18);
+  c.fillRect(x+w*0.51,y+h*0.60,w*0.06,h*0.13);
+  // body
+  c.beginPath();
+  c.ellipse(x+w*0.5,y+h*0.48,w*0.14,h*0.16,Math.PI*0.15,0,Math.PI*2);
+  c.fill();
+  // neck
+  c.fillRect(x+w*0.50,y+h*0.28,w*0.10,h*0.22);
+  // head
+  c.beginPath(); c.ellipse(x+w*0.53,y+h*0.24,w*0.07,h*0.08,Math.PI*0.25,0,Math.PI*2); c.fill();
+  // front legs up
+  c.save(); c.translate(x+w*0.48,y+h*0.44);
+  c.rotate(-0.7);
+  c.fillRect(-w*0.03,0,w*0.06,h*0.16);
+  c.restore();
+  c.save(); c.translate(x+w*0.56,y+h*0.46);
+  c.rotate(-0.4);
+  c.fillRect(-w*0.03,0,w*0.06,h*0.15);
+  c.restore();
+
+  // rider
+  c.fillStyle='#6b4520';
+  // body
+  c.fillRect(x+w*0.47,y+h*0.16,w*0.12,h*0.18);
+  // head + hat
+  c.beginPath(); c.arc(x+w*0.53,y+h*0.13,w*0.06,0,Math.PI*2); c.fill();
+  c.fillRect(x+w*0.44,y+h*0.09,w*0.18,h*0.03); // hat brim
+  c.fillRect(x+w*0.48,y+h*0.05,w*0.10,h*0.06); // hat top
+  // raised arm with rebenque
+  c.save(); c.translate(x+w*0.47,y+h*0.20);
+  c.rotate(-1.1);
+  c.fillRect(-w*0.02,0,w*0.04,h*0.14);
+  c.strokeStyle=bronze; c.lineWidth=1;
+  c.beginPath(); c.moveTo(0,0); c.lineTo(-w*0.04,-h*0.08); c.stroke();
+  c.restore();
+
+  // label bar
+  c.fillStyle='#8b1a1a';
+  c.fillRect(x, y+h*0.87, w, h*0.13);
+  c.fillStyle='#fff'; c.font=`bold ${w*0.1}px sans-serif`;
+  c.textAlign='center';
+  c.fillText('Ginete — Vacaria/RS', x+w/2, y+h*0.97);
+}
+
+// ── Billboard 2: SMED ─────────────────────────────────────────
+function drawBbSMED(c, x, y, w, h){
+  c.fillStyle='#ffffff'; c.fillRect(x,y,w,h);
+
+  // top color bar
+  c.fillStyle='#1976d2'; c.fillRect(x,y,w,h*0.08);
+
+  // pencil people icon area (left third)
+  const ix=x+w*0.04, iy=y+h*0.12, iw=w*0.38, ih=h*0.72;
+
+  // arch background
+  c.fillStyle='#f0f4ff'; c.fillRect(ix,iy,iw,ih);
+  c.fillStyle='#dde5ff';
+  c.beginPath(); c.arc(ix+iw/2,iy+ih*0.38,iw*0.42,Math.PI,0); c.lineTo(ix+iw,iy+ih*0.38); c.lineTo(ix,iy+ih*0.38); c.closePath(); c.fill();
+
+  // 3 pencil-people
+  const people=[
+    {cx:ix+iw*0.25, col:'#1565c0', tc:'#1565c0'},  // left blue
+    {cx:ix+iw*0.5,  col:'#f9a825', tc:'#f9a825'},  // center yellow
+    {cx:ix+iw*0.75, col:'#e65100', tc:'#e65100'},  // right orange
+  ];
+  people.forEach((p,i)=>{
+    const scale = i===1?1.15:1;
+    const base = iy+ih;
+    // pencil body
+    c.fillStyle=p.col;
+    c.beginPath();
+    c.moveTo(p.cx-iw*0.08*scale, base-ih*0.05);
+    c.lineTo(p.cx+iw*0.08*scale, base-ih*0.05);
+    c.lineTo(p.cx+iw*0.06*scale, iy+ih*0.42);
+    c.lineTo(p.cx-iw*0.06*scale, iy+ih*0.42);
+    c.closePath(); c.fill();
+    // pencil tip
+    c.fillStyle='#fffde7';
+    c.beginPath();
+    c.moveTo(p.cx, iy+ih*0.28*scale);
+    c.lineTo(p.cx-iw*0.06*scale, iy+ih*0.42);
+    c.lineTo(p.cx+iw*0.06*scale, iy+ih*0.42);
+    c.closePath(); c.fill();
+    // head
+    c.fillStyle=p.col;
+    c.beginPath(); c.arc(p.cx, iy+ih*0.32+iw*0.08*(scale-1), iw*0.09*scale,0,Math.PI*2); c.fill();
+  });
+  // heart on center
+  c.fillStyle='#5d4037';
+  const hx=people[1].cx, hy=iy+ih*0.62;
+  c.beginPath(); c.arc(hx-iw*0.025,hy,iw*0.03,Math.PI,0); c.fill();
+  c.beginPath(); c.arc(hx+iw*0.025,hy,iw*0.03,Math.PI,0); c.fill();
+  c.beginPath(); c.moveTo(hx-iw*0.055,hy); c.lineTo(hx,hy+iw*0.06); c.lineTo(hx+iw*0.055,hy); c.closePath(); c.fill();
+
+  // SMED text (right side)
+  const tx=x+w*0.46, ty=y+h*0.28;
+  c.fillStyle='#f9a825'; c.font=`bold ${w*0.18}px sans-serif`; c.textAlign='left';
+  c.fillText('Sm',tx,ty+h*0.22);
+  c.fillStyle='#212121';
+  c.fillText('ED',tx+w*0.24,ty+h*0.22);
+  // subtext
+  c.fillStyle='#444'; c.font=`${w*0.07}px sans-serif`;
+  c.fillText('Secretaria', tx, ty+h*0.38);
+  c.fillText('Municipal de', tx, ty+h*0.5);
+  c.fillStyle='#1565c0'; c.font=`bold ${w*0.08}px sans-serif`;
+  c.fillText('Educação', tx, ty+h*0.63);
+
+  // bottom bar
+  c.fillStyle='#1976d2'; c.fillRect(x,y+h*0.92,w,h*0.08);
+  c.fillStyle='#fff'; c.font=`bold ${w*0.08}px sans-serif`; c.textAlign='center';
+  c.fillText('Vacaria — RS', x+w/2, y+h*0.99);
+}
+
+// ── Billboard 3: CEPE ─────────────────────────────────────────
+function drawBbCEPE(c, x, y, w, h){
+  c.fillStyle='#ffffff'; c.fillRect(x,y,w,h);
+  c.fillStyle='#1a1a2a'; c.fillRect(x,y,w,h*0.07);
+
+  // Two speech bubbles (right side of billboard)
+  const bx=x+w*0.48, by=y+h*0.1;
+
+  // back bubble (black outline)
+  c.strokeStyle='#1a1a2a'; c.lineWidth=2; c.fillStyle='#fff';
+  c.beginPath();
+  c.arc(bx+w*0.22,by+h*0.18,w*0.14,0,Math.PI*2); c.fill(); c.stroke();
+  // tail
+  c.beginPath(); c.moveTo(bx+w*0.14,by+h*0.28); c.lineTo(bx+w*0.06,by+h*0.38); c.lineTo(bx+w*0.22,by+h*0.30); c.closePath(); c.fill(); c.stroke();
+
+  // front bubble (orange+blue gradient effect)
+  c.strokeStyle='#f57c00'; c.lineWidth=2.5;
+  c.fillStyle='#fff8e1';
+  c.beginPath(); c.arc(bx+w*0.28,by+h*0.28,w*0.17,0,Math.PI*2); c.fill(); c.stroke();
+  // tail
+  c.fillStyle='#fff8e1'; c.strokeStyle='#1565c0';
+  c.beginPath(); c.moveTo(bx+w*0.18,by+h*0.40); c.lineTo(bx+w*0.06,by+h*0.50); c.lineTo(bx+w*0.26,by+h*0.42); c.closePath(); c.fill(); c.stroke();
+  // lines inside front bubble
+  c.strokeStyle='#f57c00'; c.lineWidth=1.5;
+  [0.22,0.28,0.34].forEach((yy,i)=>{
+    c.beginPath();
+    c.moveTo(bx+w*0.15,by+h*yy);
+    c.lineTo(bx+w*(i===2?0.36:0.40),by+h*yy);
+    c.stroke();
+    c.strokeStyle='#1565c0';
+  });
+
+  // text on left
+  c.fillStyle='#888'; c.font=`${w*0.085}px sans-serif`; c.textAlign='left';
+  c.fillText('Centro de', x+w*0.03, y+h*0.30);
+  c.fillText('Estudos &', x+w*0.03, y+h*0.42);
+  c.fillStyle='#1a1a2a'; c.font=`bold ${w*0.09}px sans-serif`;
+  c.fillText('Pesquisas em', x+w*0.03, y+h*0.55);
+  c.fillText('Ensinagem', x+w*0.03, y+h*0.67);
+
+  // bottom
+  c.fillStyle='#f57c00'; c.fillRect(x,y+h*0.78,w,h*0.05);
+  c.fillStyle='#1565c0'; c.fillRect(x,y+h*0.83,w,h*0.05);
+  c.fillStyle='#1a1a2a'; c.fillRect(x,y+h*0.88,w,h*0.12);
+  c.fillStyle='#fff'; c.font=`bold ${w*0.08}px sans-serif`; c.textAlign='center';
+  c.fillText('CEPE — SMED Vacaria', x+w/2, y+h*0.98);
+}
+
+// ── Billboard 4: Prefeitura de Vacaria ────────────────────────
+function drawBbVacaria(c, x, y, w, h){
+  c.fillStyle='#ffffff'; c.fillRect(x,y,w,h);
+
+  // top bar with color segments (logo colors)
+  const barColors=['#1a237e','#1565c0','#2e7d32','#f9a825','#e65100'];
+  barColors.forEach((col,i)=>{
+    c.fillStyle=col;
+    c.fillRect(x+i*(w/5),y,w/5,h*0.07);
+  });
+
+  // people group icon (left side)
+  const px=x+w*0.04, py=y+h*0.12;
+  const figures=[
+    {cx:0.10, cy:0.30, r:0.07, col:'#1a237e'},
+    {cx:0.22, cy:0.24, r:0.08, col:'#1565c0'},
+    {cx:0.33, cy:0.20, r:0.09, col:'#2e7d32'},
+    {cx:0.44, cy:0.24, r:0.08, col:'#f9a825'},
+    {cx:0.55, cy:0.30, r:0.07, col:'#e65100'},
+  ];
+  figures.forEach(f=>{
+    // head
+    c.fillStyle=f.col;
+    c.beginPath(); c.arc(px+w*f.cx, py+h*f.cy-h*0.03, w*f.r*0.55,0,Math.PI*2); c.fill();
+    // body
+    c.beginPath();
+    c.arc(px+w*f.cx, py+h*(f.cy+0.18), w*f.r*0.7,0,Math.PI*2); c.fill();
+  });
+  // heart on center figure
+  c.fillStyle='#fff';
+  const hcx=px+w*0.33, hcy=py+h*0.40;
+  c.beginPath(); c.arc(hcx-w*0.02,hcy,w*0.02,Math.PI,0); c.fill();
+  c.beginPath(); c.arc(hcx+w*0.02,hcy,w*0.02,Math.PI,0); c.fill();
+  c.beginPath(); c.moveTo(hcx-w*0.04,hcy); c.lineTo(hcx,hcy+h*0.05); c.lineTo(hcx+w*0.04,hcy); c.closePath(); c.fill();
+
+  // text right side
+  c.fillStyle='#888'; c.font=`${w*0.09}px sans-serif`; c.textAlign='left';
+  c.fillText('Prefeitura de', x+w*0.44, y+h*0.42);
+  c.fillStyle='#1a237e'; c.font=`bold ${w*0.14}px sans-serif`;
+  c.fillText('Vacaria', x+w*0.44, y+h*0.60);
+
+  // multicolor underline
+  barColors.forEach((col,i)=>{
+    c.fillStyle=col;
+    c.fillRect(x+w*0.44+i*(w*0.54/5), y+h*0.63, w*0.54/5, h*0.025);
+  });
+
+  // bottom
+  c.fillStyle='#1a237e'; c.fillRect(x,y+h*0.88,w,h*0.12);
+  c.fillStyle='#fff'; c.font=`bold ${w*0.08}px sans-serif`; c.textAlign='center';
+  c.fillText('vacaria.rs.gov.br', x+w/2, y+h*0.98);
+}
+
+// ── CAR DRAW ────────────────────────────────────────────────
+function roundRect(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+  c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+  c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
+}
+function drawCar(x,y,w,h,p,scale=1){
+  const c=CAR_COLORS[p];
+  ctx.save(); ctx.translate(x,y); ctx.scale(scale,scale);
+  ctx.shadowColor=c.glow; ctx.shadowBlur=18;
+  ctx.fillStyle=c.body; roundRect(ctx,-w/2,-h/2,w,h,8); ctx.fill();
+  ctx.fillStyle='rgba(180,220,255,0.35)'; roundRect(ctx,-w/2+5,-h/2+8,w-10,h*.28,4); ctx.fill();
+  ctx.fillStyle='rgba(180,220,255,0.25)'; roundRect(ctx,-w/2+5,h/2-h*.22,w-10,h*.16,4); ctx.fill();
+  ctx.fillStyle='#222'; ctx.shadowBlur=0;
+  [[-w/2-3,-h/2+10,7,14],[w/2-4,-h/2+10,7,14],[-w/2-3,h/2-24,7,14],[w/2-4,h/2-24,7,14]].forEach(([wx,wy,ww,wh])=>{
+    roundRect(ctx,wx,wy,ww,wh,3); ctx.fill();
+    ctx.fillStyle=c.trim; roundRect(ctx,wx+1,wy+3,ww-2,wh-6,2); ctx.fill(); ctx.fillStyle='#222';
+  });
+  ctx.fillStyle=c.trim; ctx.shadowColor=c.trim; ctx.shadowBlur=10;
+  ctx.fillRect(-w/2+5,-h/2+2,8,5); ctx.fillRect(w/2-13,-h/2+2,8,5);
+  ctx.shadowBlur=0; ctx.fillStyle='#fff';
+  ctx.font=`bold ${Math.max(9,13/scale)}px 'Orbitron',sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(p,0,0);
+  ctx.restore();
+}
+
+function renderMiniCar(p){
+  const mc=document.createElement('canvas'); mc.width=54; mc.height=72;
+  const c=mc.getContext('2d'), col=CAR_COLORS[p];
+  c.fillStyle='#0d0d1e'; c.fillRect(0,0,54,72);
+  c.save(); c.translate(27,36);
+  c.shadowColor=col.glow; c.shadowBlur=12;
+  c.fillStyle=col.body; roundRectC(c,-18,-28,36,56,7); c.fill();
+  c.fillStyle='rgba(180,220,255,0.4)'; roundRectC(c,-13,-20,26,14,3); c.fill();
+  c.shadowBlur=0; c.fillStyle='#222';
+  [[-21,-18,7,12],[14,-18,7,12],[-21,6,7,12],[14,6,7,12]].forEach(([x,y,w,h])=>{ roundRectC(c,x,y,w,h,2); c.fill(); });
+  c.fillStyle=col.trim; c.shadowColor=col.trim; c.shadowBlur=8;
+  c.fillRect(-13,-26,8,4); c.fillRect(5,-26,8,4);
+  c.shadowBlur=0; c.fillStyle='#fff';
+  c.font="bold 9px 'Orbitron',sans-serif"; c.textAlign='center'; c.textBaseline='middle';
+  c.fillText(p,0,1);
+  c.restore();
+  return mc;
+}
+function roundRectC(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+  c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+  c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
+}
+
+// ── GATES ───────────────────────────────────────────────────
+function spawnGate(){
+  const gt=getTenseForGate();
+  const answers=getAnswers(gt,pronoun);
+  const correct=CORRECT[gt][pronoun];
+  const rL=92, rR=W-92, rW=rR-rL;
+  const count=answers.length, slotW=rW/count;
+  gates.push({
+    y:-180, h:60,
+    cols: answers.map((ans,i)=>({
+      x:rL+slotW*i, w:slotW, cx:rL+slotW*i+slotW/2,
+      ans, isCorrect:ans===correct, hit:false
+    })),
+    tenseLabel:gt.toUpperCase(), passed:false
+  });
+}
+
+function drawGate(g){
+  const alpha=g.y<0?Math.min(1,(g.y+200)/200):1;
+  ctx.save(); ctx.globalAlpha=Math.max(0,alpha);
+  ctx.font="bold 10px 'Orbitron',sans-serif";
+  ctx.textAlign='center'; ctx.fillStyle='#ffffff44';
+  ctx.fillText(g.tenseLabel,W/2,g.y-8);
+  const hard = difficulty==='hard';
+  g.cols.forEach(col=>{
+    const {x,y,w,h,cx}={x:col.x,y:g.y,w:col.w-4,h:g.h,cx:col.cx};
+    // HARD: all gates same neutral yellow/white; EASY: green correct / red wrong
+    const gateColor = hard ? '#c8b400cc' : (col.isCorrect?'#00ff88cc':'#ff4466cc');
+    const fillColor  = hard ? 'rgba(200,180,0,0.07)' : (col.isCorrect?'rgba(0,255,136,0.08)':'rgba(255,68,102,0.06)');
+    const textColor  = hard ? '#ffe040' : (col.isCorrect?'#00ff88':'#ff8fa3');
+    const glowColor  = hard ? '#c8b400' : (col.isCorrect?'#00ff88':'#ff4466');
+    ctx.strokeStyle=gateColor; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(x+2,y); ctx.lineTo(x+2,y+h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+w,y); ctx.lineTo(x+w,y+h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+2,y); ctx.lineTo(x+w,y); ctx.stroke();
+    ctx.fillStyle=fillColor;
+    ctx.fillRect(x+3,y+1,w-4,h-2);
+    ctx.fillStyle=textColor;
+    ctx.font=`bold ${col.ans.length>5?12:15}px 'Orbitron',sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor=glowColor; ctx.shadowBlur=hard?4:8;
+    ctx.fillText(col.ans,cx,g.y+h/2);
+    ctx.shadowBlur=0;
+  });
+  ctx.restore();
+}
+
+function updateGates(){
+  distance+=speed;
+  if(distance>=nextGateDist){ spawnGate(); nextGateDist=distance+gateSpacing; }
+  for(let i=gates.length-1;i>=0;i--){
+    const g=gates[i]; g.y+=speed;
+    if(!g.passed && g.y+g.h>=car.y-car.h/2 && g.y<=car.y+car.h/2){
+      g.cols.forEach(col=>{
+        if(!col.hit && car.x>=col.x && car.x<=col.x+col.w){
+          col.hit=true; g.passed=true;
+          if(col.isCorrect) onCorrect(col.ans,g.tenseLabel);
+          else onWrong(col.ans,CORRECT[g.tenseLabel.toLowerCase()][pronoun]);
+        }
+      });
+      if(!g.passed) g.passed=true;
+    }
+    if(g.y>H+20) gates.splice(i,1);
+  }
+}
+
+// ── FEEDBACK ────────────────────────────────────────────────
+let streak=0;
+function onCorrect(ans,t){
+  streak++;
+  const base = difficulty==='hard' ? 20 : 10;
+  const bonus = streak>=3 ? base*2 : streak>=2 ? Math.floor(base*1.5) : base;
+  score += bonus + Math.floor(speed*2);
+  document.getElementById('hud-score').textContent=score;
+  speed=Math.min(7,speed+.12);
+  flashScreen('#00ff88');
+  spawnParticles(car.x,car.y,'#00ff88',20);
+  const tag = streak>=3?' 🔥x'+streak:'';
+  showMsg(`✓  ${pronoun} ${ans}  +${bonus}${tag}`,'#00ff88');
+  if(difficulty==='hard'){
+    gateSpacing = 240 + Math.random()*300; // 240–540, unpredictable rhythm
+  } else {
+    gateSpacing=Math.max(320,gateSpacing-5);
+  }
+  sfxCorrect();
+}
+function onWrong(ans,correct){
+  streak=0; lives--;
+  updateLives(); flashScreen('#ff4466');
+  spawnParticles(car.x,car.y,'#ff4466',15);
+  showMsg(`✗  should be: ${pronoun} ${correct}`,'#ff6688');
+  if(lives<=0){ stopBGM(); sfxGameOver(); setTimeout(endGame,700); }
+  else sfxWrong();
+}
+
+function updateLives(){
+  document.getElementById('hud-lives').textContent='❤️'.repeat(Math.max(0,lives))+'🖤'.repeat(Math.max(0,3-lives));
+}
+function showMsg(txt,color){ feedbackMsg={txt,color,y:car.y-60,alpha:1}; }
+function flashScreen(color){
+  const f=document.getElementById('flash');
+  f.style.background=color+'44'; f.style.opacity='1';
+  setTimeout(()=>f.style.opacity='0',200);
+}
+
+// ── PARTICLES ───────────────────────────────────────────────
+function spawnParticles(x,y,color,n){
+  for(let i=0;i<n;i++){
+    const a=rand(0,Math.PI*2),s=rand(1,5);
+    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,color,alpha:1,r:rand(2,5)});
+  }
+}
+function updateParticles(){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=.1; p.alpha-=.03;
+    if(p.alpha<=0) particles.splice(i,1);
+  }
+}
+function drawParticles(){
+  particles.forEach(p=>{
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.color+(Math.floor(p.alpha*255).toString(16).padStart(2,'0'));
+    ctx.fill();
+  });
+}
+
+// ── ROAD ────────────────────────────────────────────────────
+function updateRoad(){ roadLines.forEach(l=>{ l.y+=speed; if(l.y>H) l.y-=H; }); }
+
+// ── INPUT ───────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && gameRunning){ togglePause(); return; }
+  keys[e.key]=true;
+});
+document.addEventListener('keyup',e=>{ keys[e.key]=false; });
+canvas.addEventListener('touchstart',e=>{ touchStartX=e.touches[0].clientX; });
+canvas.addEventListener('touchmove',e=>{
+  if(!gameRunning||touchStartX===null) return;
+  const dx=e.touches[0].clientX-touchStartX;
+  car.x=Math.max(100,Math.min(W-100,car.x+dx*.6));
+  touchStartX=e.touches[0].clientX; e.preventDefault();
+},{passive:false});
+canvas.addEventListener('touchend',()=>{ touchStartX=null; });
+
+function handleInput(){
+  if(keys['ArrowLeft']||keys['a']||keys['A']) car.vx=-CAR_SPEED;
+  else if(keys['ArrowRight']||keys['d']||keys['D']) car.vx=CAR_SPEED;
+  else car.vx=0;
+  car.x=Math.max(100,Math.min(W-100,car.x+car.vx));
+}
+
+// ── FEEDBACK DRAW ───────────────────────────────────────────
+function drawFeedbackMsg(){
+  if(!feedbackMsg) return;
+  ctx.save(); ctx.globalAlpha=feedbackMsg.alpha;
+  ctx.font="bold 13px 'Orbitron',sans-serif";
+  ctx.textAlign='center'; ctx.fillStyle=feedbackMsg.color;
+  ctx.shadowColor=feedbackMsg.color; ctx.shadowBlur=10;
+  ctx.fillText(feedbackMsg.txt,car.x,feedbackMsg.y);
+  ctx.restore();
+  feedbackMsg.y-=1; feedbackMsg.alpha-=.022;
+  if(feedbackMsg.alpha<=0) feedbackMsg=null;
+}
+
+// ── COUNTDOWN ───────────────────────────────────────────────
+let countdown=0;
+function drawCountdown(){
+  if(countdown<=0) return;
+  ctx.save();
+  ctx.font="bold 72px 'Orbitron',sans-serif";
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='#ffe040'; ctx.shadowColor='#ffe040'; ctx.shadowBlur=20;
+  ctx.fillText(countdown>0?countdown:'GO!',W/2,H/2);
+  ctx.restore();
+}
+
+// ── GAME LOOP ───────────────────────────────────────────────
+function gameLoop(){
+  if(!gameRunning) return;
+  if(!paused){
+    frameCount++;
+    handleInput();
+    updateRoad(); updateScenery(); updateGates(); updateParticles();
+    drawBg();
+    gates.forEach(drawGate);
+    drawCar(car.x,car.y,car.w,car.h,pronoun);
+    drawParticles(); drawFeedbackMsg();
+    ctx.fillStyle='#ffffff15'; ctx.font="10px 'Orbitron',sans-serif";
+    ctx.textAlign='right'; ctx.fillText(`× ${speed.toFixed(1)}`,W-12,H-12);
+  }
+  requestAnimationFrame(gameLoop);
+}
+
+// ── PAUSE ───────────────────────────────────────────────────
+function togglePause(){
+  if(!gameRunning) return;
+  paused = !paused;
+  const btn = document.getElementById('btn-pause');
+  const screen = document.getElementById('screen-pause');
+  if(paused){
+    btn.textContent='▶ RESUME';
+    screen.style.display='flex';
+    document.getElementById('pause-info').textContent=
+      pronoun+' · '+tense.toUpperCase()+' · '+difficulty.toUpperCase()+' · '+score+' pts';
+    stopBGM();
+  } else {
+    btn.textContent='⏸ PAUSE';
+    screen.style.display='none';
+    if(!muted) startBGM();
+  }
+}
+function pauseRestart(){
+  document.getElementById('screen-pause').style.display='none';
+  paused=false;
+  stopBGM();
+  startGame();
+}
+function pauseChangeCar(){
+  paused=false; gameRunning=false;
+  document.getElementById('screen-pause').style.display='none';
+  document.getElementById('hud').style.display='none';
+  document.getElementById('btn-pause').style.display='none';
+  document.getElementById('tense-badge').style.display='none';
+  document.getElementById('screen-choose').style.display='flex';
+  stopBGM();
+}
+function pauseQuit(){
+  paused=false; gameRunning=false;
+  document.getElementById('screen-pause').style.display='none';
+  document.getElementById('hud').style.display='none';
+  document.getElementById('btn-pause').style.display='none';
+  document.getElementById('tense-badge').style.display='none';
+  document.getElementById('screen-choose').style.display='flex';
+  stopBGM();
+}
+
+// ── GAME FLOW ───────────────────────────────────────────────
+function endGame(){
+  gameRunning=false; paused=false;
+  document.getElementById('btn-pause').style.display='none';
+  const over=document.getElementById('screen-over');
+  over.style.display='flex';
+  document.getElementById('final-score').textContent=score;
+  document.getElementById('name-entry-area').style.display='flex';
+  document.getElementById('player-name-input').value='';
+  const msgs=['Keep practicing! 💪','Nice run! 👍','Great job! 🎉','You are amazing! 🏆'];
+  document.getElementById('final-msg').textContent=score>100?msgs[3]:score>60?msgs[2]:score>30?msgs[1]:msgs[0];
+}
+
+function restartGame(){
+  document.getElementById('screen-over').style.display='none';
+  startGame();
+}
+function goHome(){
+  paused=false; gameRunning=false;
+  document.getElementById('screen-over').style.display='none';
+  document.getElementById('screen-difficulty').style.display='none';
+  document.getElementById('screen-pause').style.display='none';
+  document.getElementById('hud').style.display='none';
+  document.getElementById('btn-pause').style.display='none';
+  document.getElementById('tense-badge').style.display='none';
+  document.getElementById('screen-choose').style.display='flex';
+  stopBGM();
+}
+
+function selectPronoun(p){
+  getAudio(); // unlock audio context on user gesture
+  pronoun=p;
+  document.getElementById('screen-choose').style.display='none';
+  document.getElementById('screen-tense').style.display='flex';
+  document.getElementById('tense-chosen-label').textContent='Pronoun: '+p;
+}
+
+function selectTense(t){
+  tense=t;
+  document.getElementById('screen-tense').style.display='none';
+  document.getElementById('diff-chosen-label').textContent='Pronoun: '+pronoun+' · '+t.charAt(0).toUpperCase()+t.slice(1);
+  document.getElementById('screen-difficulty').style.display='flex';
+}
+
+function selectDifficulty(d){
+  difficulty=d;
+  document.getElementById('screen-difficulty').style.display='none';
+  startGame();
+}
+
+function startGame(){
+  score=0; lives=3; speed=2.2; distance=0; gates=[]; particles=[]; frameCount=0;
+  gateSpacing = difficulty==='hard' ? 300+Math.random()*200 : 420;
+  nextGateDist=300; streak=0; feedbackMsg=null;
+  car.x=W/2; car.vx=0;
+  initBg(); initScenery();
+  document.getElementById('hud').style.display='flex';
+  document.getElementById('hud-pronoun').textContent=pronoun;
+  document.getElementById('hud-score').textContent='0';
+  const diffBadge=document.getElementById('hud-diff');
+  diffBadge.textContent=difficulty.toUpperCase();
+  diffBadge.className=difficulty;
+  updateLives();
+  paused=false;
+  document.getElementById('btn-pause').style.display='block';
+  document.getElementById('btn-pause').textContent='⏸ PAUSE';
+  document.getElementById('screen-pause').style.display='none';
+  const badge=document.getElementById('tense-badge');
+  badge.textContent=tense.toUpperCase(); badge.style.display='block';
+
+  // countdown then start
+  let cd=3;
+  gameRunning=true;
+  const countInterval=setInterval(()=>{
+    drawBg();
+    ctx.save();
+    ctx.font="bold 72px 'Orbitron',sans-serif";
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='#ffe040'; ctx.shadowColor='#ffe040'; ctx.shadowBlur=30;
+    ctx.fillText(cd>0?cd:'GO!',W/2,H/2);
+    drawCar(car.x,car.y,car.w,car.h,pronoun);
+    ctx.restore();
+    if(cd>0) playTone(440+(cd*110),'square',0.12,0.3);
+    else {
+      playTone(880,'square',0.2,0.35);
+      clearInterval(countInterval);
+      startBGM();
+      gameLoop();
+    }
+    cd--;
+  },800);
+  sfxStart();
+}
+
+// ── BUILD SELECTOR ──────────────────────────────────────────
+(function buildSelector(){
+  const grid=document.getElementById('pronoun-grid');
+  PRONOUNS.forEach(p=>{
+    const btn=document.createElement('button'); btn.className='pronoun-btn';
+    const mc=renderMiniCar(p); btn.appendChild(mc);
+    const lbl=document.createElement('span'); lbl.textContent=p; btn.appendChild(lbl);
+    btn.onclick=()=>selectPronoun(p);
+    grid.appendChild(btn);
+  });
+  initBg(); initScenery(); drawBg();
+})();
+</script>
+</body>
+</html>

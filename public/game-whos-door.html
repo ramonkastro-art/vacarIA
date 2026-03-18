@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who's at the Door: Professionals Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, get, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB1d9WgqU7FfGglVjdGB17BjqdmrZFzoB8",
+    authDomain: "vacar-ia-games.firebaseapp.com",
+    databaseURL: "https://vacar-ia-games-default-rtdb.firebaseio.com",
+    projectId: "vacar-ia-games",
+    storageBucket: "vacar-ia-games.firebasestorage.app",
+    messagingSenderId: "327815210869",
+    appId: "1:327815210869:web:ee1a80204a82d4cac5d53c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+  const GAME_KEY = "whosdoor_v1";
+
+  // Expose to global scope for use in classic scripts below
+  window._fb = { db, ref, set, get, remove, onValue, GAME_KEY };
+</script>
+<style>
+  :root {
+    --door-brown: #6d4c41;
+    --door-light: #8d6e63;
+    --door-frame: #4e342e;
+    --correct: #2e7d32;
+    --wrong: #c62828;
+    --bubble-bg: #fffde7;
+    --bubble-border: #ffd54f;
+    --shadow: 0 4px 24px rgba(0,0,0,0.13);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #b3e5fc 0%, #e0f2f1 60%, #fff9c4 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 10px 30px;
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.3rem, 4vw, 2.1rem);
+    color: #4e342e;
+    letter-spacing: 1px;
+    text-shadow: 2px 3px 0 #ffd54f, 3px 5px 0 rgba(0,0,0,0.08);
+    margin-bottom: 3px;
+    text-align: center;
+  }
+  .subtitle { font-size: 0.88rem; color: #78909c; margin-bottom: 12px; font-weight: 600; }
+
+  /* ── NAME ENTRY SCREEN ── */
+  #nameScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 20px;
+    animation: popIn 0.4s;
+  }
+  #nameScreen p { font-weight: 700; color: #4e342e; font-size: 1rem; }
+  #nameInput {
+    border: 2.5px solid #ffd54f;
+    border-radius: 50px;
+    padding: 10px 22px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    outline: none;
+    text-align: center;
+    width: 240px;
+    background: #fff;
+    color: #4e342e;
+    box-shadow: 0 2px 10px rgba(255,213,79,0.2);
+  }
+  #nameInput:focus { border-color: #ff7043; }
+  .start-btn {
+    background: linear-gradient(135deg, #ff7043, #ff9800);
+    color: white; border: none; border-radius: 50px;
+    padding: 12px 36px;
+    font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+    cursor: pointer; box-shadow: 0 4px 16px rgba(255,112,67,0.35);
+    transition: transform 0.18s;
+  }
+  .start-btn:hover { transform: scale(1.06); }
+
+  /* ── SCORE BAR ── */
+  .score-bar {
+    display: flex; gap: 16px; align-items: center;
+    background: #fff3e0; border-radius: 50px;
+    padding: 7px 24px;
+    box-shadow: 0 2px 10px rgba(255,112,67,0.15);
+    margin-bottom: 10px;
+    font-weight: 800; font-size: 1rem; color: #4e342e;
+  }
+  .score-bar span { color: #ff7043; font-size: 1.2rem; }
+  .score-label { color: #78909c; font-size: 0.82rem; font-weight: 700; }
+  .score-divider { width:1px; height:18px; background:#ffd54f; }
+
+  /* ── PROGRESS ── */
+  .progress-bar-wrap {
+    width: 100%; max-width: 680px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50px; height: 8px; margin-bottom: 4px; overflow: hidden;
+  }
+  .progress-bar {
+    height: 8px;
+    background: linear-gradient(90deg, #ff7043, #ffca28);
+    border-radius: 50px; transition: width 0.5s;
+  }
+
+  /* ── GAME AREA ── */
+  .game-area {
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%; max-width: 680px;
+  }
+
+  /* ── SCENE ── */
+  .scene-wrapper {
+    position: relative; display: flex; justify-content: center;
+    margin-top: 80px; margin-bottom: 4px; width: 100%;
+  }
+
+  /* Bubble above house */
+  .bubble-above {
+    position: absolute; top: -82px; left: 50%;
+    transform: translateX(-50%);
+    width: min(340px, 92vw); z-index: 20;
+  }
+  .bubble {
+    background: var(--bubble-bg);
+    border: 2.5px solid var(--bubble-border);
+    border-radius: 16px; padding: 10px 16px;
+    font-size: 0.91rem; font-weight: 700; color: #4e342e;
+    box-shadow: 0 4px 16px rgba(255,213,79,0.3);
+    line-height: 1.45; text-align: center; position: relative;
+  }
+  .bubble::after {
+    content: ''; position: absolute;
+    bottom: -16px; left: 50%; transform: translateX(-50%);
+    border-left: 10px solid transparent; border-right: 10px solid transparent;
+    border-top: 16px solid var(--bubble-border);
+  }
+  .bubble::before {
+    content: ''; position: absolute;
+    bottom: -12px; left: 50%; transform: translateX(-50%);
+    border-left: 8px solid transparent; border-right: 8px solid transparent;
+    border-top: 12px solid var(--bubble-bg); z-index: 1;
+  }
+
+  .knock-hint {
+    font-size: 0.75rem; color: #78909c; font-weight: 700;
+    margin-top: 6px; text-align: center; animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* House */
+  .house-front {
+    background: linear-gradient(180deg, #ffecb3 0%, #ffe082 100%);
+    border-radius: 18px 18px 0 0; width: 300px; padding: 16px 24px 0;
+    box-shadow: var(--shadow); border: 3px solid #ffd54f;
+    position: relative; display: flex; flex-direction: column; align-items: center;
+  }
+  .house-front::before {
+    content: ''; position: absolute; top: -38px; left: -10px; right: -10px;
+    border-left: 160px solid transparent; border-right: 160px solid transparent;
+    border-bottom: 44px solid #e53935;
+  }
+
+  .windows { display:flex; justify-content:space-between; width:100%; padding:0 8px; margin-bottom:6px; }
+  .window-box {
+    width:42px; height:36px; background:#b3e5fc;
+    border:3px solid #4e342e; border-radius:5px; position:relative;
+  }
+  .window-box::after { content:''; position:absolute; left:50%; top:0; bottom:0; width:2px; background:#4e342e; transform:translateX(-50%); }
+  .window-box::before { content:''; position:absolute; top:50%; left:0; right:0; height:2px; background:#4e342e; transform:translateY(-50%); }
+
+  /* Door frame */
+  .door-frame {
+    background: var(--door-frame); border-radius:64px 64px 0 0;
+    width:128px; height:184px;
+    display:flex; align-items:flex-end; justify-content:center;
+    position:relative; box-shadow:0 6px 24px rgba(0,0,0,0.25);
+  }
+
+  /* Character revealed on correct — sits in scene-wrapper, centered over door */
+  .char-behind {
+    position: absolute;
+    bottom: 52px; left: 50%; transform: translateX(-50%);
+    font-size: 5rem; line-height: 1;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.22));
+    opacity: 0;
+    /* NO transition here — we control visibility purely via JS to avoid flash */
+    pointer-events: none; z-index: 10;
+  }
+  .char-behind.visible {
+    opacity: 1;
+    animation: bounce 1.8s infinite ease-in-out;
+  }
+  @keyframes bounce {
+    0%,100% { transform:translateX(-50%) translateY(0); }
+    50%      { transform:translateX(-50%) translateY(-10px); }
+  }
+  .char-behind.walk-away {
+    animation: walkAway 0.9s forwards ease-in !important;
+  }
+  @keyframes walkAway {
+    0%   { opacity:1; transform:translateX(-50%) scale(1); }
+    50%  { opacity:0.5; transform:translateX(40px) scale(0.7); }
+    100% { opacity:0; transform:translateX(120px) scale(0.3); }
+  }
+
+  /* Door */
+  .door {
+    background: linear-gradient(160deg, var(--door-light) 0%, var(--door-brown) 100%);
+    border-radius: 58px 58px 0 0; width:108px; height:170px;
+    position:relative; cursor:pointer;
+    transition: transform 0.55s cubic-bezier(.23,1.4,.6,1), filter 0.2s;
+    transform-origin: left center; overflow:hidden; user-select:none; z-index:2;
+  }
+  .door:hover { filter:brightness(1.1); }
+  .door:active { filter:brightness(0.9); }
+  .door-panel { position:absolute; left:12px; right:12px; border:2px solid rgba(255,255,255,0.18); border-radius:6px; }
+  .door-panel.top { top:16px; height:56px; }
+  .door-panel.bot { top:84px; height:72px; }
+  .door-knocker {
+    position:absolute; right:18px; top:50%; transform:translateY(-50%);
+    width:13px; height:13px; border-radius:50%;
+    background:#ffd54f; box-shadow:0 0 6px rgba(255,213,79,0.7); border:2px solid #f9a825;
+  }
+  .door.open { transform: perspective(500px) rotateY(-62deg); }
+
+  .sound-ripple {
+    position:absolute; top:50%; left:50%; width:20px; height:20px;
+    border-radius:50%; background:rgba(255,213,79,0.55);
+    transform:translate(-50%,-50%) scale(0); pointer-events:none;
+    animation: ripple 0.65s ease-out forwards;
+  }
+  @keyframes ripple { to { transform:translate(-50%,-50%) scale(5.5); opacity:0; } }
+
+  .steps {
+    width:148px; height:14px;
+    background:linear-gradient(180deg,#bdbdbd,#9e9e9e);
+    border-radius:0 0 8px 8px; box-shadow:0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  /* Feedback */
+  .feedback {
+    min-height:30px; font-size:1.2rem; font-weight:800;
+    font-family:'Fredoka One',cursive; text-align:center;
+    margin:8px 0 2px; letter-spacing:0.5px;
+  }
+  .feedback.correct { color:var(--correct); animation:popIn 0.35s; }
+  .feedback.wrong   { color:var(--wrong);   animation:shake 0.35s; }
+
+  @keyframes popIn { 0%{transform:scale(0.6);opacity:0} 70%{transform:scale(1.18)} 100%{transform:scale(1);opacity:1} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-9px)} 75%{transform:translateX(9px)} }
+
+  /* Buttons */
+  .buttons-grid {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:8px; width:100%; max-width:680px; margin-top:10px;
+  }
+  .prof-btn {
+    background:#fff; border:2.5px solid #b0bec5; border-radius:50px;
+    padding:10px 6px; font-family:'Nunito',sans-serif; font-weight:800;
+    font-size:0.76rem; color:#37474f; cursor:pointer;
+    transition:all 0.17s; text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.07); outline:none;
+  }
+  .prof-btn:hover:not(:disabled) {
+    background:#e3f2fd; border-color:#29b6f6; color:#0277bd;
+    transform:translateY(-2px) scale(1.04); box-shadow:0 5px 14px rgba(41,182,246,0.18);
+  }
+  .prof-btn.correct-ans { background:#e8f5e9; border-color:#43a047; color:#2e7d32; transform:scale(1.08); }
+  .prof-btn.wrong-ans   { background:#ffebee; border-color:#e53935; color:#c62828; animation:shake 0.35s; }
+  .prof-btn:disabled { cursor:not-allowed; opacity:0.55; }
+
+  /* ── END SCREEN ── */
+  .end-screen {
+    display:none; flex-direction:column; align-items:center;
+    text-align:center; gap:14px; animation:popIn 0.5s; padding:10px;
+    width:100%; max-width:680px;
+  }
+  .end-screen h2 {
+    font-family:'Fredoka One',cursive; font-size:2rem;
+    color:#ff7043; text-shadow:2px 3px 0 #ffd54f;
+  }
+  .end-score { font-size:1.15rem; font-weight:800; color:#4e342e; }
+  .stars { font-size:2.1rem; letter-spacing:4px; }
+
+  /* ── LEADERBOARD ── */
+  .leaderboard {
+    width:100%; background:#fff; border-radius:18px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.1);
+    overflow:hidden; border:2px solid #ffd54f;
+  }
+  .lb-header {
+    background:linear-gradient(135deg,#ff7043,#ff9800);
+    padding:10px 18px;
+    font-family:'Fredoka One',cursive; font-size:1.1rem;
+    color:#fff; letter-spacing:0.5px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .lb-row {
+    display:grid; grid-template-columns:36px 1fr auto;
+    align-items:center; gap:10px;
+    padding:9px 18px; border-bottom:1px solid #f5f5f5;
+    font-weight:700; font-size:0.9rem; color:#37474f;
+    transition:background 0.2s;
+  }
+  .lb-row:last-child { border-bottom:none; }
+  .lb-row.me { background:#fff8e1; }
+  .lb-row.gold   { color:#f9a825; }
+  .lb-row.silver { color:#78909c; }
+  .lb-row.bronze { color:#a1887f; }
+  .lb-rank { font-family:'Fredoka One',cursive; font-size:1.1rem; text-align:center; }
+  .lb-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lb-score { font-family:'Fredoka One',cursive; font-size:1rem; color:#ff7043; white-space:nowrap; }
+  .lb-empty { padding:16px; text-align:center; color:#b0bec5; font-weight:700; }
+  .lb-loading { padding:16px; text-align:center; color:#b0bec5; font-weight:700; font-style:italic; }
+  .lb-refresh {
+    background:none; border:2px solid #ffd54f; border-radius:50px;
+    padding:6px 18px; font-family:'Nunito',sans-serif; font-weight:700;
+    font-size:0.82rem; color:#ff7043; cursor:pointer; transition:all 0.18s;
+  }
+  .lb-refresh:hover { background:#fff3e0; }
+
+  .btn-row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  .restart-btn {
+    background:linear-gradient(135deg,#ff7043,#ff9800);
+    color:white; border:none; border-radius:50px; padding:12px 32px;
+    font-family:'Fredoka One',cursive; font-size:1.1rem;
+    cursor:pointer; box-shadow:0 4px 18px rgba(255,112,67,0.4);
+    transition:transform 0.18s;
+  }
+  .restart-btn:hover { transform:scale(1.07); }
+  .clear-btn {
+    background:none; border:2px solid #ef9a9a; border-radius:50px;
+    padding:12px 22px; font-family:'Nunito',sans-serif; font-weight:700;
+    font-size:0.82rem; color:#e53935; cursor:pointer; transition:all 0.18s;
+  }
+  .clear-btn:hover { background:#ffebee; }
+
+  @media (max-width:500px) { .buttons-grid{grid-template-columns:repeat(3,1fr)} .house-front{width:260px} }
+  @media (max-width:360px) { .buttons-grid{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+
+<h1>🚪 Who's at the Door?</h1>
+<p class="subtitle">Professionals Edition</p>
+
+<!-- NAME ENTRY -->
+<div id="nameScreen">
+  <p>Enter your name to start:</p>
+  <input id="nameInput" type="text" maxlength="20" placeholder="Your name..." autocomplete="off" />
+  <button class="start-btn" onclick="submitName()">Let's Play! 🎉</button>
+</div>
+
+<!-- SCORE BAR (hidden until game starts) -->
+<div class="score-bar" id="scoreBar" style="display:none">
+  <div class="score-label">SCORE</div>
+  <span id="scoreDisplay">0</span>
+  <div class="score-divider"></div>
+  <div class="score-label">ROUND</div>
+  <span id="roundDisplay">1</span>
+  <span style="color:#b0bec5;font-size:0.88rem;">/20</span>
+</div>
+
+<div class="progress-bar-wrap" id="progressWrap" style="display:none">
+  <div class="progress-bar" id="progressBar" style="width:0%"></div>
+</div>
+
+<!-- GAME AREA -->
+<div class="game-area" id="gameArea" style="display:none">
+  <div class="scene-wrapper">
+    <div class="bubble-above">
+      <div class="bubble" id="clueText">…</div>
+    </div>
+    <div class="char-behind" id="charBehind"></div>
+    <div class="house-front">
+      <div class="windows">
+        <div class="window-box"></div>
+        <div class="window-box"></div>
+      </div>
+      <div class="door-frame">
+        <div class="door" id="door" onclick="speakClue(event)">
+          <div class="door-panel top"></div>
+          <div class="door-panel bot"></div>
+          <div class="door-knocker"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="steps"></div>
+  <div class="knock-hint" id="knockHint">🔊 Click the door to hear the clue again!</div>
+  <div class="feedback" id="feedback"></div>
+  <div class="buttons-grid" id="buttonsGrid"></div>
+</div>
+
+<!-- END SCREEN -->
+<div class="end-screen" id="endScreen">
+  <div style="font-size:3.5rem;">🏠🎉</div>
+  <h2 id="endTitle">You're Done!</h2>
+  <div class="stars" id="endStars"></div>
+  <div class="end-score" id="endScoreText"></div>
+
+  <div class="leaderboard" id="leaderboard">
+    <div class="lb-header">🏆 Class Ranking</div>
+    <div class="lb-loading" id="lbBody">Loading scores…</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="restart-btn" onclick="restartGame()">Play Again 🔄</button>
+    <button class="lb-refresh" onclick="loadLeaderboard()">↻ Refresh Ranking</button>
+    <button class="clear-btn" onclick="clearLeaderboard()">🗑 Clear Ranking</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   DATA — 15 professions × 4 clues each
+═══════════════════════════════════════════════ */
+const PROFESSIONS = [
+  {
+    name: "doctor",
+    emoji: "👨‍⚕️",
+    clues: [
+      "I work in a hospital and I help sick people.",
+      "I examine patients and tell them what medicine to take.",
+      "When you are very sick, your parents take you to see me.",
+      "I wear a white coat and I listen to your heart."
+    ]
+  },
+  {
+    name: "nurse",
+    emoji: "👩‍⚕️",
+    clues: [
+      "I wear scrubs and I take care of patients in the hospital.",
+      "I give injections and check if you have a fever.",
+      "I work with doctors and I help patients feel better.",
+      "I check your blood pressure and your temperature."
+    ]
+  },
+  {
+    name: "firefighter",
+    emoji: "🧑‍🚒",
+    clues: [
+      "I put out fires and rescue people from danger.",
+      "I ride a big red truck and wear a heavy helmet.",
+      "When there is a fire, you call me for help!",
+      "I use a long hose with water to fight fires."
+    ]
+  },
+  {
+    name: "teacher",
+    emoji: "👩‍🏫",
+    clues: [
+      "I work in a school and I help students learn.",
+      "I write on the board and I give homework.",
+      "Students sit in my classroom and listen to my lessons.",
+      "I correct tests and explain new subjects every day."
+    ]
+  },
+  {
+    name: "police officer",
+    emoji: "👮",
+    clues: [
+      "I wear a uniform and I keep people safe.",
+      "I drive a police car and I follow the laws.",
+      "If something bad happens on the street, you call me!",
+      "I arrest people who break the law."
+    ]
+  },
+  {
+    name: "chef/cook",
+    emoji: "👨‍🍳",
+    clues: [
+      "I prepare and cook food in a restaurant kitchen.",
+      "I wear a white hat and I use pots and pans.",
+      "I make delicious meals for people to eat at a restaurant.",
+      "I follow recipes and I create new dishes every day."
+    ]
+  },
+  {
+    name: "driver",
+    emoji: "🚗",
+    clues: [
+      "I drive a car, a bus, or a truck every day.",
+      "I need a license to do my job.",
+      "I take people from one place to another by road.",
+      "I know all the streets and roads in the city."
+    ]
+  },
+  {
+    name: "librarian",
+    emoji: "📖",
+    clues: [
+      "I work in a library and I organize books.",
+      "I help people find and borrow books.",
+      "I ask everyone to be quiet in the place where I work!",
+      "I put books back on the shelves and keep everything in order."
+    ]
+  },
+  {
+    name: "pharmacist",
+    emoji: "💊",
+    clues: [
+      "I work in a pharmacy and I give medicine to people.",
+      "I read the doctor's prescription and prepare your medicine.",
+      "You come to see me to buy pills, vitamins, or medicine.",
+      "I explain how and when to take your medicine."
+    ]
+  },
+  {
+    name: "hairstylist",
+    emoji: "💇",
+    clues: [
+      "I cut and style people's hair.",
+      "I use scissors and a comb at work every day.",
+      "You sit in my chair when you want a new haircut.",
+      "I can also wash and color your hair."
+    ]
+  },
+  {
+    name: "cashier",
+    emoji: "🛒",
+    clues: [
+      "I work in a store and I receive money from customers.",
+      "I scan your products and tell you the total price.",
+      "You see me at the checkout when you finish shopping.",
+      "I give you the receipt and your change."
+    ]
+  },
+  {
+    name: "receptionist",
+    emoji: "🗂️",
+    clues: [
+      "I work at the front desk of an office or hotel.",
+      "I answer the phone and welcome visitors.",
+      "I am the first person you talk to when you arrive.",
+      "I schedule appointments and help people find their way."
+    ]
+  },
+  {
+    name: "security guard",
+    emoji: "💂",
+    clues: [
+      "I protect a building and the people inside it.",
+      "I stand at the entrance and check who comes in.",
+      "I watch cameras and make sure everything is safe.",
+      "I wear a uniform and I patrol the area."
+    ]
+  },
+  {
+    name: "server (waiter/waitress)",
+    emoji: "🍽️",
+    clues: [
+      "I work in a restaurant and I bring food to your table.",
+      "I write down your order and carry your plates.",
+      "When you are hungry at a restaurant, you ask me for help!",
+      "I bring the menu and tell you what is available today."
+    ]
+  },
+  {
+    name: "sales/attendant/salesperson",
+    emoji: "🏪",
+    clues: [
+      "I work in a store and I help customers buy things.",
+      "I show products and explain the prices to customers.",
+      "When you can't find something in a store, you ask me!",
+      "I help you choose the right product for your needs."
+    ]
+  }
+];
+
+const ALL_NAMES = PROFESSIONS.map(p => p.name);
+const TOTAL_ROUNDS = 20;
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let playerName = '';
+let score = 0;
+let round = 0;
+let currentAnswer = '';
+let currentEmoji  = '';
+let currentClue   = '';
+let buttonsDisabled = false;
+let sequence = [];      // 20-item list (professions can repeat, clues won't)
+let profClueIndex = {}; // tracks which clue to use next per profession
+
+/* ═══════════════════════════════════════════════
+   SEQUENCE BUILDER — 20 rounds, professions repeat,
+   consecutive rounds never show the same profession
+═══════════════════════════════════════════════ */
+function buildSequence() {
+  profClueIndex = {};
+  PROFESSIONS.forEach(p => { profClueIndex[p.name] = 0; });
+
+  const pool = [];
+  // Fill pool: each profession appears at least once, remainder random
+  const shuffled = shuffle([...PROFESSIONS]);
+  // First 15: one of each
+  pool.push(...shuffled);
+  // Last 5: random picks
+  for (let i = 0; i < TOTAL_ROUNDS - PROFESSIONS.length; i++) {
+    pool.push(PROFESSIONS[Math.floor(Math.random() * PROFESSIONS.length)]);
+  }
+  // Shuffle but prevent two consecutive identical professions
+  return deconflict(shuffle(pool));
+}
+
+function deconflict(arr) {
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i].name === arr[i-1].name) {
+      // swap with a later element that differs
+      for (let j = i+1; j < arr.length; j++) {
+        if (arr[j].name !== arr[i-1].name) {
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+          break;
+        }
+      }
+    }
+  }
+  return arr;
+}
+
+/* ═══════════════════════════════════════════════
+   TTS
+═══════════════════════════════════════════════ */
+function getBestVoice() {
+  const voices = speechSynthesis.getVoices();
+  const preferred = ['Samantha','Alex','Google US English','Microsoft Aria Online','Microsoft Aria','Zoe','Nicky'];
+  for (const p of preferred) {
+    const v = voices.find(v => v.name.includes(p));
+    if (v) return v;
+  }
+  return voices.find(v => v.lang === 'en-US') ||
+         voices.find(v => v.lang.startsWith('en')) || null;
+}
+
+function speak(text, onEnd) {
+  if (!('speechSynthesis' in window)) { onEnd && onEnd(); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.78; u.pitch = 1.05;
+  const v = getBestVoice(); if (v) u.voice = v;
+  u.onend = () => { onEnd && onEnd(); };
+  u.onerror = () => { onEnd && onEnd(); };
+  speechSynthesis.speak(u);
+}
+
+/* ═══════════════════════════════════════════════
+   NAME SCREEN
+═══════════════════════════════════════════════ */
+function submitName() {
+  const val = document.getElementById('nameInput').value.trim();
+  if (!val) { document.getElementById('nameInput').focus(); return; }
+  playerName = val;
+  document.getElementById('nameScreen').style.display = 'none';
+  document.getElementById('scoreBar').style.display = '';
+  document.getElementById('progressWrap').style.display = '';
+  document.getElementById('gameArea').style.display = 'flex';
+  startGame();
+}
+
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitName();
+});
+
+/* ═══════════════════════════════════════════════
+   GAME FLOW
+═══════════════════════════════════════════════ */
+function startGame() {
+  score = 0; round = 0;
+  sequence = buildSequence();
+  document.getElementById('scoreDisplay').textContent = 0;
+  document.getElementById('roundDisplay').textContent = 1;
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('endScreen').style.display = 'none';
+  document.getElementById('gameArea').style.display = 'flex';
+  nextRound();
+}
+
+function restartGame() {
+  document.getElementById('endScreen').style.display = 'none';
+  document.getElementById('scoreBar').style.display = '';
+  document.getElementById('progressWrap').style.display = '';
+  document.getElementById('gameArea').style.display = 'flex';
+  startGame();
+}
+
+function nextRound() {
+  speechSynthesis.cancel();
+  if (round >= sequence.length) { endGame(); return; }
+
+  const prof = sequence[round];
+  currentAnswer = prof.name;
+  currentEmoji  = prof.emoji;
+
+  // Pick next unused clue for this profession
+  const ci = profClueIndex[prof.name] % prof.clues.length;
+  profClueIndex[prof.name]++;
+  currentClue = prof.clues[ci];
+
+  // ── FIX #3: hide emoji FIRST (instantly), then after door closes, update text ──
+  const charEl = document.getElementById('charBehind');
+  charEl.style.cssText = 'opacity:0; transition:none;';
+  charEl.className = 'char-behind';
+
+  const door = document.getElementById('door');
+  door.classList.remove('open');
+
+  // Wait for door close animation (550ms) THEN update emoji & bubble text
+  setTimeout(() => {
+    charEl.textContent = currentEmoji;
+    document.getElementById('clueText').textContent = currentClue;
+  }, 600);
+
+  // Reset UI immediately
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('knockHint').style.display = '';
+  document.getElementById('progressBar').style.width = (round / sequence.length * 100) + '%';
+  document.getElementById('roundDisplay').textContent = round + 1;
+
+  // Build buttons
+  const wrong = shuffle(ALL_NAMES.filter(n => n !== currentAnswer));
+  const opts  = shuffle([currentAnswer, ...wrong.slice(0, 11)]);
+  const grid  = document.getElementById('buttonsGrid');
+  grid.innerHTML = '';
+  buttonsDisabled = false;
+
+  opts.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'prof-btn';
+    btn.textContent = name;
+    btn.onclick = () => handleAnswer(btn, name);
+    grid.appendChild(btn);
+  });
+
+  // Auto-speak clue after door closes
+  setTimeout(() => speak(currentClue), 700);
+}
+
+function handleAnswer(btn, chosen) {
+  if (buttonsDisabled) return;
+  buttonsDisabled = true;
+  speechSynthesis.cancel();
+
+  document.querySelectorAll('.prof-btn').forEach(b => b.disabled = true);
+  document.getElementById('knockHint').style.display = 'none';
+
+  const feedback = document.getElementById('feedback');
+  const door     = document.getElementById('door');
+  const charEl   = document.getElementById('charBehind');
+
+  if (chosen === currentAnswer) {
+    /* ✅ CORRECT */
+    btn.classList.add('correct-ans');
+    feedback.textContent = '✅ Correct! Come on in!';
+    feedback.className = 'feedback correct';
+    score++;
+    document.getElementById('scoreDisplay').textContent = score;
+
+    door.classList.add('open');
+    // Ensure emoji is loaded, wipe the inline style, then reveal via class
+    charEl.textContent = currentEmoji;
+    // Must remove inline style in next frame so browser doesn't batch it with class change
+    charEl.style.cssText = '';
+    requestAnimationFrame(() => {
+      charEl.classList.add('visible');
+    });
+
+    speak("Correct! Come on in!", () => {
+      round++;
+      setTimeout(nextRound, 900);
+    });
+
+  } else {
+    /* ❌ WRONG */
+    btn.classList.add('wrong-ans');
+    feedback.textContent = '👋 See you later!';
+    feedback.className = 'feedback wrong';
+
+    // Peek then walk away
+    charEl.style.transition = 'none';
+    charEl.style.opacity = '1';
+    setTimeout(() => { charEl.classList.add('walk-away'); }, 180);
+
+    speak("See you later!", () => {
+      round++;
+      setTimeout(nextRound, 700);
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   END GAME
+═══════════════════════════════════════════════ */
+async function endGame() {
+  document.getElementById('gameArea').style.display = 'none';
+  document.getElementById('scoreBar').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('endScreen').style.display = 'flex';
+  document.getElementById('progressBar').style.width = '100%';
+
+  const pct = score / TOTAL_ROUNDS;
+  document.getElementById('endStars').textContent =
+    pct >= 0.9 ? '⭐⭐⭐' : pct >= 0.65 ? '⭐⭐' : '⭐';
+  document.getElementById('endScoreText').textContent =
+    `${playerName} got ${score} out of ${TOTAL_ROUNDS} correct!`;
+  document.getElementById('endTitle').textContent =
+    pct >= 0.9 ? '🎉 Amazing!' : pct >= 0.65 ? '👍 Good Job!' : '💪 Keep Trying!';
+
+  speak(pct >= 0.9 ? "Amazing! Three stars! You are a pro!"
+      : pct >= 0.65 ? "Good job! Keep practicing!"
+      : "Don't give up! Try again!");
+
+  // Save score then display leaderboard
+  await saveScore(playerName, score);
+  await loadLeaderboard();
+}
+
+/* ═══════════════════════════════════════════════
+   LEADERBOARD — Firebase Realtime Database
+═══════════════════════════════════════════════ */
+const GAME_KEY = 'whos_at_the_door_v1';
+
+// Firebase refs — populated after SDK loads
+let _db = null, _ref = null, _get = null, _set = null, _remove = null;
+
+function initFirebase() {
+  try {
+    const { initializeApp } = window.firebaseApp;
+    const { getDatabase, ref, get, set, remove } = window.firebaseDB;
+
+    const app = initializeApp({
+      apiKey: "AIzaSyB1d9WgqU7FfGglVjdGB17BjqdmrZFzoB8",
+      authDomain: "vacar-ia-games.firebaseapp.com",
+      databaseURL: "https://vacar-ia-games-default-rtdb.firebaseio.com",
+      projectId: "vacar-ia-games",
+      storageBucket: "vacar-ia-games.firebasestorage.app",
+      messagingSenderId: "327815210869",
+      appId: "1:327815210869:web:ee1a80204a82d4cac5d53c"
+    });
+
+    _db     = getDatabase(app);
+    _ref    = ref;
+    _get    = get;
+    _set    = set;
+    _remove = remove;
+    console.log('Firebase ready ✅');
+  } catch(err) {
+    console.warn('Firebase init error:', err);
+  }
+}
+
+async function saveScore(name, points) {
+  if (!_db) { console.warn('Firebase not ready'); return; }
+  try {
+    const scoresRef = _ref(_db, GAME_KEY);
+    const snap = await _get(scoresRef);
+    let entries = snap.exists() ? Object.values(snap.val()) : [];
+
+    // Keep only best score per player name
+    const idx = entries.findIndex(e => e.name.toLowerCase() === name.toLowerCase());
+    if (idx >= 0) {
+      if (points > entries[idx].score) {
+        entries[idx].score = points;
+        entries[idx].date = new Date().toLocaleDateString('pt-BR');
+      }
+    } else {
+      entries.push({ name, score: points, date: new Date().toLocaleDateString('pt-BR') });
+    }
+
+    // Sort and cap at 50 players
+    entries.sort((a,b) => b.score - a.score || a.name.localeCompare(b.name));
+    entries = entries.slice(0, 50);
+
+    // Write back as keyed object (Firebase requirement)
+    const obj = {};
+    entries.forEach((e, i) => { obj['p' + i] = e; });
+    await _set(scoresRef, obj);
+  } catch(err) {
+    console.warn('Firebase save error:', err);
+  }
+}
+
+async function loadLeaderboard() {
+  const lbBody = document.getElementById('lbBody');
+  lbBody.innerHTML = '<div class="lb-loading">Loading ranking…</div>';
+
+  if (!_db) {
+    lbBody.innerHTML = '<div class="lb-empty">⚠️ Could not connect to database.</div>';
+    return;
+  }
+
+  try {
+    const snap = await _get(_ref(_db, GAME_KEY));
+    if (!snap.exists()) {
+      lbBody.innerHTML = '<div class="lb-empty">No scores yet — be the first! 🏆</div>';
+      return;
+    }
+
+    const entries = Object.values(snap.val())
+      .sort((a,b) => b.score - a.score || a.name.localeCompare(b.name))
+      .slice(0, 30);
+
+    if (!entries.length) {
+      lbBody.innerHTML = '<div class="lb-empty">No scores yet — be the first! 🏆</div>';
+      return;
+    }
+
+    const medals = ['🥇','🥈','🥉'];
+    const colorClass = ['gold','silver','bronze'];
+
+    lbBody.innerHTML = entries.map((e, i) => {
+      const isMe = e.name.toLowerCase() === playerName.toLowerCase();
+      const rankLabel = i < 3 ? medals[i] : String(i+1);
+      const cls = ['lb-row', i < 3 ? colorClass[i] : '', isMe ? 'me' : ''].filter(Boolean).join(' ');
+      return `<div class="${cls}">
+        <div class="lb-rank">${rankLabel}</div>
+        <div class="lb-name">${escHtml(e.name)}${isMe ? ' 👈' : ''}</div>
+        <div class="lb-score">${e.score}/${TOTAL_ROUNDS} <span style="font-size:0.7rem;color:#b0bec5">${e.date||''}</span></div>
+      </div>`;
+    }).join('');
+
+  } catch(err) {
+    lbBody.innerHTML = '<div class="lb-empty">⚠️ Could not load scores.</div>';
+    console.warn('Firebase load error:', err);
+  }
+}
+
+async function clearLeaderboard() {
+  if (!confirm('Clear ALL scores from the ranking? This cannot be undone.')) return;
+  if (!_db) return;
+  try {
+    await _remove(_ref(_db, GAME_KEY));
+    await loadLeaderboard();
+  } catch(err) { console.warn('Firebase clear error:', err); }
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════════════════════════════════════════
+   DOOR CLICK
+═══════════════════════════════════════════════ */
+function speakClue(e) {
+  if (buttonsDisabled) return;
+  const r = document.createElement('div');
+  r.className = 'sound-ripple';
+  e.currentTarget.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+  speak(currentClue);
+}
+
+/* ═══════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════ */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+/* Boot */
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+window.addEventListener('load', () => {
+  speechSynthesis.getVoices && speechSynthesis.getVoices();
+  document.getElementById('nameInput').focus();
+});
+// Initialize Firebase once the ESM module has loaded
+window.addEventListener('firebaseReady', () => {
+  initFirebase();
+});
+</script>
+
+<!-- Firebase SDK (loaded as modules, exposed to window for compatibility) -->
+<script type="module">
+  import { initializeApp }                    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getDatabase, ref, get, set, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  window.firebaseApp = { initializeApp };
+  window.firebaseDB  = { getDatabase, ref, get, set, remove };
+  // Signal to game that Firebase modules are ready
+  window.dispatchEvent(new Event('firebaseReady'));
+</script>
+</body>
+</html>

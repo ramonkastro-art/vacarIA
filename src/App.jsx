@@ -456,6 +456,19 @@ export default function App() {
         .install-btn:hover{background:#b45309}
         .install-dismiss{padding:8px 12px;background:transparent;border:1.5px solid #fde68a;border-radius:8px;color:#a16207;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s}
         .install-dismiss:hover{border-color:#d97706;color:#92400e}
+        /* GAMES SECTION */
+        .games-section{width:100%;max-width:600px;margin-top:40px}
+        .games-section-title{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:#92400e;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+        .games-section-title::after{content:'';flex:1;height:1px;background:#fde68a}
+        .games-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        .game-card{background:#fff;border:1.5px solid #fde68a;border-radius:14px;padding:20px 18px;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+        .game-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(217,119,6,.04),transparent);pointer-events:none}
+        .game-card:hover{border-color:#d97706;transform:translateY(-3px);box-shadow:0 8px 28px rgba(180,83,9,.14)}
+        .game-card-icon{font-size:28px;line-height:1}
+        .game-card-name{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#b45309;line-height:1.3}
+        .game-card-desc{font-size:12px;color:#78716c;line-height:1.5}
+        .game-card-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(14,116,144,.08);border:1px solid rgba(14,116,144,.2);border-radius:100px;padding:2px 9px;font-family:'Space Mono',monospace;font-size:9px;color:#0e7490;align-self:flex-start}
+        @media(max-width:480px){.games-grid{grid-template-columns:1fr}}
         .footer{margin-top:48px;text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:#d4c4a0;letter-spacing:.05em}
 
         @media(max-width:640px){
@@ -562,6 +575,25 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* GAMIFICAÇÃO */}
+        <div className="games-section">
+          <div className="games-section-title">🎮 Gamificação</div>
+          <div className="games-grid">
+            <a className="game-card" href="/game-tobe-racer.html" target="_blank" rel="noopener noreferrer">
+              <div className="game-card-icon">🏎️</div>
+              <div className="game-card-name">To BE Racer</div>
+              <div className="game-card-desc">Corrida de carros com conjugações do Verb To Be. Escolha o pronome e acelere!</div>
+              <span className="game-card-tag">⚡ Solo · Ranking</span>
+            </a>
+            <a className="game-card" href="/game-whos-door.html" target="_blank" rel="noopener noreferrer">
+              <div className="game-card-icon">🚪</div>
+              <div className="game-card-name">Who's at the Door?</div>
+              <div className="game-card-desc">Adivinhe a profissão em inglês antes que o tempo acabe. Multijogador em tempo real!</div>
+              <span className="game-card-tag">🌐 Multiplayer · Firebase</span>
+            </a>
+          </div>
+        </div>
 
         <footer className="footer">VacarIA · Desenvolvido por Ramon Castro</footer>
       </div>
