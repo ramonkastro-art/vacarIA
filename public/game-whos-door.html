@@ -5,13 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Who's at the Door: Professionals Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- Easter egg toast -->
+<div class="egg-toast" id="eggToast"></div>
+
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, set, get, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyB1d9WgqU7FfGglVjdGB17BjqdmrZFzoB8",
+    apiKey: "AIzaSyDG0J47PljT4XgkWdm362vPuUhyxy-zuX0",
     authDomain: "vacar-ia-games.firebaseapp.com",
     databaseURL: "https://vacar-ia-games-default-rtdb.firebaseio.com",
     projectId: "vacar-ia-games",
@@ -60,7 +63,12 @@
     margin-bottom: 3px;
     text-align: center;
   }
-  .subtitle { font-size: 0.88rem; color: #78909c; margin-bottom: 12px; font-weight: 600; }
+  .subtitle { font-size: 0.88rem; color: #78909c; margin-bottom: 4px; font-weight: 600; }
+  .credit {
+    font-size: 0.78rem; color: #b0bec5; font-weight: 600;
+    margin-bottom: 12px; letter-spacing: 0.3px;
+  }
+  .credit strong { color: #ff7043; }
 
   /* ── NAME ENTRY SCREEN ── */
   #nameScreen {
@@ -355,6 +363,46 @@
   }
   .clear-btn:hover { background:#ffebee; }
 
+  /* Easter egg toast */
+  .egg-toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #4e342e; color: #fff; border-radius: 50px;
+    padding: 10px 22px; font-size: 0.92rem; font-weight: 700;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.22); z-index: 9999;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    white-space: nowrap;
+  }
+  .egg-toast.show {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+  /* Clickable house elements */
+  .window-box { cursor: pointer; transition: filter 0.15s; }
+  .window-box:hover { filter: brightness(1.2); }
+  .steps-wrap { cursor: pointer; }
+  .roof-click { 
+    position: absolute; top: -38px; left: -10px; right: -10px; height: 44px;
+    cursor: pointer; z-index: 5;
+  }
+  .mailbox {
+    position: absolute; right: -28px; bottom: 0;
+    font-size: 1.6rem; cursor: pointer;
+    transition: transform 0.2s;
+    user-select: none;
+  }
+  .mailbox:hover { transform: scale(1.2) rotate(-10deg); }
+  .cat {
+    position: absolute; left: -32px; bottom: 0;
+    font-size: 1.5rem; cursor: pointer;
+    transition: transform 0.2s;
+    user-select: none;
+    animation: catIdle 3s infinite ease-in-out;
+  }
+  .cat:hover { transform: scale(1.25); }
+  @keyframes catIdle {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+  }
   @media (max-width:500px) { .buttons-grid{grid-template-columns:repeat(3,1fr)} .house-front{width:260px} }
   @media (max-width:360px) { .buttons-grid{grid-template-columns:repeat(2,1fr)} }
 </style>
@@ -363,6 +411,7 @@
 
 <h1>🚪 Who's at the Door?</h1>
 <p class="subtitle">Professionals Edition</p>
+<p class="credit">Desenvolvido por <strong>Prof. Ramon Castro</strong> 👨‍🏫</p>
 
 <!-- NAME ENTRY -->
 <div id="nameScreen">
@@ -393,9 +442,11 @@
     </div>
     <div class="char-behind" id="charBehind"></div>
     <div class="house-front">
+      <!-- Invisible roof click area -->
+      <div class="roof-click" onclick="eggRoof()"></div>
       <div class="windows">
-        <div class="window-box"></div>
-        <div class="window-box"></div>
+        <div class="window-box" onclick="eggWindow(this, 0)"></div>
+        <div class="window-box" onclick="eggWindow(this, 1)"></div>
       </div>
       <div class="door-frame">
         <div class="door" id="door" onclick="speakClue(event)">
@@ -404,9 +455,12 @@
           <div class="door-knocker"></div>
         </div>
       </div>
+      <!-- Mailbox & Cat -->
+      <div class="mailbox" onclick="eggMailbox()">📬</div>
+      <div class="cat" onclick="eggCat()">🐱</div>
     </div>
   </div>
-  <div class="steps"></div>
+  <div class="steps-wrap" onclick="eggSteps()"><div class="steps"></div></div>
   <div class="knock-hint" id="knockHint">🔊 Click the door to hear the clue again!</div>
   <div class="feedback" id="feedback"></div>
   <div class="buttons-grid" id="buttonsGrid"></div>
@@ -850,7 +904,7 @@ function initFirebase() {
     const { getDatabase, ref, get, set, remove } = window.firebaseDB;
 
     const app = initializeApp({
-      apiKey: "AIzaSyB1d9WgqU7FfGglVjdGB17BjqdmrZFzoB8",
+      apiKey: "AIzaSyDG0J47PljT4XgkWdm362vPuUhyxy-zuX0",
       authDomain: "vacar-ia-games.firebaseapp.com",
       databaseURL: "https://vacar-ia-games-default-rtdb.firebaseio.com",
       projectId: "vacar-ia-games",
@@ -957,6 +1011,84 @@ async function clearLeaderboard() {
 
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════════════════════════════════════════
+   EASTER EGGS
+═══════════════════════════════════════════════ */
+let eggToastTimer = null;
+let windowClickCounts = [0, 0];
+let roofClickCount = 0;
+let stepsClickCount = 0;
+
+function showEgg(msg) {
+  const toast = document.getElementById('eggToast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(eggToastTimer);
+  eggToastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  // speak the easter egg message too
+  speak(msg.replace(/[^a-zA-Z0-9 .,!?'\-]/g, ' ').trim());
+}
+
+function eggWindow(el, idx) {
+  windowClickCounts[idx]++;
+  const n = windowClickCounts[idx];
+  const msgs = [
+    "👀 Hey! I can see you through the window!",
+    "🕵️ Are you spying on me?",
+    "🌟 Stop peeking and guess my job!",
+    "😂 Okay okay, I see you too!",
+    "🏠 This is a private residence!"
+  ];
+  // Flash the window
+  el.style.background = '#fff176';
+  setTimeout(() => { el.style.background = ''; }, 400);
+  showEgg(msgs[n % msgs.length]);
+}
+
+function eggRoof() {
+  roofClickCount++;
+  const msgs = [
+    "🏚️ Don't climb on the roof, please!",
+    "☁️ What are you looking for up there?",
+    "🐦 Only birds are allowed up here!",
+    "⚡ Careful — it's slippery!"
+  ];
+  showEgg(msgs[roofClickCount % msgs.length]);
+}
+
+function eggMailbox() {
+  const msgs = [
+    "📬 You've got mail! It says: guess my job!",
+    "💌 A letter from your teacher... it says STUDY!",
+    "📦 Package delivery! Contents: English vocabulary.",
+    "🗑️ Just bills. Nothing fun here.",
+    "📮 The mailbox is empty. Like some students' notebooks!"
+  ];
+  showEgg(msgs[Math.floor(Math.random() * msgs.length)]);
+}
+
+function eggCat() {
+  const msgs = [
+    "🐱 Meow! I live here. Guess who feeds me!",
+    "😸 The cat says: the answer is NOT cat-sitter!",
+    "🐈 I've been sitting here for 3 hours. Help.",
+    "😹 Purrfect! Now focus on the game!",
+    "🐱 My owner is behind the door. Can you guess who?"
+  ];
+  showEgg(msgs[Math.floor(Math.random() * msgs.length)]);
+}
+
+function eggSteps() {
+  stepsClickCount++;
+  const msgs = [
+    "🪨 These steps lead to knowledge!",
+    "👣 Someone walked here recently...",
+    "🧹 I just swept these steps. Don't dirty them!",
+    "💃 No dancing on the steps!"
+  ];
+  showEgg(msgs[stepsClickCount % msgs.length]);
 }
 
 /* ═══════════════════════════════════════════════
