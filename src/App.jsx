@@ -135,7 +135,13 @@ ${duracao === "2 períodos (80 min)"
 ## Referências e Recursos Complementares
 [Aprende Brasil Volume/Unidade${temNotebook ? " + links de ferramentas digitais usadas no plano" : " + sugestões de materiais físicos"}]
 
-Instruções finais: gere SOMENTE o plano, sem introduções extras.`;
+Instruções finais: gere SOMENTE o plano, sem introduções extras.
+
+REGRA DE OURO — EXEMPLOS OBRIGATÓRIOS:
+Em TODAS as seções da aula (especialmente Apresentação, Prática e Produção), sempre que mencionar vocabulário, frases ou estruturas em inglês, inclua OBRIGATORIAMENTE exemplos reais e concretos entre aspas simples, que o professor possa falar ou escrever no quadro imediatamente.
+Exemplos devem ser simples, criativos, próximos da realidade do aluno e prontos para uso em sala.
+Formato: 'frase de exemplo em inglês' — nunca deixe apenas a instrução genérica "forneça exemplos" sem de fato fornecê-los.
+Quantidade mínima: ao menos 2 exemplos por seção que envolva vocabulário ou estrutura linguística.`;
 }
 
 async function callAPI(params) {
