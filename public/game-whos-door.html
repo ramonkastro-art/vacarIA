@@ -138,13 +138,13 @@
 
   /* ── SCENE ── */
   .scene-wrapper {
-    position: relative; display: flex; justify-content: center;
+    position: relative; display: flex; flex-direction: column; align-items: center;
     margin-top: 80px; margin-bottom: 4px; width: 100%;
   }
 
   /* Bubble above house */
   .bubble-above {
-    position: absolute; top: -82px; left: 50%;
+    position: absolute; top: -88px; left: 50%;
     transform: translateX(-50%);
     width: min(340px, 92vw); z-index: 20;
   }
@@ -178,14 +178,16 @@
   /* House */
   .house-front {
     background: linear-gradient(180deg, #ffecb3 0%, #ffe082 100%);
-    border-radius: 18px 18px 0 0; width: 300px; padding: 16px 24px 0;
-    box-shadow: var(--shadow); border: 3px solid #ffd54f;
+    border-radius: 0 0 0 0; width: 300px; padding: 16px 24px 0;
+    box-shadow: var(--shadow); border: 3px solid #ffd54f; border-top: none;
     position: relative; display: flex; flex-direction: column; align-items: center;
   }
-  .house-front::before {
-    content: ''; position: absolute; top: -38px; left: -10px; right: -10px;
-    border-left: 160px solid transparent; border-right: 160px solid transparent;
-    border-bottom: 44px solid #e53935;
+  /* Roof sits as a real element above house-front, see HTML */
+  .roof-svg {
+    width: 306px; /* matches house width + borders */
+    display: block;
+    margin-bottom: -2px; /* overlap border seam */
+    filter: drop-shadow(0 -2px 6px rgba(0,0,0,0.12));
   }
 
   .windows { display:flex; justify-content:space-between; width:100%; padding:0 8px; margin-bottom:6px; }
@@ -380,10 +382,7 @@
   .window-box { cursor: pointer; transition: filter 0.15s; }
   .window-box:hover { filter: brightness(1.2); }
   .steps-wrap { cursor: pointer; }
-  .roof-click { 
-    position: absolute; top: -38px; left: -10px; right: -10px; height: 44px;
-    cursor: pointer; z-index: 5;
-  }
+
   .mailbox {
     position: absolute; right: -28px; bottom: 0;
     font-size: 1.6rem; cursor: pointer;
@@ -441,9 +440,24 @@
       <div class="bubble" id="clueText">…</div>
     </div>
     <div class="char-behind" id="charBehind"></div>
+    <!-- SVG Roof — perfectly centred triangle -->
+    <svg class="roof-svg" viewBox="0 0 306 60" xmlns="http://www.w3.org/2000/svg"
+         onclick="eggRoof()" style="cursor:pointer">
+      <!-- Shadow layer -->
+      <polygon points="153,4 306,60 0,60" fill="#c62828"/>
+      <!-- Main roof -->
+      <polygon points="153,6 303,60 3,60" fill="#e53935"/>
+      <!-- Ridge highlight -->
+      <line x1="153" y1="6" x2="153" y2="18" stroke="#ef9a9a" stroke-width="2" stroke-linecap="round"/>
+      <!-- Chimney -->
+      <rect x="210" y="18" width="22" height="32" fill="#bf360c" rx="2"/>
+      <rect x="207" y="14" width="28" height="7" fill="#d84315" rx="2"/>
+      <!-- Chimney smoke puffs -->
+      <circle cx="221" cy="10" r="4" fill="#cfd8dc" opacity="0.7"/>
+      <circle cx="225" cy="5" r="3" fill="#cfd8dc" opacity="0.5"/>
+      <circle cx="218" cy="2" r="2.5" fill="#cfd8dc" opacity="0.4"/>
+    </svg>
     <div class="house-front">
-      <!-- Invisible roof click area -->
-      <div class="roof-click" onclick="eggRoof()"></div>
       <div class="windows">
         <div class="window-box" onclick="eggWindow(this, 0)"></div>
         <div class="window-box" onclick="eggWindow(this, 1)"></div>
@@ -842,7 +856,7 @@ function handleAnswer(btn, chosen) {
 
     speak("Correct! Come on in!", () => {
       round++;
-      setTimeout(nextRound, 900);
+      setTimeout(nextRound, 2500); // emoji stays visible ~2.5s after TTS ends
     });
 
   } else {
@@ -858,7 +872,7 @@ function handleAnswer(btn, chosen) {
 
     speak("See you later!", () => {
       round++;
-      setTimeout(nextRound, 700);
+      setTimeout(nextRound, 400); // wrong moves on quickly
     });
   }
 }
