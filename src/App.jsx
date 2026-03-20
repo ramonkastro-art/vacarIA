@@ -507,7 +507,7 @@ function CheckboxGroup({ label, options, value, onChange }) {
       <div className="checkbox-group">
         {options.map(opt => (
           <button key={opt} type="button"
-            className={`chip${opt.includes("Ar livre") ? " chip-verde" : ""}${value.includes(opt) ? " chip-active" : ""}`}
+            className={"chip" + (opt.includes("Ar livre") ? " chip-verde" : "") + (value.includes(opt) ? " chip-active" : "")}
             onClick={() => toggle(opt)}>
             {opt}
           </button>
