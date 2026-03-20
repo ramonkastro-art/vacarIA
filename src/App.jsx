@@ -174,7 +174,7 @@ function buildPromptAvaliacao(ano, tema, nivel, tipos, qtd) {
   let instrucoes = "";
   if (temCaca) instrucoes += "\nCACA-PALAVRAS: Enunciado: Busque no caca-palavras os nomes em ingles. Liste 8-12 palavras em PORTUGUES separadas por traco. Crie uma grade 12x12 com as palavras escondidas horizontal e verticalmente, 12 letras por linha separadas por espaco. As palavras DEVEM estar realmente na grade.";
   if (temRelacione) instrucoes += "\nRELACIONE COLUNAS: Enunciado: Relacione a 2a coluna de acordo com a 1a. FORMATO OBRIGATORIO em duas colunas lado a lado separadas por | (pipe). Coluna esquerda: letra + palavra em ingles. Coluna direita: parenteses + traducao EMBARALHADA. Exemplo:\n(A) Dog       | ( ) Gato\n(B) Cat       | ( ) Cachorro\n(C) Bird      | ( ) Passaro\nMinimo 8 pares. NUNCA liste uma embaixo da outra - SEMPRE lado a lado com o | separando.";
-  if (temAnagrama) instrucoes += "\nORGANIZE AS LETRAS: Enunciado: Organize as letras e descubra a palavra em ingles. Letras embaralhadas em MAIUSCULAS espacadas. Duas linhas de resposta abaixo. Minimo 4 anagramas.";
+  if (temAnagrama) instrucoes += "\nORGANIZE AS LETRAS: Gere UMA unica questao com multiplos itens (a, b, c, d...). Formato OBRIGATORIO:\n[numero]. Organize as letras e descubra a profissao (ou palavra do tema) em ingles:\na) [LETRAS EMBARALHADAS] = ___________\nb) [LETRAS EMBARALHADAS] = ___________\nc) [LETRAS EMBARALHADAS] = ___________\nd) [LETRAS EMBARALHADAS] = ___________\nREGRAS CRITICAS PARA EMBARALHAR:\n- NUNCA deixe as letras na ordem original da palavra\n- SEMPRE mude a ordem de todas as letras\n- Embaralhe usando algoritmo mental: pegue a palavra, inverta, misture inicio com fim\n- Exemplos CORRETOS: LAWYER -> WERALY ou YERLWA | NURSE -> ESUNR ou RUNES | ENGINEER -> RGINNEEE | MUSICIAN -> SNACIIMU\n- Exemplos ERRADOS (nao embaralhados): LAWYER -> LAWYER ou L A W Y E R\n- Minimo 4 itens (a, b, c, d). Para 20 questoes use 6 itens (a ate f).\n- Gabarito: liste as respostas corretas de cada item.";
   if (temCharada) instrucoes += "\nCHARADA/ENIGMA: Charadas poeticas em portugues descrevendo algo do tema. Resposta em ingles. Ex: Sou amarelo e doce, macacos me adoram. Quem sou em ingles? _________. Crie 2 a 3 charadas.";
   if (temMultipla) instrucoes += "\nMULTIPLA ESCOLHA: Enunciado em portugues, contextos culturais reais (musicas, series, datas, noticias). Formato: a) opcao  b) opcao  c) opcao  d) opcao. Citar Fonte quando usar texto em ingles. Pelo menos uma questao com trecho em ingles.";
   if (temInterpretacao) instrucoes += "\nINTERPRETACAO DE TEXTO: Texto autentico em ingles com Fonte citada. Tamanho: " + txtSize + ". 3 a 5 perguntas em portugues: localizacao + vocabulario + interpretacao. Questoes abertas com linhas; objetivas com a/b/c/d.";
@@ -268,6 +268,19 @@ function renderLines(text) {
           <span style={{width:"50%"}}>{right}</span>
         </div>
       );
+    }
+    // Anagram item: a) WERALY = ___________
+    if (/^[a-h]\) [A-Z]+ = /.test(line)) {
+      const match = line.match(/^([a-h]\) )([A-Z]+)( = _+)$/);
+      if (match) {
+        return (
+          <div key={i} style={{display:"flex",alignItems:"baseline",gap:8,margin:"4px 0 4px 16px"}}>
+            <span style={{fontWeight:700,color:"#7c3aed",minWidth:20}}>{match[1]}</span>
+            <span style={{fontFamily:"'Space Mono',monospace",fontWeight:700,fontSize:14,letterSpacing:3,color:"#0e7490",background:"#f0fdf4",padding:"2px 8px",borderRadius:4}}>{match[2]}</span>
+            <span style={{color:"#78716c",marginLeft:4}}>= ___________</span>
+          </div>
+        );
+      }
     }
     const html = line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     return <p key={i} className="md-p" dangerouslySetInnerHTML={{ __html: html }} />;
