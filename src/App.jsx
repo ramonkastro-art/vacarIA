@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./App.css";
 
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
@@ -604,121 +605,7 @@ export default function App() {
 
   return (
     <>
-      <style>{`
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{background:#fefce8;min-height:100vh}
-        .app{min-height:100vh;background:#fefce8;background-image:radial-gradient(ellipse at 15% 0%,rgba(251,191,36,.18) 0%,transparent 45%),radial-gradient(ellipse at 85% 100%,rgba(14,116,144,.08) 0%,transparent 45%);display:flex;flex-direction:column;align-items:center;padding:40px 16px 60px;font-family:'IBM Plex Sans',sans-serif}
-        .header{text-align:center;margin-bottom:40px}
-        .logo-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(180,83,9,.08);border:1px solid rgba(180,83,9,.2);border-radius:100px;padding:6px 16px;margin-bottom:20px}
-        .logo-dot{width:8px;height:8px;background:#d97706;border-radius:50%;animation:pulse 2s infinite}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-        .logo-badge span{font-family:'Space Mono',monospace;font-size:11px;color:#92400e;letter-spacing:.1em;text-transform:uppercase}
-        .title{font-family:'Space Mono',monospace;font-size:clamp(42px,8vw,72px);font-weight:700;color:#b45309;letter-spacing:-2px;line-height:1;margin-bottom:12px}
-        .title span{color:#0e7490}
-        .subtitle{font-size:15px;color:#78716c;max-width:420px;line-height:1.6}
 
-        .card{width:100%;max-width:600px;background:#fff;border:1px solid #fde68a;border-radius:16px;padding:32px;box-shadow:0 4px 6px rgba(180,83,9,.04),0 10px 40px rgba(180,83,9,.08)}
-
-        .field{margin-bottom:22px}
-        .field label{display:block;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:#92400e;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-
-        .select,.textarea{width:100%;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;color:#1c1917;font-family:'IBM Plex Sans',sans-serif;font-size:15px;padding:12px 16px;outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;-webkit-appearance:none}
-        .select:focus,.textarea:focus{border-color:#d97706;box-shadow:0 0 0 3px rgba(217,119,6,.12)}
-        .select-wrapper{position:relative}
-        .select-wrapper::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#a16207;pointer-events:none;font-size:12px}
-        .textarea{resize:vertical;min-height:90px;line-height:1.6}
-        .textarea::placeholder{color:#c4b59a}
-        select option{background:#fffbeb;color:#1c1917}
-
-        .radio-group,.checkbox-group{display:flex;flex-wrap:wrap;gap:8px}
-        .chip{padding:8px 16px;border-radius:100px;border:1.5px solid #fde68a;background:#fffbeb;color:#78716c;font-family:'IBM Plex Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .18s;white-space:nowrap}
-        .chip:hover{border-color:#d97706;color:#92400e}
-        .chip-active{background:#d97706;border-color:#d97706;color:#fff;font-weight:600}
-        .chip-verde{border-color:#16a34a!important;color:#15803d!important}
-        .chip-verde.chip-active{background:#16a34a!important;border-color:#16a34a!important;color:#fff!important}
-        .chip-active:hover{background:#b45309;border-color:#b45309;color:#fff}
-
-        .divider{border:none;border-top:1px solid #fde68a;margin:4px 0 20px}
-
-        .btn{width:100%;padding:14px;background:linear-gradient(135deg,#d97706,#b45309);border:none;border-radius:10px;color:#fff;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(180,83,9,.3)}
-        .btn:hover:not(:disabled){background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 6px 24px rgba(180,83,9,.4);transform:translateY(-1px)}
-        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-
-        .error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;color:#b91c1c;font-size:14px;margin-top:16px}
-
-        .result-card{width:100%;max-width:780px;background:#fff;border:1px solid #fde68a;border-radius:16px;margin-top:32px;overflow:hidden;box-shadow:0 4px 6px rgba(180,83,9,.04),0 10px 40px rgba(180,83,9,.08)}
-        .result-header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:#fffbeb;border-bottom:1px solid #fde68a;flex-wrap:wrap;gap:10px}
-        .result-header-left{display:flex;align-items:center;gap:10px}
-        .result-tag{font-family:'Space Mono',monospace;font-size:11px;color:#92400e;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
-        .provider-badge{background:rgba(14,116,144,.08);border:1px solid rgba(14,116,144,.2);border-radius:100px;padding:3px 10px;font-family:'Space Mono',monospace;font-size:10px;color:#0e7490}
-        .result-actions{display:flex;gap:8px;flex-wrap:wrap}
-        .action-btn{background:#fff;border:1.5px solid #fde68a;border-radius:8px;color:#92400e;font-family:'Space Mono',monospace;font-size:11px;padding:6px 13px;cursor:pointer;transition:all .2s;white-space:nowrap}
-        .action-btn:hover{background:#fef3c7;border-color:#d97706}
-        .action-btn.pdf{background:#b45309;border-color:#b45309;color:#fff}
-        .action-btn.pdf:hover{background:#92400e;border-color:#92400e}
-
-        .result-body{padding:28px 32px}
-        .md-h1{font-size:20px;font-weight:800;color:#b45309;font-family:'Space Mono',monospace;margin:8px 0 12px;border-bottom:2px solid #fde68a;padding-bottom:8px}
-        .md-h2{font-size:12px;font-weight:700;color:#0e7490;font-family:'Space Mono',monospace;margin:24px 0 8px;text-transform:uppercase;letter-spacing:.08em}
-        .md-h3{font-size:14px;font-weight:700;color:#7c3aed;font-family:'Space Mono',monospace;margin:16px 0 6px}
-        .md-bold{font-weight:700;color:#0f172a;margin:4px 0}
-        .md-li{display:flex;gap:10px;margin:3px 0;padding-left:4px}
-        .md-bullet{color:#d97706;flex-shrink:0;margin-top:2px}
-        .md-li strong{color:#92400e}
-        .md-hr{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
-        .md-p{margin:2px 0;color:#1e293b;line-height:1.75;font-size:15px}
-
-        .loading-box{display:flex;justify-content:center;padding:48px}
-        .spinner{width:36px;height:36px;border:3px solid #fde68a;border-top-color:#d97706;border-radius:50%;animation:spin .8s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-
-        .install-banner{width:100%;max-width:600px;margin-top:20px;background:#fff;border:1.5px solid #d97706;border-radius:14px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 16px rgba(180,83,9,.1);animation:fadeIn .4s ease}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        .install-banner-left{display:flex;align-items:center;gap:12px}
-        .install-icon{width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0}
-        .install-text strong{display:block;font-size:14px;color:#92400e;font-weight:700}
-        .install-text span{font-size:12px;color:#78716c}
-        .install-actions{display:flex;gap:8px;flex-shrink:0}
-        .install-btn{padding:8px 18px;background:#d97706;border:none;border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
-        .install-btn:hover{background:#b45309}
-        .install-dismiss{padding:8px 12px;background:transparent;border:1.5px solid #fde68a;border-radius:8px;color:#a16207;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s}
-        .install-dismiss:hover{border-color:#d97706;color:#92400e}
-        /* MODE TABS */
-        .mode-tabs{display:flex;width:100%;max-width:600px;background:#fff;border:1.5px solid #fde68a;border-radius:14px;overflow:hidden;margin-bottom:0}
-        .mode-tab{flex:1;padding:13px;text-align:center;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:#a16207;transition:all .2s}
-        .mode-tab:first-child{border-right:1px solid #fde68a}
-        .mode-tab.active{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
-        .mode-tab:not(.active):hover{background:#fffbeb}
-        /* AVALIACAO */
-        .av-result-card{width:100%;max-width:780px;background:#fff;border:1.5px solid #c4b5fd;border-radius:16px;margin-top:32px;overflow:hidden;box-shadow:0 4px 6px rgba(124,58,237,.04),0 10px 40px rgba(124,58,237,.08)}
-        .av-result-header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:#faf5ff;border-bottom:1px solid #e9d5ff;flex-wrap:wrap;gap:10px}
-        .av-result-tag{font-family:'Space Mono',monospace;font-size:11px;color:#6d28d9;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
-        .av-badge{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:100px;padding:3px 10px;font-family:'Space Mono',monospace;font-size:10px;color:#7c3aed}
-        .av-pdf-btn{background:#7c3aed;border:none;border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:11px;padding:7px 16px;cursor:pointer;transition:all .2s;font-weight:700}
-        .av-pdf-btn:hover{background:#6d28d9}
-        /* GAMES SECTION */
-        .games-section{width:100%;max-width:600px;margin-top:40px}
-        .games-section-title{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:#92400e;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
-        .games-section-title::after{content:'';flex:1;height:1px;background:#fde68a}
-        .games-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-        .game-card{background:#fff;border:1.5px solid #fde68a;border-radius:14px;padding:20px 18px;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
-        .game-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(217,119,6,.04),transparent);pointer-events:none}
-        .game-card:hover{border-color:#d97706;transform:translateY(-3px);box-shadow:0 8px 28px rgba(180,83,9,.14)}
-        .game-card-icon{font-size:28px;line-height:1}
-        .game-card-name{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#b45309;line-height:1.3}
-        .game-card-desc{font-size:12px;color:#78716c;line-height:1.5}
-        .game-card-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(14,116,144,.08);border:1px solid rgba(14,116,144,.2);border-radius:100px;padding:2px 9px;font-family:'Space Mono',monospace;font-size:9px;color:#0e7490;align-self:flex-start}
-        @media(max-width:480px){.games-grid{grid-template-columns:1fr}}
-        .footer{margin-top:48px;text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:#d4c4a0;letter-spacing:.05em}
-
-        @media(max-width:640px){
-          .card{padding:24px 16px}
-          .result-body{padding:20px 16px}
-          .result-header{flex-direction:column;align-items:flex-start}
-          .result-actions{width:100%}
-          .action-btn{flex:1;text-align:center}
-        }
-      `}</style>
 
       <div className="app">
         <header className="header">
