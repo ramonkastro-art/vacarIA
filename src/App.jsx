@@ -228,18 +228,18 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
 }
 
 async function callAvaliacao(params) {
-  const response = await fetch("/api/grok", {
+  const response = await fetch("/api/avaliacao", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       messages: [
         {
           role: "system",
-          content: "Você é um professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS. Crie avaliações pedagógicas precisas, claras e adequadas ao nível dos alunos.",
+          content: "Você é um professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS. Siga as instruções com precisão absoluta. Crie avaliações pedagógicas corretas, sem erros de lógica, com alternativas sempre em inglês e relacionamentos sempre inglês↔português.",
         },
         { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.qtd) },
       ],
-      temperature: 0.5,
+      temperature: 0.3,
       max_tokens: 4000,
     }),
   });
@@ -664,7 +664,7 @@ export default function App() {
             <div className="av-result-header">
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <span className="av-result-tag">Avaliação Gerada</span>
-                {providerAv && <span className="av-badge">{providerAv === "groq" ? "Groq · LLaMA 3.3" : "Gemini · Fallback"}</span>}
+                {providerAv && <span className="av-badge">{providerAv === "gemini" ? "Gemini 2.0 Flash" : providerAv === "groq-fallback" ? "Groq · Fallback" : providerAv}</span>}
               </div>
               <div style={{display:"flex",gap:8}}>
               <button className="av-pdf-btn" onClick={() => handlePrintAvaliacao({ ano: anoAv, tema: temaAv })}>↓ PDF</button>
