@@ -4,6 +4,8 @@ const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
 const NIVEIS = ["Básico","Intermediário","Avançado"];
 const RECURSOS = ["Quadro negro apenas","Cards / Flashcards","Notebook / Computador","Ar livre 🌿"];
+const TIPOS_QUESTAO = ["Múltipla escolha","Verdadeiro ou Falso","Interpretação de texto","Complete as lacunas","Produção escrita"];
+const QTD_QUESTOES = ["5 questões","8 questões","10 questões","15 questões"];
 
 function buildPrompt(ano, tema, duracao, nivel, recursos) {
   const temNotebook = recursos.includes("Notebook / Computador");
@@ -144,6 +146,75 @@ Formato: 'frase de exemplo em inglês' — nunca deixe apenas a instrução gen�
 Quantidade mínima: ao menos 2 exemplos por seção que envolva vocabulário ou estrutura linguística.`;
 }
 
+function buildPromptAvaliacao(ano, tema, nivel, tipos) {
+  const efI = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"].includes(ano);
+  const tiposStr = tipos.join(", ");
+  const temInterpretacao = tipos.includes("Interpretação de texto");
+  const temProducao = tipos.includes("Produção escrita");
+
+  return `Você é um professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS.
+Crie uma avaliação completa de Língua Inglesa para o ${ano}, nível ${nivel}, sobre o tema "${tema}".
+
+REGRAS OBRIGATÓRIAS:
+1. A avaliação deve estar 100% em PORTUGUÊS BRASILEIRO, com enunciados claros.
+2. O conteúdo avaliado deve ser de LÍNGUA INGLESA (vocabulário, gramática, leitura em inglês).
+3. Tipos de questão solicitados: ${tiposStr}.
+4. Distribua as questões de forma equilibrada entre os tipos escolhidos.
+5. Adapte a complexidade para o nível ${nivel}:
+   ${nivel === "Básico" ? "- Use vocabulário simples, frases curtas, imagens descritas por palavras, opções bem distintas." : ""}
+   ${nivel === "Intermediário" ? "- Equilibre reconhecimento e produção. Textos curtos com vocabulário variado." : ""}
+   ${nivel === "Avançado" ? "- Inclua textos mais longos, inferência de significado, produção escrita elaborada." : ""}
+${temInterpretacao ? `6. Na interpretação de texto: inclua um texto autêntico e acessível em inglês (4–8 linhas), seguido de 2–3 perguntas de compreensão.` : ""}
+${temProducao ? `7. Na produção escrita: proponha uma situação comunicativa real (ex: escrever um e-mail, descrição, diálogo), com instruções claras em português.` : ""}
+${efI ? `8. Para ${ano} (anos iniciais): foque em vocabulário visual, associação de palavras e imagens descritas, sem textos longos.` : ""}
+
+FORMATO OBRIGATÓRIO:
+
+# Avaliação de Língua Inglesa
+**Tema:** ${tema}
+**Série:** ${ano} | **Nível:** ${nivel} | **Componente:** Língua Inglesa
+**Nome:** _________________________________ **Data:** ___/___/_______ **Nota:** _______
+
+---
+
+[Para cada tipo de questão solicitado, crie uma seção com título, instrução clara e as questões numeradas sequencialmente.]
+
+Exemplo de estrutura para múltipla escolha:
+## Questões de Múltipla Escolha
+*Leia cada questão e marque a alternativa correta.*
+1. [Enunciado em português com palavra/frase em inglês entre aspas]
+   a) [opção]  b) [opção]  c) [opção]  d) [opção]
+
+Exemplo para verdadeiro ou falso:
+## Verdadeiro (T) ou Falso (F)
+*Leia as afirmações e marque T para verdadeiro ou F para falso.*
+( ) [afirmação]
+
+Exemplo para interpretação:
+## Interpretação de Texto
+*Leia o texto abaixo e responda às perguntas.*
+[texto em inglês]
+1. [pergunta em português]
+
+Exemplo para lacunas:
+## Complete as Lacunas
+*Complete as frases com a palavra correta do quadro.*
+[quadro de palavras em inglês]
+1. __________ [resto da frase]
+
+Exemplo para produção:
+## Produção Escrita
+*Siga as instruções abaixo.*
+[instrução clara da tarefa em português]
+
+---
+
+## Gabarito
+[Liste as respostas corretas de todas as questões objetivas ao final]
+
+Gere SOMENTE a avaliação, sem introduções ou comentários extras.`;
+}
+
 async function callAPI(params) {
   const response = await fetch("/api/grok", {
     method: "POST",
@@ -157,6 +228,29 @@ async function callAPI(params) {
         { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos) },
       ],
       temperature: 0.65,
+      max_tokens: 4000,
+    }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data?.error?.message || data?.error || response.statusText);
+  const text = data.choices?.[0]?.message?.content;
+  if (!text || text.trim().length === 0) throw new Error("A API retornou uma resposta vazia.");
+  return { text, provider: data._provider || "ia" };
+}
+
+async function callAvaliacao(params) {
+  const response = await fetch("/api/grok", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messages: [
+        {
+          role: "system",
+          content: "Você é um professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS. Crie avaliações pedagógicas precisas, claras e adequadas ao nível dos alunos.",
+        },
+        { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.tipos) },
+      ],
+      temperature: 0.5,
       max_tokens: 4000,
     }),
   });
@@ -295,6 +389,89 @@ window.addEventListener("load", () => setTimeout(() => document.getElementById("
 
 
 
+function handlePrintAvaliacao(params) {
+  const printEl = document.getElementById("avaliacao-para-pdf");
+  if (!printEl) return;
+  const filename = `Avaliacao_${params.ano}_${params.tema}.pdf`
+    .replace(/[^a-zA-Z0-9_\-\.áéíóúàãõâêôçÁÉÍÓÚÀÃÕÂÊÔÇ ]/g, "")
+    .replace(/ /g, "_");
+  const win = window.open("", "_blank", "width=1000,height=800");
+  win.document.write(`<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"/>
+<title>Avaliação — ${params.tema} — ${params.ano}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#f5f3ff}
+#pdf-wrap{width:794px;margin:0 auto;background:#fff;padding:2cm 2.2cm;font-family:'IBM Plex Sans',sans-serif;font-size:11pt;color:#1e293b;line-height:1.65}
+.pdf-header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #7c3aed;padding-bottom:10px;margin-bottom:18px}
+.pdf-title{font-size:18pt;font-weight:700;color:#6d28d9;letter-spacing:-1px}
+.pdf-title span{color:#d97706}
+.pdf-sub{font-size:9pt;color:#78716c;text-align:right;line-height:1.5}
+.md-h1{font-size:14pt;font-weight:700;color:#6d28d9;margin:16px 0 8px;padding-bottom:5px;border-bottom:1.5px solid #e9d5ff}
+.md-h2{font-size:10pt;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 6px}
+.md-h3{font-size:10pt;font-weight:700;color:#b45309;margin:10px 0 4px}
+.md-bold{font-weight:700;color:#0f172a;margin:4px 0}
+.md-p{margin:3px 0;line-height:1.7}
+.md-li{display:flex;gap:8px;margin:3px 0;padding-left:4px}
+.md-bullet{color:#7c3aed;flex-shrink:0}
+.md-li strong{color:#6d28d9}
+.md-hr{border:none;border-top:2px solid #e9d5ff;margin:14px 0}
+.pdf-footer{margin-top:28px;padding-top:8px;border-top:1px solid #e9d5ff;font-size:8pt;color:#a8a29e;display:flex;align-items:center;justify-content:space-between}
+.pdf-footer-logo{width:32px;height:32px;object-fit:contain;opacity:0.6;border-radius:6px}
+#btn-baixar{position:fixed;bottom:24px;right:24px;z-index:999;padding:14px 28px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,.4);transition:all .2s}
+#btn-baixar:hover{background:linear-gradient(135deg,#8b5cf6,#7c3aed);transform:translateY(-2px)}
+#btn-baixar:disabled{opacity:.6;cursor:not-allowed;transform:none}
+@media print{body{padding:1.5cm 2cm}@page{margin:1.5cm 2cm}}
+</style></head><body>
+<div id="pdf-wrap">
+  <div class="pdf-header">
+    <div class="pdf-title">Vacar<span>IA</span> — Avaliação</div>
+    <div class="pdf-sub">Rede Municipal de Vacaria/RS<br/>Avaliação — Língua Inglesa</div>
+  </div>
+  ${printEl.innerHTML}
+  <div class="pdf-footer">
+    <div>
+      <div>VacarIA · Assistente Pedagógico para Professores de Inglês</div>
+      <div style="font-size:7.5pt;color:#c4b5a0">Desenvolvido por Ramon Castro · ${new Date().toLocaleDateString("pt-BR")}</div>
+    </div>
+    <img class="pdf-footer-logo" src="${LOGO_B64}" alt="VacarIA" />
+  </div>
+</div>
+<button id="btn-baixar">⬇ Baixar PDF</button>
+<script>
+document.getElementById("btn-baixar").addEventListener("click", async function() {
+  const btn = this;
+  btn.disabled = true; btn.textContent = "Gerando...";
+  try {
+    await document.fonts.ready;
+    const canvas = await html2canvas(document.getElementById("pdf-wrap"), {scale:2,useCORS:true,backgroundColor:"#ffffff",logging:false});
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const imgW = pageW;
+    const imgH = (canvas.height * pageW) / canvas.width;
+    const imgData = canvas.toDataURL("image/jpeg", 0.92);
+    let y = 0, remaining = imgH;
+    while (remaining > 0) {
+      if (y > 0) pdf.addPage();
+      pdf.addImage(imgData, "JPEG", 0, -y, imgW, imgH);
+      y += pageH; remaining -= pageH;
+    }
+    pdf.save("${filename}");
+    btn.textContent = "✓ PDF Salvo!";
+    setTimeout(() => { btn.disabled = false; btn.textContent = "⬇ Baixar PDF"; }, 3000);
+  } catch(e) { btn.textContent = "⬇ Baixar PDF"; btn.disabled = false; alert("Erro: " + e.message); }
+});
+window.addEventListener("load", () => setTimeout(() => document.getElementById("btn-baixar").click(), 800));
+<\/script>
+</body></html>\`);
+  win.document.close();
+}
+
 function CheckboxGroup({ label, options, value, onChange }) {
   const toggle = (opt) => {
     if (value.includes(opt)) onChange(value.filter(v => v !== opt));
@@ -343,6 +520,17 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [provider, setProvider] = useState("");
   const [error, setError] = useState(null);
+  // Avaliação states
+  const [modo, setModo] = useState("plano"); // "plano" | "avaliacao"
+  const [anoAv, setAnoAv] = useState("");
+  const [temaAv, setTemaAv] = useState("");
+  const [nivelAv, setNivelAv] = useState("Básico");
+  const [tiposAv, setTiposAv] = useState(["Múltipla escolha"]);
+  const [loadingAv, setLoadingAv] = useState(false);
+  const [resultAv, setResultAv] = useState(null);
+  const [errorAv, setErrorAv] = useState(null);
+  const [providerAv, setProviderAv] = useState("");
+
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstall, setShowInstall] = useState(false);
 
@@ -373,6 +561,18 @@ export default function App() {
     finally { setLoading(false); }
   };
 
+
+  const handleGerarAvaliacao = async () => {
+    if (!anoAv || !temaAv.trim()) { setErrorAv("Selecione o ano e digite o tema da avaliação."); return; }
+    if (tiposAv.length === 0) { setErrorAv("Selecione pelo menos um tipo de questão."); return; }
+    setLoadingAv(true); setResultAv(null); setErrorAv(null);
+    try {
+      const res = await callAvaliacao({ ano: anoAv, tema: temaAv, nivel: nivelAv, tipos: tiposAv });
+      setResultAv(res.text);
+      setProviderAv(res.provider);
+    } catch (e) { setErrorAv(e.message); }
+    finally { setLoadingAv(false); }
+  };
 
   const handleLink = () => {
     handleShareLink(result, { ano, tema, duracao, nivel, recursos });
@@ -462,6 +662,19 @@ export default function App() {
         .install-btn:hover{background:#b45309}
         .install-dismiss{padding:8px 12px;background:transparent;border:1.5px solid #fde68a;border-radius:8px;color:#a16207;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s}
         .install-dismiss:hover{border-color:#d97706;color:#92400e}
+        /* MODE TABS */
+        .mode-tabs{display:flex;width:100%;max-width:600px;background:#fff;border:1.5px solid #fde68a;border-radius:14px;overflow:hidden;margin-bottom:0}
+        .mode-tab{flex:1;padding:13px;text-align:center;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:#a16207;transition:all .2s}
+        .mode-tab:first-child{border-right:1px solid #fde68a}
+        .mode-tab.active{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
+        .mode-tab:not(.active):hover{background:#fffbeb}
+        /* AVALIACAO */
+        .av-result-card{width:100%;max-width:780px;background:#fff;border:1.5px solid #c4b5fd;border-radius:16px;margin-top:32px;overflow:hidden;box-shadow:0 4px 6px rgba(124,58,237,.04),0 10px 40px rgba(124,58,237,.08)}
+        .av-result-header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:#faf5ff;border-bottom:1px solid #e9d5ff;flex-wrap:wrap;gap:10px}
+        .av-result-tag{font-family:'Space Mono',monospace;font-size:11px;color:#6d28d9;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+        .av-badge{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:100px;padding:3px 10px;font-family:'Space Mono',monospace;font-size:10px;color:#7c3aed}
+        .av-pdf-btn{background:#7c3aed;border:none;border-radius:8px;color:#fff;font-family:'Space Mono',monospace;font-size:11px;padding:7px 16px;cursor:pointer;transition:all .2s;font-weight:700}
+        .av-pdf-btn:hover{background:#6d28d9}
         /* GAMES SECTION */
         .games-section{width:100%;max-width:600px;margin-top:40px}
         .games-section-title{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:#92400e;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
@@ -512,7 +725,18 @@ export default function App() {
           </div>
         )}
 
-        <div className="card">
+        {/* TABS */}
+        <div className="mode-tabs">
+          <button className={`mode-tab${modo === "plano" ? " active" : ""}`} onClick={() => setModo("plano")}>
+            📋 Plano de Aula
+          </button>
+          <button className={`mode-tab${modo === "avaliacao" ? " active" : ""}`} onClick={() => setModo("avaliacao")}>
+            📝 Avaliação
+          </button>
+        </div>
+
+        {/* PLANO DE AULA */}
+        {modo === "plano" && <div className="card" style={{borderTopLeftRadius:0,borderTopRightRadius:0,borderTop:"none"}}>
 
           {/* Ano */}
           <div className="field">
@@ -550,7 +774,36 @@ export default function App() {
           </button>
 
           {error && <div className="error-box">⚠ {error}</div>}
-        </div>
+        </div>}
+
+        {/* AVALIAÇÃO */}
+        {modo === "avaliacao" && (
+          <div className="card" style={{borderTopLeftRadius:0,borderTopRightRadius:0,borderTop:"none"}}>
+            <div className="field">
+              <label>Ano / Série</label>
+              <div className="select-wrapper">
+                <select className="select" value={anoAv} onChange={e => setAnoAv(e.target.value)}>
+                  <option value="">Selecione o ano...</option>
+                  {ANOS.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="field">
+              <label>Tema / Conteúdo Avaliado</label>
+              <textarea className="textarea" value={temaAv} onChange={e => setTemaAv(e.target.value)}
+                placeholder="Ex: Verb To Be, Daily Routines, Present Continuous, Colors and Numbers..." rows={3} />
+            </div>
+            <hr className="divider" />
+            <RadioGroup label="Nível da Turma" options={NIVEIS} value={nivelAv} onChange={setNivelAv} />
+            <CheckboxGroup label="Tipos de Questão" options={TIPOS_QUESTAO} value={tiposAv} onChange={setTiposAv} />
+            <hr className="divider" />
+            <button className="btn" style={{background:"linear-gradient(135deg,#7c3aed,#6d28d9)",boxShadow:"0 4px 16px rgba(124,58,237,.3)"}}
+              onClick={handleGerarAvaliacao} disabled={loadingAv}>
+              {loadingAv ? "Gerando..." : "✦ Gerar Avaliação"}
+            </button>
+            {errorAv && <div className="error-box">⚠ {errorAv}</div>}
+          </div>
+        )}
 
         {loading && (
           <div className="result-card">
@@ -578,6 +831,33 @@ export default function App() {
             </div>
             <div className="result-body">
               <div id="plano-para-pdf">{renderLines(result)}</div>
+            </div>
+          </div>
+        )}
+
+        {/* RESULTADO AVALIAÇÃO */}
+        {loadingAv && (
+          <div className="av-result-card">
+            <div className="loading-box">
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
+                <div className="spinner" style={{borderColor:"#e9d5ff",borderTopColor:"#7c3aed"}} />
+                <p style={{color:"#6d28d9",fontSize:14,fontFamily:"'Space Mono',monospace"}}>Gerando avaliação com IA...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {resultAv && !loadingAv && (
+          <div className="av-result-card">
+            <div className="av-result-header">
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <span className="av-result-tag">Avaliação Gerada</span>
+                {providerAv && <span className="av-badge">{providerAv === "groq" ? "Groq · LLaMA 3.3" : "Gemini · Fallback"}</span>}
+              </div>
+              <button className="av-pdf-btn" onClick={() => handlePrintAvaliacao({ ano: anoAv, tema: temaAv })}>↓ Salvar PDF</button>
+            </div>
+            <div className="result-body">
+              <div id="avaliacao-para-pdf">{renderLines(resultAv)}</div>
             </div>
           </div>
         )}
