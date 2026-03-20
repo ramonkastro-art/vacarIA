@@ -377,7 +377,7 @@ function markdownToDocxXml(text) {
 function buildDocxBlob(title, subtitle, paras, dataAtual) {
   // Build a minimal but valid .docx using raw XML
   // Returns a Blob
-  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const esc = s => s.split(String.fromCharCode(38)).join("\u0026amp;").split(String.fromCharCode(60)).join("\u0026lt;").split(String.fromCharCode(62)).join("\u0026gt;");
 
   let body = "";
 
@@ -493,7 +493,7 @@ function handleDocx(text, filename) {
     "<button id='btn' disabled>⬇ Baixar DOCX</button>" +
     "<scr" + "ipt>" +
     "var data=" + JSON.stringify({paras, filename, dataAtual}) + ";" +
-    "function esc(s){var r=s;r=r.split('&').join('&amp;');r=r.split('<').join('&lt;');r=r.split('>').join('&gt;');r=r.split('\\"').join('&quot;');return r;}" +
+    "function esc(s){var r=s;r=r.split(String.fromCharCode(38)).join('\u0026amp;');r=r.split(String.fromCharCode(60)).join('\u0026lt;');r=r.split(String.fromCharCode(62)).join('\u0026gt;');return r;}" +
     "function buildBody(paras){" +
     "var b='';" +
     "b+='<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/><w:color w:val="B45309"/></w:rPr><w:t>VacarIA</w:t></w:r></w:p>';" +
