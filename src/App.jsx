@@ -344,6 +344,231 @@ function handlePrintAvaliacao(params) {
   if (win) setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
+function markdownToDocxXml(text) {
+  // Converts markdown text to an array of docx paragraph XML strings
+  // Returns array of paragraph descriptors: {type, text, bold}
+  const lines = text.split("\n");
+  const paras = [];
+  for (const line of lines) {
+    if (line.startsWith("# ")) {
+      paras.push({type:"h1", text: line.slice(2)});
+    } else if (line.startsWith("## ")) {
+      paras.push({type:"h2", text: line.slice(3)});
+    } else if (line.startsWith("### ")) {
+      paras.push({type:"h3", text: line.slice(4)});
+    } else if (line.startsWith("**") && line.endsWith("**") && line.length > 4) {
+      paras.push({type:"bold", text: line.slice(2,-2)});
+    } else if (line.startsWith("• ") || line.startsWith("- ")) {
+      paras.push({type:"bullet", text: line.slice(2).replace(/\*\*(.+?)\*\*/g,"$1")});
+    } else if (line.startsWith("═")) {
+      // skip
+    } else if (line.trim() === "---") {
+      paras.push({type:"hr"});
+    } else if (line.trim() === "") {
+      paras.push({type:"empty"});
+    } else {
+      paras.push({type:"normal", text: line.replace(/\*\*(.+?)\*\*/g,"$1")});
+    }
+  }
+  return paras;
+}
+
+function buildDocxBlob(title, subtitle, paras, dataAtual) {
+  // Build a minimal but valid .docx using raw XML
+  // Returns a Blob
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+  let body = "";
+
+  // Header paragraph
+  body += '<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr>' +
+    '<w:r><w:rPr><w:color w:val="B45309"/></w:rPr><w:t>' + esc("VacarIA") + '</w:t></w:r></w:p>';
+
+  body += '<w:p><w:pPr><w:jc w:val="left"/></w:pPr>' +
+    '<w:r><w:rPr><w:sz w:val="18"/><w:color w:val="555555"/></w:rPr>' +
+    '<w:t>' + esc(subtitle) + '</w:t></w:r></w:p>';
+
+  body += '<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="D97706"/></w:pPr></w:p>';
+
+  for (const p of paras) {
+    if (p.type === "h1") {
+      body += '<w:p><w:pPr><w:pStyle w:val="Heading1"/><w:spacing w:before="240" w:after="120"/></w:pPr>' +
+        '<w:r><w:rPr><w:color w:val="B45309"/><w:sz w:val="28"/><w:b/></w:rPr>' +
+        '<w:t>' + esc(p.text) + '</w:t></w:r></w:p>';
+    } else if (p.type === "h2") {
+      body += '<w:p><w:pPr><w:pStyle w:val="Heading2"/><w:spacing w:before="200" w:after="80"/></w:pPr>' +
+        '<w:r><w:rPr><w:color w:val="0E7490"/><w:sz w:val="22"/><w:b/><w:caps/></w:rPr>' +
+        '<w:t>' + esc(p.text) + '</w:t></w:r></w:p>';
+    } else if (p.type === "h3") {
+      body += '<w:p><w:pPr><w:spacing w:before="160" w:after="60"/></w:pPr>' +
+        '<w:r><w:rPr><w:color w:val="7C3AED"/><w:sz w:val="22"/><w:b/></w:rPr>' +
+        '<w:t>' + esc(p.text) + '</w:t></w:r></w:p>';
+    } else if (p.type === "bold") {
+      body += '<w:p><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">' + esc(p.text) + '</w:t></w:r></w:p>';
+    } else if (p.type === "bullet") {
+      body += '<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr>' +
+        '<w:r><w:t xml:space="preserve">' + esc(p.text) + '</w:t></w:r></w:p>';
+    } else if (p.type === "hr") {
+      body += '<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="E2E8F0"/></w:pPr></w:p>';
+    } else if (p.type === "empty") {
+      body += '<w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>';
+    } else if (p.text) {
+      body += '<w:p><w:r><w:t xml:space="preserve">' + esc(p.text) + '</w:t></w:r></w:p>';
+    }
+  }
+
+  // Footer
+  body += '<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="4" w:space="1" w:color="FDE68A"/></w:pPr></w:p>';
+  body += '<w:p><w:r><w:rPr><w:sz w:val="16"/><w:color w:val="A8A29E"/></w:rPr>' +
+    '<w:t>VacarIA · Assistente Pedagógico · Desenvolvido por Ramon Castro · ' + esc(dataAtual) + '</w:t></w:r></w:p>';
+
+  const numbering = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+    '<w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:start w:val="1"/>' +
+    '<w:numFmt w:val="bullet"/><w:lvlText w:val="•"/>' +
+    '<w:lvlJc w:val="left"/><w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr></w:lvl></w:abstractNum>' +
+    '<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>';
+
+  const docXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+    '<w:body>' + body +
+    '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>' +
+    '<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>' +
+    '</w:body></w:document>';
+
+  const rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>' +
+    '</Relationships>';
+
+  const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+    '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>' +
+    '<w:sz w:val="24"/></w:rPr></w:rPrDefault></w:docDefaults>' +
+    '<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/>' +
+    '<w:rPr><w:b/><w:sz w:val="32"/></w:rPr></w:style>' +
+    '<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/>' +
+    '<w:rPr><w:b/><w:sz w:val="26"/></w:rPr></w:style></w:styles>';
+
+  const contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+    '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
+    '<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>' +
+    '</Types>';
+
+  const rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+    '</Relationships>';
+
+  // Build ZIP using JSZip-compatible manual approach
+  // We'll use a data: URL trick with a pre-built minimal DOCX structure
+  // Since we can't use JSZip in the browser without importing it,
+  // we use a Blob with the docx mime type built from base64
+  // Instead: open a page that uses SheetJS/docx CDN
+  return {docXml, numbering, rels, styles, contentTypes, rootRels};
+}
+
+function handleDocx(text, filename) {
+  // Use a CDN page that builds the DOCX client-side
+  const paras = markdownToDocxXml(text);
+  const dataAtual = new Date().toLocaleDateString("pt-BR");
+  const payload = JSON.stringify({paras, filename, dataAtual});
+  const encoded = encodeURIComponent(payload);
+
+  const html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" +
+    "<title>Gerando DOCX...</title>" +
+    "<script src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'></scr" + "ipt>" +
+    "<style>body{font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#fefce8;gap:16px;margin:0}" +
+    "button{padding:14px 28px;background:#d97706;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}" +
+    "button:disabled{opacity:.5}" +
+    "p{color:#92400e;font-size:14px}</style></head>" +
+    "<body><p id='msg'>Preparando documento...</p>" +
+    "<button id='btn' disabled>⬇ Baixar DOCX</button>" +
+    "<scr" + "ipt>" +
+    "var data=" + JSON.stringify({paras, filename, dataAtual}) + ";" +
+    "function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}" +
+    "function buildBody(paras){" +
+    "var b='';" +
+    "b+='<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/><w:color w:val="B45309"/></w:rPr><w:t>VacarIA</w:t></w:r></w:p>';" +
+    "b+='<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="D97706"/></w:pPr><w:spacing w:after="160"/></w:pPr></w:p>';" +
+    "for(var i=0;i<paras.length;i++){var p=paras[i];" +
+    "if(p.type==='h1'){b+='<w:p><w:pPr><w:spacing w:before="240" w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="30"/><w:color w:val="B45309"/></w:rPr><w:t>'+esc(p.text)+'</w:t></w:r></w:p>';}" +
+    "else if(p.type==='h2'){b+='<w:p><w:pPr><w:spacing w:before="200" w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="0E7490"/><w:caps/></w:rPr><w:t>'+esc(p.text)+'</w:t></w:r></w:p>';}" +
+    "else if(p.type==='h3'){b+='<w:p><w:pPr><w:spacing w:before="160" w:after="40"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="22"/><w:color w:val="7C3AED"/></w:rPr><w:t>'+esc(p.text)+'</w:t></w:r></w:p>';}" +
+    "else if(p.type==='bold'){b+='<w:p><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">'+esc(p.text)+'</w:t></w:r></w:p>';}" +
+    "else if(p.type==='bullet'){b+='<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr><w:r><w:t xml:space="preserve">'+esc(p.text)+'</w:t></w:r></w:p>';}" +
+    "else if(p.type==='hr'){b+='<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="E2E8F0"/></w:pPr></w:p>';}" +
+    "else if(p.type==='empty'){b+='<w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>';}" +
+    "else if(p.text){b+='<w:p><w:r><w:t xml:space="preserve">'+esc(p.text)+'</w:t></w:r></w:p>';}" +
+    "}b+='<w:p><w:pPr><w:spacing w:before="200"/><w:pBdr><w:top w:val="single" w:sz="4" w:space="1" w:color="FDE68A"/></w:pPr></w:p>';" +
+    "b+='<w:p><w:r><w:rPr><w:sz w:val="16"/><w:color w:val="A8A29E"/></w:rPr><w:t>VacarIA · Desenvolvido por Ramon Castro · '+esc(data.dataAtual)+'</w:t></w:r></w:p>';" +
+    "return b;}" +
+    "window.onload=async function(){" +
+    "try{" +
+    "var ns='http://schemas.openxmlformats.org/wordprocessingml/2006/main';" +
+    "var docXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+" +
+    "'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+" +
+    "'<w:body>'+buildBody(data.paras)+" +
+    "'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>'+" +
+    "'</w:body></w:document>';" +
+    "var numbering='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+" +
+    "'<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+" +
+    "'<w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/>'+" +
+    "'<w:lvlText w:val="•"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr></w:lvl></w:abstractNum>'+" +
+    "'<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>';" +
+    "var styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+" +
+    "'<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+" +
+    "'<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/></w:rPr></w:rPrDefault></w:docDefaults>'+" +
+    "'</w:styles>';" +
+    "var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+" +
+    "'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+" +
+    "'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+" +
+    "'<Default Extension="xml" ContentType="application/xml"/>'+" +
+    "'<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+" +
+    "'<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'+" +
+    "'<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>'+" +
+    "'</Types>';" +
+    "var rootRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+" +
+    "'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+" +
+    "'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+" +
+    "'</Relationships>';" +
+    "var wordRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+" +
+    "'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+" +
+    "'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+" +
+    "'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>'+" +
+    "'</Relationships>';" +
+    "var zip=new JSZip();" +
+    "zip.file('[Content_Types].xml',ct);" +
+    "zip.file('_rels/.rels',rootRels);" +
+    "zip.file('word/document.xml',docXml);" +
+    "zip.file('word/styles.xml',styles);" +
+    "zip.file('word/numbering.xml',numbering);" +
+    "zip.file('word/_rels/document.xml.rels',wordRels);" +
+    "var blob=await zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});" +
+    "var btn=document.getElementById('btn');" +
+    "btn.disabled=false;" +
+    "document.getElementById('msg').textContent='Documento pronto!';" +
+    "btn.addEventListener('click',function(){" +
+    "var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=data.filename+'.docx';a.click();" +
+    "btn.textContent='✓ Baixado!';});" +
+    "btn.click();" +
+    "}catch(e){document.getElementById('msg').textContent='Erro: '+e.message;console.error(e);}" +
+    "};" +
+    "</scr" + "ipt></body></html>";
+
+  const blob = new Blob([html], {type:"text/html"});
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, "_blank");
+  if (win) setTimeout(() => URL.revokeObjectURL(url), 15000);
+}
+
+
 function CheckboxGroup({ label, options, value, onChange }) {
   const toggle = (opt) => {
     if (value.includes(opt)) onChange(value.filter(v => v !== opt));
@@ -584,7 +809,10 @@ export default function App() {
                   </span>
                 )}
               </div>
-              <button className="action-btn pdf" onClick={() => handlePrint({ ano, tema })}>↓ Salvar PDF</button>
+              <div style={{display:"flex",gap:8}}>
+                <button className="action-btn pdf" onClick={() => handlePrint({ ano, tema })}>↓ PDF</button>
+                <button className="docx-btn" onClick={() => handleDocx(result, "Plano_" + ano + "_" + tema)}>↓ Editar DOCX</button>
+              </div>
             </div>
             <div className="result-body">
               <div id="plano-para-pdf">{renderLines(result)}</div>
@@ -611,7 +839,10 @@ export default function App() {
                 <span className="av-result-tag">Avaliação Gerada</span>
                 {providerAv && <span className="av-badge">{providerAv === "groq" ? "Groq · LLaMA 3.3" : "Gemini · Fallback"}</span>}
               </div>
-              <button className="av-pdf-btn" onClick={() => handlePrintAvaliacao({ ano: anoAv, tema: temaAv })}>↓ Salvar PDF</button>
+              <div style={{display:"flex",gap:8}}>
+              <button className="av-pdf-btn" onClick={() => handlePrintAvaliacao({ ano: anoAv, tema: temaAv })}>↓ PDF</button>
+              <button className="docx-btn" onClick={() => handleDocx(resultAv, "Avaliacao_" + anoAv + "_" + temaAv)}>↓ Editar DOCX</button>
+            </div>
             </div>
             <div className="result-body">
               <div id="avaliacao-para-pdf">{renderLines(resultAv)}</div>
