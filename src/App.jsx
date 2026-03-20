@@ -173,7 +173,7 @@ function buildPromptAvaliacao(ano, tema, nivel, tipos, qtd) {
 
   let instrucoes = "";
   if (temCaca) instrucoes += "\nCACA-PALAVRAS: Enunciado: Busque no caca-palavras os nomes em ingles. Liste 8-12 palavras em PORTUGUES separadas por traco. Crie uma grade 12x12 com as palavras escondidas horizontal e verticalmente, 12 letras por linha separadas por espaco. As palavras DEVEM estar realmente na grade.";
-  if (temRelacione) instrucoes += "\nRELACIONE COLUNAS: Enunciado: Relacione a 2a coluna de acordo com a 1a. Coluna esquerda: (A) palavra em ingles. Coluna direita: ( ) traducao embaralhada. Minimo 8 pares.";
+  if (temRelacione) instrucoes += "\nRELACIONE COLUNAS: Enunciado: Relacione a 2a coluna de acordo com a 1a. FORMATO OBRIGATORIO em duas colunas lado a lado separadas por | (pipe). Coluna esquerda: letra + palavra em ingles. Coluna direita: parenteses + traducao EMBARALHADA. Exemplo:\n(A) Dog       | ( ) Gato\n(B) Cat       | ( ) Cachorro\n(C) Bird      | ( ) Passaro\nMinimo 8 pares. NUNCA liste uma embaixo da outra - SEMPRE lado a lado com o | separando.";
   if (temAnagrama) instrucoes += "\nORGANIZE AS LETRAS: Enunciado: Organize as letras e descubra a palavra em ingles. Letras embaralhadas em MAIUSCULAS espacadas. Duas linhas de resposta abaixo. Minimo 4 anagramas.";
   if (temCharada) instrucoes += "\nCHARADA/ENIGMA: Charadas poeticas em portugues descrevendo algo do tema. Resposta em ingles. Ex: Sou amarelo e doce, macacos me adoram. Quem sou em ingles? _________. Crie 2 a 3 charadas.";
   if (temMultipla) instrucoes += "\nMULTIPLA ESCOLHA: Enunciado em portugues, contextos culturais reais (musicas, series, datas, noticias). Formato: a) opcao  b) opcao  c) opcao  d) opcao. Citar Fonte quando usar texto em ingles. Pelo menos uma questao com trecho em ingles.";
@@ -185,9 +185,7 @@ function buildPromptAvaliacao(ano, tema, nivel, tipos, qtd) {
     "Crie uma atividade avaliativa de Lingua Inglesa para " + ano + ", nivel " + nivel + ", tema: " + tema + ".\n\n" +
     "CABECALHO OBRIGATORIO:\n" +
     "ATIVIDADE DE INGLES\n" +
-    "ESTUDANTE: _________________________________\n" +
-    "PROFESSOR(A): _________________________________ DATA: ___/___/_______\n" +
-    "ESCOLA: _________________________________ TURMA: _______\n\n" +
+    "Nome: _____________________________________________ Turma: _______\n\n" +
     "REGRAS:\n" +
     "1. " + (nivel === "Avançado" ? "Nivel AVANCADO: enunciados e instrucoes podem estar em INGLES. O conteudo avaliado tambem em ingles." : "Enunciados SEMPRE em portugues. Conteudo avaliado em ingles.") + "\n" +
     "2. Questoes numeradas sequencialmente (1, 2, 3...).\n" +
@@ -262,6 +260,15 @@ function renderLines(text) {
     if (line.startsWith("═")) return null;
     if (line.trim() === "---") return <hr key={i} className="md-hr" />;
     if (line.trim() === "") return <div key={i} style={{ height: 6 }} />;
+    if (line.includes(" | ")) {
+      const [left, right] = line.split(" | ");
+      return (
+        <div key={i} style={{display:"flex",gap:0,margin:"1px 0",fontFamily:"inherit",fontSize:15}}>
+          <span style={{width:"50%",paddingRight:16}}>{left}</span>
+          <span style={{width:"50%"}}>{right}</span>
+        </div>
+      );
+    }
     const html = line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     return <p key={i} className="md-p" dangerouslySetInnerHTML={{ __html: html }} />;
   });
@@ -273,8 +280,11 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
   const css = [
     "*{box-sizing:border-box;margin:0;padding:0}",
     "html,body{background:#fff}",
-    "#pdf-wrap{width:794px;margin:0 auto;background:#fff;padding:60px 70px;font-family:Arial,sans-serif;font-size:11pt;color:#1e293b;line-height:1.65}",
-    ".pdf-header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid " + headerColor + ";padding-bottom:10px;margin-bottom:18px}",
+    "#pdf-wrap{width:794px;margin:0 auto;background:#fff;padding:40px 56px;font-family:Arial,sans-serif;font-size:10.5pt;color:#1e293b;line-height:1.5}",
+    ".rel-table{width:100%;border-collapse:collapse;margin:4px 0 8px}",
+    ".rel-table td{padding:1px 6px;font-size:10pt;vertical-align:top;width:50%}",
+    ".rel-table td:first-child{padding-right:16px}",
+    ".pdf-header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid " + headerColor + ";padding-bottom:6px;margin-bottom:10px}",
     ".pdf-title{font-size:20pt;font-weight:700;color:" + headerColor + ";letter-spacing:-1px}",
     ".pdf-title span{color:#0e7490}",
     ".pdf-sub{font-size:9pt;color:#78716c;text-align:right;line-height:1.5}",
