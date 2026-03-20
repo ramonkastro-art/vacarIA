@@ -6,7 +6,7 @@ const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
 const NIVEIS = ["Básico","Intermediário","Avançado"];
 const RECURSOS = ["Quadro negro apenas","Cards / Flashcards","Notebook / Computador","Ar livre 🌿"];
 const TIPOS_QUESTAO = ["Caça-palavras","Relacione colunas","Organize as letras","Múltipla escolha","Interpretação de texto","Complete as lacunas","Charada / Enigma","Produção escrita"];
-const QTD_QUESTOES = ["5 questões","8 questões","10 questões","15 questões"];
+const QTD_QUESTOES = ["10 questões (1 página)","20 questões (2 páginas)"];
 
 function buildPrompt(ano, tema, duracao, nivel, recursos) {
   const temNotebook = recursos.includes("Notebook / Computador");
@@ -148,7 +148,8 @@ Formato: 'frase de exemplo em inglês' — nunca deixe apenas a instrução gen�
 Quantidade mínima: ao menos 2 exemplos por seção que envolva vocabulário ou estrutura linguística.`;
 }
 
-function buildPromptAvaliacao(ano, tema, nivel, tipos) {
+function buildPromptAvaliacao(ano, tema, nivel, tipos, qtd) {
+  const vinte = qtd && qtd.includes("20");
   const efI = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"].includes(ano);
   const temCaca = tipos.includes("Caça-palavras");
   const temRelacione = tipos.includes("Relacione colunas");
@@ -191,7 +192,8 @@ function buildPromptAvaliacao(ano, tema, nivel, tipos) {
     "1. " + (nivel === "Avançado" ? "Nivel AVANCADO: enunciados e instrucoes podem estar em INGLES. O conteudo avaliado tambem em ingles." : "Enunciados SEMPRE em portugues. Conteudo avaliado em ingles.") + "\n" +
     "2. Questoes numeradas sequencialmente (1, 2, 3...).\n" +
     "3. Questoes abertas com linhas: _______________________________________\n" +
-    "4. Gere entre 8 e 12 questoes distribuidas entre os tipos: " + tiposStr + "\n" +
+    "4. Gere EXATAMENTE " + (vinte ? "20" : "10") + " questoes distribuidas entre os tipos: " + tiposStr + "\n" +
+    (vinte ? "   A avaliacao deve ocupar 2 paginas A4. Distribua 10 questoes por pagina.\n" : "   A avaliacao deve caber em 1 pagina A4. Seja objetivo e conciso.\n") +
     "5. Nivel " + nivel + ": " + nivelDesc + "\n" +
     (efI ? "6. Anos iniciais (" + ano + "): foco em vocabulario, imagens descritas, associacoes simples.\n" : "") +
     "\nINSTRUCOES POR TIPO:" + instrucoes +
@@ -233,7 +235,7 @@ async function callAvaliacao(params) {
           role: "system",
           content: "Você é um professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS. Crie avaliações pedagógicas precisas, claras e adequadas ao nível dos alunos.",
         },
-        { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.tipos) },
+        { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.tipos, params.qtd) },
       ],
       temperature: 0.5,
       max_tokens: 4000,
@@ -406,6 +408,7 @@ export default function App() {
   const [temaAv, setTemaAv] = useState("");
   const [nivelAv, setNivelAv] = useState("Básico");
   const [tiposAv, setTiposAv] = useState(["Múltipla escolha"]);
+  const [qtdAv, setQtdAv] = useState("10 questões (1 página)");
   const [loadingAv, setLoadingAv] = useState(false);
   const [resultAv, setResultAv] = useState(null);
   const [errorAv, setErrorAv] = useState(null);
@@ -447,7 +450,7 @@ export default function App() {
     if (tiposAv.length === 0) { setErrorAv("Selecione pelo menos um tipo de questão."); return; }
     setLoadingAv(true); setResultAv(null); setErrorAv(null);
     try {
-      const res = await callAvaliacao({ ano: anoAv, tema: temaAv, nivel: nivelAv, tipos: tiposAv });
+      const res = await callAvaliacao({ ano: anoAv, tema: temaAv, nivel: nivelAv, tipos: tiposAv, qtd: qtdAv });
       setResultAv(res.text);
       setProviderAv(res.provider);
     } catch (e) { setErrorAv(e.message); }
@@ -560,6 +563,7 @@ export default function App() {
             </div>
             <hr className="divider" />
             <RadioGroup label="Nível da Turma" options={NIVEIS} value={nivelAv} onChange={setNivelAv} />
+            <RadioGroup label="Número de Questões" options={QTD_QUESTOES} value={qtdAv} onChange={setQtdAv} />
             <CheckboxGroup label="Tipos de Questão" options={TIPOS_QUESTAO} value={tiposAv} onChange={setTiposAv} />
             <hr className="divider" />
             <button className="btn" style={{background:"linear-gradient(135deg,#7c3aed,#6d28d9)",boxShadow:"0 4px 16px rgba(124,58,237,.3)"}}
