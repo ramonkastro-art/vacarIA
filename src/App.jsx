@@ -27,8 +27,9 @@ Este plano é ESTRITAMENTE de LÍNGUA INGLESA.
 Independente do tema "${tema}", estruture a aula como aula de Inglês.
 
 RESTRIÇÃO 2 — IDIOMA DO PLANO:
-O plano deve estar 100% em PORTUGUÊS BRASILEIRO.
-Use inglês apenas para vocabulário-alvo, comandos e estruturas gramaticais ensinados.
+${nivel === "Avançado"
+  ? "Nível AVANÇADO: os enunciados e instruções do plano podem estar em INGLÊS, pois a turma tem capacidade de compreender. Escreva o plano em inglês, exceto BNCC, referências e observações pedagógicas ao professor que devem permanecer em português."
+  : "O plano deve estar 100% em PORTUGUÊS BRASILEIRO. Use inglês apenas para vocabulário-alvo, comandos e estruturas gramaticais ensinados."}
 
 RESTRIÇÃO 3 — BNCC (OBRIGATÓRIO, verbatim):
 Use SOMENTE códigos e descrições EXATOS da BNCC oficial para Língua Inglesa.
@@ -187,7 +188,7 @@ function buildPromptAvaliacao(ano, tema, nivel, tipos) {
     "PROFESSOR(A): _________________________________ DATA: ___/___/_______\n" +
     "ESCOLA: _________________________________ TURMA: _______\n\n" +
     "REGRAS:\n" +
-    "1. Enunciados SEMPRE em portugues. Conteudo avaliado em ingles.\n" +
+    "1. " + (nivel === "Avançado" ? "Nivel AVANCADO: enunciados e instrucoes podem estar em INGLES. O conteudo avaliado tambem em ingles." : "Enunciados SEMPRE em portugues. Conteudo avaliado em ingles.") + "\n" +
     "2. Questoes numeradas sequencialmente (1, 2, 3...).\n" +
     "3. Questoes abertas com linhas: _______________________________________\n" +
     "4. Gere entre 8 e 12 questoes distribuidas entre os tipos: " + tiposStr + "\n" +
