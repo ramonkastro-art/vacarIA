@@ -5,7 +5,7 @@ const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
 const NIVEIS = ["Básico","Intermediário","Avançado"];
 const RECURSOS = ["Quadro negro apenas","Cards / Flashcards","Notebook / Computador","Ar livre 🌿"];
-const TIPOS_QUESTAO = ["Caça-palavras","Relacione colunas","Organize as letras","Múltipla escolha","Interpretação de texto","Complete as lacunas","Charada / Enigma","Produção escrita"];
+// Tipos fixos — definidos internamente, sem seleção pelo usuário
 const QTD_QUESTOES = ["10 questões (1 página)","20 questões (2 páginas)"];
 
 function buildPrompt(ano, tema, duracao, nivel, recursos) {
@@ -148,79 +148,62 @@ Formato: 'frase de exemplo em inglês' — nunca deixe apenas a instrução gen�
 Quantidade mínima: ao menos 2 exemplos por seção que envolva vocabulário ou estrutura linguística.`;
 }
 
-function buildPromptAvaliacao(ano, tema, nivel, tipos, qtd) {
-  const vinte = qtd && qtd.includes("20");
+function buildPromptAvaliacao(ano, tema, nivel, qtd) {
   const efI = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"].includes(ano);
-  const temCaca = tipos.includes("Caça-palavras");
-  const temRelacione = tipos.includes("Relacione colunas");
-  const temAnagrama = tipos.includes("Organize as letras");
-  const temInterpretacao = tipos.includes("Interpretação de texto");
-  const temMultipla = tipos.includes("Múltipla escolha");
-  const temLacunas = tipos.includes("Complete as lacunas");
-  const temProducao = tipos.includes("Produção escrita");
-  const temCharada = tipos.includes("Charada / Enigma");
-  const tiposStr = tipos.join(", ");
+  const vinte = qtd && qtd.includes("20");
+  const avancado = nivel === "Avançado";
+  const basico = nivel === "Básico";
 
-  const nivelDesc = nivel === "Básico"
-    ? "vocabulário simples, frases curtas, opções claras."
-    : nivel === "Intermediário"
-    ? "vocabulário variado, textos curtos, perguntas de interpretação."
-    : "textos autênticos, inferência, produção elaborada.";
+  const idioma = avancado
+    ? "IDIOMA: Nivel AVANCADO — todos os enunciados, instrucoes e alternativas em INGLES. Sem traducoes."
+    : basico
+    ? "IDIOMA: Nivel BASICO — enunciados em portugues. Nas alternativas de multipla escolha, adicione a traducao em portugues entre parenteses apos cada opcao. Ex: a) Doctor (Medico)."
+    : "IDIOMA: Nivel INTERMEDIARIO — enunciados em portugues. SEM traducoes nas alternativas.";
 
-  const txtSize = nivel === "Básico" ? "3-5 linhas (diálogo ou descrição simples)"
-    : nivel === "Intermediário" ? "5-8 linhas (notícia curta, carta ou anúncio)"
-    : "8-12 linhas (artigo ou carta formal)";
+  const qtdTotal = vinte ? 20 : 10;
+  const distribuicao = vinte
+    ? "Distribua EXATAMENTE assim: 3 Multipla Escolha + 1 Relacione Colunas + 1 Organize as Letras + 1 Interpretacao de Texto + 1 Charada/Enigma = 7 questoes na pagina 1. Repita a mesma distribuicao na pagina 2 (mais 3 Multipla Escolha + 1 Relacione + 1 Anagrama + 1 Interpretacao + 1 Charada = 13 questoes). Total: 20 questoes."
+    : "Distribua EXATAMENTE assim: 3 Multipla Escolha + 1 Relacione Colunas + 1 Organize as Letras + 1 Interpretacao de Texto + 1 Charada/Enigma + 3 Multipla Escolha = 10 questoes.";
 
-  let instrucoes = "";
-  if (temCaca) instrucoes += "\nCACA-PALAVRAS: Enunciado: Busque no caca-palavras os nomes em ingles. Liste 8-12 palavras em PORTUGUES separadas por traco. Crie uma grade 12x12 com as palavras escondidas horizontal e verticalmente, 12 letras por linha separadas por espaco. As palavras DEVEM estar realmente na grade.";
-  if (temRelacione) instrucoes += "\nRELACIONE COLUNAS: Enunciado: Relacione a 2a coluna de acordo com a 1a. FORMATO OBRIGATORIO em duas colunas lado a lado separadas por | (pipe). Coluna esquerda: letra + palavra em ingles. Coluna direita: parenteses + traducao EMBARALHADA. Exemplo:\n(A) Dog       | ( ) Gato\n(B) Cat       | ( ) Cachorro\n(C) Bird      | ( ) Passaro\nMinimo 8 pares. NUNCA liste uma embaixo da outra - SEMPRE lado a lado com o | separando.";
-  if (temAnagrama) instrucoes += "\nORGANIZE AS LETRAS: Gere UMA unica questao com multiplos itens (a, b, c, d...). Formato OBRIGATORIO:\n[numero]. Organize as letras e descubra a profissao (ou palavra do tema) em ingles:\na) [LETRAS EMBARALHADAS] = ___________\nb) [LETRAS EMBARALHADAS] = ___________\nc) [LETRAS EMBARALHADAS] = ___________\nd) [LETRAS EMBARALHADAS] = ___________\nREGRAS CRITICAS PARA EMBARALHAR:\n- NUNCA deixe as letras na ordem original da palavra\n- SEMPRE mude a ordem de todas as letras\n- Embaralhe usando algoritmo mental: pegue a palavra, inverta, misture inicio com fim\n- Exemplos CORRETOS: LAWYER -> WERALY ou YERLWA | NURSE -> ESUNR ou RUNES | ENGINEER -> RGINNEEE | MUSICIAN -> SNACIIMU\n- Exemplos ERRADOS (nao embaralhados): LAWYER -> LAWYER ou L A W Y E R\n- Minimo 4 itens (a, b, c, d). Para 20 questoes use 6 itens (a ate f).\n- Gabarito: liste as respostas corretas de cada item.";
-  if (temCharada) instrucoes += "\nCHARADA/ENIGMA: Charadas poeticas em portugues descrevendo algo do tema. Resposta em ingles. Ex: Sou amarelo e doce, macacos me adoram. Quem sou em ingles? _________. Crie 2 a 3 charadas.";
-  if (temMultipla) instrucoes += "\nMULTIPLA ESCOLHA: Enunciado em portugues, contextos culturais reais (musicas, series, datas, noticias). Formato: a) opcao  b) opcao  c) opcao  d) opcao. Citar Fonte quando usar texto em ingles. Pelo menos uma questao com trecho em ingles.";
-  if (temInterpretacao) instrucoes += "\nINTERPRETACAO DE TEXTO: Texto autentico em ingles com Fonte citada. Tamanho: " + txtSize + ". 3 a 5 perguntas em portugues: localizacao + vocabulario + interpretacao. Questoes abertas com linhas; objetivas com a/b/c/d.";
-  if (temLacunas) instrucoes += "\nCOMPLETE AS LACUNAS: Quadro com palavras em ingles. Cada frase com traducao em italico entre parenteses abaixo. Ex: 1. The sky is __________. (O ceu e azul.) Minimo 4 frases.";
-  if (temProducao) instrucoes += "\nPRODUCAO ESCRITA: Situacao comunicativa real em portugues. Minimo 3-5 linhas de resposta. Nivel avancado: paragrafo em ingles sobre o tema.";
+  const txtSize = basico ? "3-5 linhas simples" : nivel === "Intermediário" ? "5-7 linhas" : "7-10 linhas";
 
   return "Voce e professor especialista em Lingua Inglesa da Rede Municipal de Vacaria/RS.\n" +
     "Crie uma atividade avaliativa de Lingua Inglesa para " + ano + ", nivel " + nivel + ", tema: " + tema + ".\n\n" +
-    "CABECALHO OBRIGATORIO:\n" +
+    "CABECALHO OBRIGATORIO (exatamente assim):\n" +
     "ATIVIDADE DE INGLES\n" +
     "Nome: _____________________________________________ Turma: _______\n\n" +
-    "REGRAS:\n" +
-    "1. " + (nivel === "Avançado" ? "Nivel AVANCADO: enunciados e instrucoes podem estar em INGLES. O conteudo avaliado tambem em ingles." : "Enunciados SEMPRE em portugues. Conteudo avaliado em ingles.") + "\n" +
-    "2. Questoes numeradas sequencialmente (1, 2, 3...).\n" +
-    "3. Questoes abertas com linhas: _______________________________________\n" +
-    "4. Gere EXATAMENTE " + (vinte ? "20" : "10") + " questoes distribuidas entre os tipos: " + tiposStr + "\n" +
-    (vinte ? "   A avaliacao deve ocupar 2 paginas A4. Distribua 10 questoes por pagina.\n" : "   A avaliacao deve caber em 1 pagina A4. Seja objetivo e conciso.\n") +
-    "5. Nivel " + nivel + ": " + nivelDesc + "\n" +
-    (efI ? "6. Anos iniciais (" + ano + "): foco em vocabulario, imagens descritas, associacoes simples.\n" : "") +
-    "\nINSTRUCOES POR TIPO:" + instrucoes +
-    "\n\nGABARITO: Ao final, adicione o gabarito completo.\n" +
-    "Formato:\nGABARITO\n1. [resposta]\n2. [resposta]...\n\n" +
-    "Gere SOMENTE a atividade + gabarito, sem introducoes ou comentarios extras.";
-}
-
-async function callAPI(params) {
-  const response = await fetch("/api/grok", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messages: [
-        {
-          role: "system",
-          content: "Você é um especialista pedagógico em Língua Inglesa da Rede Municipal de Vacaria/RS. Responda sempre em português brasileiro, com precisão técnica e linguagem acessível a professores.",
-        },
-        { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos) },
-      ],
-      temperature: 0.65,
-      max_tokens: 4000,
-    }),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message || data?.error || response.statusText);
-  const text = data.choices?.[0]?.message?.content;
-  if (!text || text.trim().length === 0) throw new Error("A API retornou uma resposta vazia.");
-  return { text, provider: data._provider || "ia" };
+    idioma + "\n\n" +
+    "QUANTIDADE: " + qtdTotal + " questoes. " + distribuicao + "\n\n" +
+    (efI ? "Anos iniciais (" + ano + "): sem textos longos, foco em vocabulario visual e associacoes simples.\n\n" : "") +
+    "INSTRUCOES POR TIPO:\n\n" +
+    "MULTIPLA ESCOLHA:\n" +
+    "- Enunciado com contexto cultural real: series, filmes, musicas, datas, fatos curiosos.\n" +
+    "- Formato: a) opcao  b) opcao  c) opcao  d) opcao\n" +
+    (basico ? "- Adicione traducao em portugues entre parenteses em cada alternativa.\n" : "") +
+    "- Varie os contextos entre as questoes.\n\n" +
+    "RELACIONE COLUNAS:\n" +
+    "- Enunciado: Relacione a 2a coluna de acordo com a 1a.\n" +
+    "- FORMATO OBRIGATORIO em duas colunas lado a lado separadas por | (pipe):\n" +
+    "(A) palavra em ingles    | ( ) traducao EMBARALHADA\n" +
+    "(B) palavra em ingles    | ( ) traducao EMBARALHADA\n" +
+    "- Minimo 8 pares. Traducoes SEMPRE embaralhadas (fora de ordem).\n\n" +
+    "ORGANIZE AS LETRAS:\n" +
+    "- UMA questao com subitens a) b) c) d) e) f).\n" +
+    "- Formato: a) XYZABC = ___________\n" +
+    "- REGRA CRITICA: embaralhe TODAS as letras. NUNCA deixe na ordem original.\n" +
+    "- Exemplos corretos: LAWYER->WERALY | NURSE->ESUNR | ENGINEER->RGINNEEE | MUSICIAN->SNACIIMU\n" +
+    "- Minimo 4 subitens. Para 20 questoes use 6 subitens.\n\n" +
+    "INTERPRETACAO DE TEXTO:\n" +
+    "- Texto autentico em ingles (" + txtSize + ") com Fonte citada.\n" +
+    "- " + (basico ? "3 perguntas simples de localizacao de informacao." : nivel === "Intermediário" ? "3-4 perguntas de compreensao e vocabulario." : "4-5 perguntas: compreensao, vocabulario e inferencia.") + "\n" +
+    "- Questoes abertas com linhas de resposta.\n\n" +
+    "CHARADA/ENIGMA:\n" +
+    "- " + (avancado ? "Escreva a charada em ingles." : "Escreva a charada em portugues.") + "\n" +
+    "- Descricao poetica de algo relacionado ao tema. Resposta em ingles.\n" +
+    "- Formato: [charada]? ___________\n\n" +
+    "GABARITO: Ao final, adicione gabarito completo de todas as questoes.\n" +
+    "Formato: GABARITO\n1. [resposta]\n2. [resposta]...\n\n" +
+    "IMPORTANTE: Gere SOMENTE a atividade + gabarito. Sem introducoes ou comentarios extras.";
 }
 
 async function callAvaliacao(params) {
@@ -233,7 +216,7 @@ async function callAvaliacao(params) {
           role: "system",
           content: "Você é um professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS. Crie avaliações pedagógicas precisas, claras e adequadas ao nível dos alunos.",
         },
-        { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.tipos, params.qtd) },
+        { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.qtd) },
       ],
       temperature: 0.5,
       max_tokens: 4000,
@@ -293,15 +276,18 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
   const css = [
     "*{box-sizing:border-box;margin:0;padding:0}",
     "html,body{background:#fff}",
-    "#pdf-wrap{width:794px;margin:0 auto;background:#fff;padding:40px 56px;font-family:Arial,sans-serif;font-size:10.5pt;color:#1e293b;line-height:1.5}",
-    ".rel-table{width:100%;border-collapse:collapse;margin:4px 0 8px}",
-    ".rel-table td{padding:1px 6px;font-size:10pt;vertical-align:top;width:50%}",
-    ".rel-table td:first-child{padding-right:16px}",
+    "#pdf-wrap{width:794px;margin:0 auto;background:#fff;padding:44px 60px 44px 60px;font-family:Arial,sans-serif;font-size:10.5pt;color:#1e293b;line-height:1.55}",
+    ".md-p{margin:3px 0;line-height:1.55}",
+    ".two-col{display:flex;gap:0;margin:2px 0}",
+    ".two-col span:first-child{width:48%;padding-right:12px}",
+    ".two-col span:last-child{width:52%}",
+    ".md-h2{font-size:9.5pt;font-weight:700;color:#0e7490;text-transform:uppercase;letter-spacing:.07em;margin:12px 0 4px;border-bottom:1px solid #e2e8f0;padding-bottom:2px}",
+    ".md-h3{font-size:10.5pt;font-weight:700;color:#7c3aed;margin:8px 0 3px}",
     ".pdf-header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid " + headerColor + ";padding-bottom:6px;margin-bottom:10px}",
     ".pdf-title{font-size:20pt;font-weight:700;color:" + headerColor + ";letter-spacing:-1px}",
     ".pdf-title span{color:#0e7490}",
     ".pdf-sub{font-size:9pt;color:#78716c;text-align:right;line-height:1.5}",
-    ".md-h1{font-size:14pt;font-weight:700;color:" + headerColor + ";margin:16px 0 6px;padding-bottom:5px;border-bottom:1.5px solid #fde68a}",
+    ".md-h1{font-size:13pt;font-weight:700;color:" + headerColor + ";margin:10px 0 4px;padding-bottom:4px;border-bottom:1.5px solid #fde68a}",
     ".md-h2{font-size:9pt;font-weight:700;color:#0e7490;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 5px}",
     ".md-h3{font-size:10pt;font-weight:700;color:#7c3aed;margin:10px 0 4px}",
     ".md-bold{font-weight:700;color:#0f172a;margin:4px 0}",
@@ -430,7 +416,6 @@ export default function App() {
   const [anoAv, setAnoAv] = useState("");
   const [temaAv, setTemaAv] = useState("");
   const [nivelAv, setNivelAv] = useState("Básico");
-  const [tiposAv, setTiposAv] = useState(["Múltipla escolha"]);
   const [qtdAv, setQtdAv] = useState("10 questões (1 página)");
   const [loadingAv, setLoadingAv] = useState(false);
   const [resultAv, setResultAv] = useState(null);
@@ -470,10 +455,9 @@ export default function App() {
 
   const handleGerarAvaliacao = async () => {
     if (!anoAv || !temaAv.trim()) { setErrorAv("Selecione o ano e digite o tema da avaliação."); return; }
-    if (tiposAv.length === 0) { setErrorAv("Selecione pelo menos um tipo de questão."); return; }
     setLoadingAv(true); setResultAv(null); setErrorAv(null);
     try {
-      const res = await callAvaliacao({ ano: anoAv, tema: temaAv, nivel: nivelAv, tipos: tiposAv, qtd: qtdAv });
+      const res = await callAvaliacao({ ano: anoAv, tema: temaAv, nivel: nivelAv, qtd: qtdAv });
       setResultAv(res.text);
       setProviderAv(res.provider);
     } catch (e) { setErrorAv(e.message); }
@@ -587,7 +571,6 @@ export default function App() {
             <hr className="divider" />
             <RadioGroup label="Nível da Turma" options={NIVEIS} value={nivelAv} onChange={setNivelAv} />
             <RadioGroup label="Número de Questões" options={QTD_QUESTOES} value={qtdAv} onChange={setQtdAv} />
-            <CheckboxGroup label="Tipos de Questão" options={TIPOS_QUESTAO} value={tiposAv} onChange={setTiposAv} />
             <hr className="divider" />
             <button className="btn" style={{background:"linear-gradient(135deg,#7c3aed,#6d28d9)",boxShadow:"0 4px 16px rgba(124,58,237,.3)"}}
               onClick={handleGerarAvaliacao} disabled={loadingAv}>
