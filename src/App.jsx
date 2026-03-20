@@ -4,7 +4,7 @@ const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
 const NIVEIS = ["Básico","Intermediário","Avançado"];
 const RECURSOS = ["Quadro negro apenas","Cards / Flashcards","Notebook / Computador","Ar livre 🌿"];
-const TIPOS_QUESTAO = ["Múltipla escolha","Verdadeiro ou Falso","Interpretação de texto","Complete as lacunas","Produção escrita"];
+const TIPOS_QUESTAO = ["Caça-palavras","Relacione colunas","Organize as letras","Múltipla escolha","Interpretação de texto","Complete as lacunas","Charada / Enigma","Produção escrita"];
 const QTD_QUESTOES = ["5 questões","8 questões","10 questões","15 questões"];
 
 function buildPrompt(ano, tema, duracao, nivel, recursos) {
@@ -148,71 +148,95 @@ Quantidade mínima: ao menos 2 exemplos por seção que envolva vocabulário ou 
 
 function buildPromptAvaliacao(ano, tema, nivel, tipos) {
   const efI = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"].includes(ano);
-  const tiposStr = tipos.join(", ");
+  const temCaca = tipos.includes("Caça-palavras");
+  const temRelacione = tipos.includes("Relacione colunas");
+  const temAnagrama = tipos.includes("Organize as letras");
   const temInterpretacao = tipos.includes("Interpretação de texto");
+  const temMultipla = tipos.includes("Múltipla escolha");
+  const temLacunas = tipos.includes("Complete as lacunas");
   const temProducao = tipos.includes("Produção escrita");
+  const temCharada = tipos.includes("Charada / Enigma");
+  const tiposStr = tipos.join(", ");
 
-  return `Você é um professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS.
-Crie uma avaliação completa de Língua Inglesa para o ${ano}, nível ${nivel}, sobre o tema "${tema}".
+  const cacaInstr = temCaca ? `
+CAÇA-PALAVRAS (obrigatório se selecionado):
+- Enunciado: "Busque no caça-palavras as seguintes palavras em inglês."
+- Liste 8-12 palavras em PORTUGUÊS separadas por traço: PALAVRA1 - PALAVRA2 - PALAVRA3...
+- Crie uma grade de letras 12x12 com as palavras escondidas horizontalmente e verticalmente.
+- Formate a grade assim (12 letras por linha, separadas por espaço):
+  A R E D O R A N G E H M
+  ... (12 linhas)
+- As palavras DEVEM estar realmente escondidas na grade.` : "";
 
-REGRAS OBRIGATÓRIAS:
-1. A avaliação deve estar 100% em PORTUGUÊS BRASILEIRO, com enunciados claros.
-2. O conteúdo avaliado deve ser de LÍNGUA INGLESA (vocabulário, gramática, leitura em inglês).
-3. Tipos de questão solicitados: ${tiposStr}.
-4. Distribua as questões de forma equilibrada entre os tipos escolhidos.
-5. Adapte a complexidade para o nível ${nivel}:
-   ${nivel === "Básico" ? "- Use vocabulário simples, frases curtas, imagens descritas por palavras, opções bem distintas." : ""}
-   ${nivel === "Intermediário" ? "- Equilibre reconhecimento e produção. Textos curtos com vocabulário variado." : ""}
-   ${nivel === "Avançado" ? "- Inclua textos mais longos, inferência de significado, produção escrita elaborada." : ""}
-${temInterpretacao ? `6. Na interpretação de texto: inclua um texto autêntico e acessível em inglês (4–8 linhas), seguido de 2–3 perguntas de compreensão.` : ""}
-${temProducao ? `7. Na produção escrita: proponha uma situação comunicativa real (ex: escrever um e-mail, descrição, diálogo), com instruções claras em português.` : ""}
-${efI ? `8. Para ${ano} (anos iniciais): foque em vocabulário visual, associação de palavras e imagens descritas, sem textos longos.` : ""}
+  const relacioneInstr = temRelacione ? `
+RELACIONE COLUNAS (obrigatório se selecionado):
+- Enunciado: "Relacione a 2ª coluna de acordo com a 1ª."
+- Coluna esquerda: (A) palavra em inglês, (B) palavra...
+- Coluna direita: ( ) tradução em português — EMBARALHADA
+- Pelo menos 8 pares. Formato lado a lado.` : "";
 
-FORMATO OBRIGATÓRIO:
+  const anagramaInstr = temAnagrama ? `
+ORGANIZE AS LETRAS (obrigatório se selecionado):
+- Enunciado: "Organize as letras e descubra a palavra em inglês."
+- Letras embaralhadas em MAIÚSCULAS espaçadas: ex. T O A G
+- Duas linhas de resposta abaixo de cada uma.
+- Mínimo 4 anagramas do tema.` : "";
 
-# Avaliação de Língua Inglesa
-**Tema:** ${tema}
-**Série:** ${ano} | **Nível:** ${nivel} | **Componente:** Língua Inglesa
-**Nome:** _________________________________ **Data:** ___/___/_______ **Nota:** _______
+  const charadaInstr = temCharada ? `
+CHARADA / ENIGMA (obrigatório se selecionado):
+- Charadas poéticas em português que descrevem algo do tema.
+- A resposta é uma palavra em inglês.
+- Ex: "Sou amarelo e doce, macacos me adoram. Quem sou em inglês? ___________"
+- Crie 2 a 3 charadas criativas.` : "";
 
----
+  const multiplaInstr = temMultipla ? `
+MÚLTIPLA ESCOLHA (obrigatório se selecionado):
+- Enunciado em português, contextos culturais reais: músicas, séries, datas comemorativas, memes, notícias.
+- Formato: a) opção  b) opção  c) opção  d) opção
+- Quando usar texto em inglês, cite: Fonte: [origem real]
+- Pelo menos uma questão com trecho em inglês para interpretar.` : "";
 
-[Para cada tipo de questão solicitado, crie uma seção com título, instrução clara e as questões numeradas sequencialmente.]
+  const interpretacaoInstr = temInterpretacao ? `
+INTERPRETAÇÃO DE TEXTO (obrigatório se selecionado):
+- Texto autêntico em inglês com Fonte citada em itálico.
+- Tamanho: ${nivel === "Básico" ? "3-5 linhas (diálogo, receita, descrição simples)" : nivel === "Intermediário" ? "5-8 linhas (notícia curta, carta, anúncio)" : "8-12 linhas (artigo, notícia, carta formal)"}
+- 3 a 5 perguntas em português: localização de informação + vocabulário + interpretação.
+- Questões abertas com linhas de resposta; objetivas com alternativas a/b/c/d.` : "";
 
-Exemplo de estrutura para múltipla escolha:
-## Questões de Múltipla Escolha
-*Leia cada questão e marque a alternativa correta.*
-1. [Enunciado em português com palavra/frase em inglês entre aspas]
-   a) [opção]  b) [opção]  c) [opção]  d) [opção]
+  const lacunasInstr = temLacunas ? `
+COMPLETE AS LACUNAS (obrigatório se selecionado):
+- Forneça um quadro com as palavras em inglês.
+- Cada frase com tradução em itálico entre parênteses logo abaixo.
+- Ex: 1. The sky is __________. (O céu é azul.)
+- Mínimo 4 frases.` : "";
 
-Exemplo para verdadeiro ou falso:
-## Verdadeiro (T) ou Falso (F)
-*Leia as afirmações e marque T para verdadeiro ou F para falso.*
-( ) [afirmação]
+  const producaoInstr = temProducao ? `
+PRODUÇÃO ESCRITA (obrigatório se selecionado):
+- Situação comunicativa real em português.
+- Mínimo 3-5 linhas de resposta.
+- Nível avançado: parágrafo em inglês sobre o tema.` : "";
 
-Exemplo para interpretação:
-## Interpretação de Texto
-*Leia o texto abaixo e responda às perguntas.*
-[texto em inglês]
-1. [pergunta em português]
-
-Exemplo para lacunas:
-## Complete as Lacunas
-*Complete as frases com a palavra correta do quadro.*
-[quadro de palavras em inglês]
-1. __________ [resto da frase]
-
-Exemplo para produção:
-## Produção Escrita
-*Siga as instruções abaixo.*
-[instrução clara da tarefa em português]
-
----
-
-## Gabarito
-[Liste as respostas corretas de todas as questões objetivas ao final]
-
-Gere SOMENTE a avaliação, sem introduções ou comentários extras.`;
+  return "Você é professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS.\n" +
+"Crie uma atividade avaliativa de Língua Inglesa para " + ano + ", nível " + nivel + ", tema: \"" + tema + "\".\n\n" +
+"CABEÇALHO OBRIGATÓRIO:\n" +
+"ATIVIDADE DE INGLÊS\n" +
+"ESTUDANTE: _________________________________\n" +
+"PROFESSOR(A): _________________________________ DATA: ___/___/_______\n" +
+"ESCOLA: _________________________________ TURMA: _______\n\n" +
+"REGRAS:\n" +
+"1. Enunciados SEMPRE em português. Conteúdo avaliado em inglês.\n" +
+"2. Questões numeradas sequencialmente (1, 2, 3...) sem separar por seção.\n" +
+"3. Questões abertas com linhas de resposta: _______________________________________\n" +
+"4. Gere entre 8 e 12 questões distribuídas entre os tipos: " + tiposStr + "\n" +
+"5. Nível " + nivel + ": " + (nivel === "Básico" ? "vocabulário simples, frases curtas, opções claras." : nivel === "Intermediário" ? "vocabulário variado, textos curtos, perguntas de interpretação." : "textos autênticos, inferência, produção elaborada.") + "\n" +
+(efI ? "6. Anos iniciais (" + ano + "): foco em vocabulário, imagens descritas, associações simples.\n" : "") +
+"\nINSTRUÇÕES POR TIPO:\n" +
+cacaInstr + relacioneInstr + anagramaInstr + charadaInstr +
+multiplaInstr + interpretacaoInstr + lacunasInstr + producaoInstr +
+"\nGABARITO:\n" +
+"Ao final, adicione o gabarito completo de todas as questões.\n" +
+"Formato:\nGABARITO\n1. [resposta]\n2. [resposta]...\n\n" +
+"Gere SOMENTE a atividade + gabarito, sem introduções ou comentários extras.";
 }
 
 async function callAPI(params) {
