@@ -155,10 +155,10 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
   const basico = nivel === "Básico";
 
   const idioma = avancado
-    ? "IDIOMA: Nivel AVANCADO — todos os enunciados, instrucoes e alternativas em INGLES. Sem traducoes."
+    ? "IDIOMA: Nível AVANÇADO — todos os enunciados, instruções e alternativas em INGLÊS. Sem traduções."
     : basico
-    ? "IDIOMA: Nivel BASICO — enunciados em portugues. Nas alternativas de multipla escolha, adicione a traducao em portugues entre parenteses apos cada opcao. Ex: a) Doctor (Medico)."
-    : "IDIOMA: Nivel INTERMEDIARIO — enunciados em portugues. SEM traducoes nas alternativas.";
+    ? "IDIOMA: Nível BÁSICO — enunciados em português. Nas alternativas de múltipla escolha, adicione a tradução em português entre parênteses após cada opção. Ex: a) Doctor (Médico)."
+    : "IDIOMA: Nível INTERMEDIÁRIO — enunciados em português. SEM traduções nas alternativas.";
 
   const qtdTotal = vinte ? 20 : 10;
   const distribuicao = vinte
@@ -167,43 +167,45 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
 
   const txtSize = basico ? "3-5 linhas simples" : nivel === "Intermediário" ? "5-7 linhas" : "7-10 linhas";
 
-  return "Voce e professor especialista em Lingua Inglesa da Rede Municipal de Vacaria/RS.\n" +
-    "Crie uma atividade avaliativa de Lingua Inglesa para " + ano + ", nivel " + nivel + ", tema: " + tema + ".\n\n" +
-    "CABECALHO OBRIGATORIO (exatamente assim):\n" +
-    "ATIVIDADE DE INGLES\n" +
+  return "Você é professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS.\n" +
+    "Crie uma atividade avaliativa de Língua Inglesa para " + ano + ", nivel " + nivel + ", tema: " + tema + ".\n\n" +
+    "CABEÇALHO OBRIGATÓRIO (exatamente assim):\n" +
+    "ATIVIDADE DE INGLÊS\n" +
     "Nome: _____________________________________________ Turma: _______\n\n" +
     idioma + "\n\n" +
-    "QUANTIDADE: " + qtdTotal + " questoes. " + distribuicao + "\n\n" +
-    (efI ? "Anos iniciais (" + ano + "): sem textos longos, foco em vocabulario visual e associacoes simples.\n\n" : "") +
-    "INSTRUCOES POR TIPO:\n\n" +
-    "MULTIPLA ESCOLHA:\n" +
-    "- Enunciado com contexto cultural real: series, filmes, musicas, datas, fatos curiosos.\n" +
+    "QUANTIDADE: " + qtdTotal + " questões. " + distribuicao + "\n\n" +
+    (efI ? "Anos iniciais (" + ano + "): sem textos longos, foco em vocabulário visual e associações simples.\n\n" : "") +
+    "INSTRUÇÕES POR TIPO:\n\n" +
+    "MÚLTIPLA ESCOLHA:\n" +
+    "- Enunciado com contexto cultural real: séries, filmes, músicas, datas, fatos curiosos.\n" +
     "- Formato: a) opcao  b) opcao  c) opcao  d) opcao\n" +
     (basico ? "- Adicione traducao em portugues entre parenteses em cada alternativa.\n" : "") +
-    "- Varie os contextos entre as questoes.\n\n" +
+    "- Varie os contextos entre as questões.\n\n" +
     "RELACIONE COLUNAS:\n" +
-    "- Enunciado: Relacione a 2a coluna de acordo com a 1a.\n" +
+    "- Enunciado: Relacione a 2ª coluna de acordo com a 1ª.\n" +
     "- FORMATO OBRIGATORIO em duas colunas lado a lado separadas por | (pipe):\n" +
     "(A) palavra em ingles    | ( ) traducao EMBARALHADA\n" +
     "(B) palavra em ingles    | ( ) traducao EMBARALHADA\n" +
-    "- Minimo 8 pares. Traducoes SEMPRE embaralhadas (fora de ordem).\n\n" +
+    "- Mínimo 8 pares. Traduções SEMPRE embaralhadas (fora de ordem).\n\n" +
     "ORGANIZE AS LETRAS:\n" +
-    "- UMA questao com subitens a) b) c) d) e) f).\n" +
+    "- UMA questão com subitens a) b) c) d) e) f).\n" +
     "- Formato: a) XYZABC = ___________\n" +
-    "- REGRA CRITICA: embaralhe TODAS as letras. NUNCA deixe na ordem original.\n" +
+    "- REGRA CRÍTICA: embaralhe TODAS as letras. NUNCA deixe na ordem original.\n" +
     "- Exemplos corretos: LAWYER->WERALY | NURSE->ESUNR | ENGINEER->RGINNEEE | MUSICIAN->SNACIIMU\n" +
-    "- Minimo 4 subitens. Para 20 questoes use 6 subitens.\n\n" +
-    "INTERPRETACAO DE TEXTO:\n" +
-    "- Texto autentico em ingles (" + txtSize + ") com Fonte citada.\n" +
-    "- " + (basico ? "3 perguntas simples de localizacao de informacao." : nivel === "Intermediário" ? "3-4 perguntas de compreensao e vocabulario." : "4-5 perguntas: compreensao, vocabulario e inferencia.") + "\n" +
-    "- Questoes abertas com linhas de resposta.\n\n" +
+    "- Mínimo 4 subitens. Para 20 questões use 6 subitens.\n\n" +
+    "INTERPRETAÇÃO DE TEXTO:\n" +
+    "- Texto autêntico em inglês (" + txtSize + ") com Fonte citada.\n" +
+    "- " + (basico ? "3 perguntas simples de localização de informação." : nivel === "Intermediário" ? "3-4 perguntas de compreensão e vocabulário." : "4-5 perguntas: compreensão, vocabulário e inferência.") + "\n" +
+    "- Questões abertas com linhas de resposta.\n\n" +
     "CHARADA/ENIGMA:\n" +
     "- " + (avancado ? "Escreva a charada em ingles." : "Escreva a charada em portugues.") + "\n" +
-    "- Descricao poetica de algo relacionado ao tema. Resposta em ingles.\n" +
+    "- Descrição poética de algo relacionado ao tema. Resposta em inglês.\n" +
     "- Formato: [charada]? ___________\n\n" +
-    "GABARITO: Ao final, adicione gabarito completo de todas as questoes.\n" +
+    "GABARITO: Ao final, adicione gabarito completo de todas as questões.\n" +
     "Formato: GABARITO\n1. [resposta]\n2. [resposta]...\n\n" +
-    "IMPORTANTE: Gere SOMENTE a atividade + gabarito. Sem introducoes ou comentarios extras.";
+    "IMPORTANTE: Gere SOMENTE a atividade + gabarito. Sem introducoes, sem comentarios extras, sem linha IDIOMA no documento final.\n" +
+    "QUALIDADE DO PORTUGUES: Revise TODOS os textos em portugues antes de finalizar. Sem erros ortograficos. Correto: 'alguem' (nao 'alguiem'), 'profissao' (nao 'profissao'), 'medico' (nao 'medico').\n" +
+    "O documento deve comecar diretamente com o CABECALHO, sem nenhum texto antes dele.";
 }
 
 async function callAvaliacao(params) {
@@ -298,6 +300,8 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
     ".md-hr{border:none;border-top:1px solid #e2e8f0;margin:10px 0}",
     ".pdf-footer{margin-top:28px;padding-top:8px;border-top:1px solid " + footerBorderColor + ";font-size:8pt;color:#a8a29e;display:flex;align-items:center;justify-content:space-between}",
     ".pdf-footer-logo{width:32px;height:32px;object-fit:contain;opacity:0.6;border-radius:6px}",
+    "@page{margin:10mm}",
+    "@media print{body{margin:0}#pdf-wrap{padding:30px 50px}}",
     "#btn-baixar{position:fixed;bottom:24px;right:24px;padding:14px 28px;background:" + headerColor + ";color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.3)}",
     "#btn-baixar:disabled{opacity:.6;cursor:not-allowed}"
   ].join("\n");
@@ -325,9 +329,20 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
     "var jsPDF=window.jspdf.jsPDF;" +
     "var pdf=new jsPDF({orientation:\"portrait\",unit:\"mm\",format:\"a4\"});" +
     "var pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();" +
-    "var iw=pw,ih=(canvas.height*pw)/canvas.width,y=0,rem=ih;" +
-    "var img=canvas.toDataURL(\"image/jpeg\",0.92);" +
-    "while(rem>0){if(y>0)pdf.addPage();pdf.addImage(img,\"JPEG\",0,-y,iw,ih);y+=ph;rem-=ph;}" +
+    "var mg=12;" +
+    "var scale=canvas.width/(pw*2);" +
+    "var ih=canvas.height/scale/pw*pw;" +
+    "ih=(canvas.height*pw)/canvas.width;" +
+    "var pageH=ph-2*mg;" +
+    "var numPages=Math.ceil(ih/pageH);" +
+    "var img=canvas.toDataURL(\"image/jpeg\",0.95);" +
+    "for(var pg=0;pg<numPages;pg++){" +
+    "  if(pg>0)pdf.addPage();" +
+    "  pdf.addImage(img,\"JPEG\",0,mg-(pg*pageH),pw,ih);" +
+    "  pdf.setFillColor(255,255,255);" +
+    "  pdf.rect(0,0,pw,mg,\"F\");" +
+    "  pdf.rect(0,ph-mg,pw,mg+1,\"F\");" +
+    "}" +
     "pdf.save(\"" + title.replace(/ /g,"_") + ".pdf\");" +
     "btn.textContent=\"✓ PDF Salvo!\";setTimeout(()=>{btn.disabled=false;btn.textContent=\"⬇ Baixar PDF\"},3000);" +
     "}catch(e){btn.disabled=false;btn.textContent=\"⬇ Baixar PDF\";alert(\"Erro: \"+e.message);}" +
