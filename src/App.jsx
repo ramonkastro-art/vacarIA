@@ -493,7 +493,7 @@ function handleDocx(text, filename) {
     "<button id='btn' disabled>⬇ Baixar DOCX</button>" +
     "<scr" + "ipt>" +
     "var data=" + JSON.stringify({paras, filename, dataAtual}) + ";" +
-    "function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}" +
+    "function esc(s){var r=s;r=r.split('&').join('&amp;');r=r.split('<').join('&lt;');r=r.split('>').join('&gt;');r=r.split('\\"').join('&quot;');return r;}" +
     "function buildBody(paras){" +
     "var b='';" +
     "b+='<w:p><w:pPr><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/><w:color w:val="B45309"/></w:rPr><w:t>VacarIA</w:t></w:r></w:p>';" +
