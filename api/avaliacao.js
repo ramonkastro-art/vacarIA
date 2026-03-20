@@ -15,52 +15,62 @@ export default async function handler(req, res) {
   const userMsg  = messages.filter(m => m.role === 'user').map(m => m.content).join('\n')
   const sysMsg   = messages.filter(m => m.role === 'system').map(m => m.content).join('\n')
 
-  // ── 1. Gemini 2.0 Flash (prioritário para avaliações) ──────────
+  // Modelos Gemini para tentar em ordem
+  const geminiModels = [
+    'gemini-2.5-flash-preview-04-17',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+  ]
+
+  // ── 1. Gemini (prioritário para avaliações) ─────────────────────
   if (geminiKey) {
-    try {
-      const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: sysMsg }] },
-            contents: [{ role: 'user', parts: [{ text: userMsg }] }],
-            generationConfig: {
-              temperature: body.temperature ?? 0.4,
-              maxOutputTokens: body.max_tokens ?? 4000,
-            },
-          }),
+    for (const model of geminiModels) {
+      try {
+        console.log(`Tentando Gemini: ${model}`)
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: sysMsg }] },
+              contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+              generationConfig: {
+                temperature: body.temperature ?? 0.3,
+                maxOutputTokens: body.max_tokens ?? 4000,
+              },
+            }),
+          }
+        )
+
+        const data = await geminiRes.json()
+
+        if (geminiRes.ok) {
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+          if (text.trim().length > 100) {
+            console.log(`Gemini OK: ${model}`)
+            return res.status(200).json({
+              _provider: `gemini-${model}`,
+              choices: [{ message: { role: 'assistant', content: text } }],
+            })
+          }
         }
-      )
 
-      const data = await geminiRes.json()
+        console.warn(`Gemini ${model} falhou:`, geminiRes.status, JSON.stringify(data).slice(0, 200))
 
-      if (geminiRes.ok) {
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-        if (text.trim().length > 0) {
-          return res.status(200).json({
-            _provider: 'gemini',
-            choices: [{ message: { role: 'assistant', content: text } }],
-          })
-        }
+        // Só tenta próximo modelo em erros de modelo não encontrado
+        if (geminiRes.status !== 404 && geminiRes.status !== 400) break
+
+      } catch (e) {
+        console.warn(`Gemini ${model} erro de rede:`, e.message)
       }
-
-      const status = geminiRes.status
-      if (status !== 429 && status !== 503) {
-        console.error('Gemini erro:', JSON.stringify(data))
-        return res.status(status).json({ error: data?.error?.message || 'Erro no Gemini' })
-      }
-
-      console.warn('Gemini indisponível, tentando Groq...', status)
-    } catch (e) {
-      console.warn('Gemini erro de rede:', e.message)
     }
   }
 
   // ── 2. Fallback: Groq ──────────────────────────────────────────
   if (groqKey) {
     try {
+      console.log('Usando Groq como fallback...')
       const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -70,17 +80,15 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           messages,
-          temperature: body.temperature ?? 0.4,
+          temperature: body.temperature ?? 0.3,
           max_tokens: body.max_tokens ?? 4000,
         }),
       })
 
       const data = await groqRes.json()
-
       if (groqRes.ok) {
         return res.status(200).json({ ...data, _provider: 'groq-fallback' })
       }
-
       return res.status(groqRes.status).json(data)
     } catch (e) {
       console.error('Groq fallback erro:', e.message)

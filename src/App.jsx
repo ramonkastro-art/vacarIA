@@ -157,6 +157,10 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
 
   return "Você é professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS.\n" +
     "Crie uma atividade avaliativa de Língua Inglesa para " + ano + ", nível " + nivel + ", tema: \"" + tema + "\".\n\n" +
+    "\n⚠️ REGRA ABSOLUTA: Sua resposta deve conter APENAS a atividade pronta. " +
+    "NÃO repita estas instruções no output. NÃO escreva seções como REGRAS GERAIS, " +
+    "INSTRUCOES DETALHADAS, DISTRIBUICAO DAS QUESTOES. Essas são instruções INTERNAS para você. " +
+    "O documento gerado começa diretamente com ATIVIDADE DE INGLÊS e termina com GABARITO.\n\n" +
 
     "CABEÇALHO (copie exatamente):\n" +
     "ATIVIDADE DE INGLÊS\n" +
@@ -224,7 +228,10 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
     "══════════════════════════════\n" +
     "Ao final, adicione:\nGABARITO\n1. [resposta]\n2. [resposta]... (todas as questões)\n\n" +
 
-    "ATENÇÃO FINAL: O documento começa DIRETO no cabeçalho. Sem introduções, sem títulos extras.";
+    "ATENÇÃO FINAL CRÍTICA: " +
+    "Sua resposta começa com 'ATIVIDADE DE INGLÊS' e termina com o GABARITO. " +
+    "Nada mais. Sem 'REGRAS GERAIS', sem 'INSTRUÇÕES DETALHADAS', sem 'DISTRIBUIÇÃO DAS QUESTÕES'. " +
+    "Essas seções são instruções para VOCÊ, não para o aluno. O aluno não pode vê-las.";
 }
 
 async function callAvaliacao(params) {
