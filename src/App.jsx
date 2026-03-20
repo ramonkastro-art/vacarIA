@@ -321,7 +321,6 @@ function handlePrint(params) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#f1f5f9}
 #pdf-wrap{width:794px;margin:0 auto;background:#fff;padding:2cm 2.2cm;font-family:'IBM Plex Sans',sans-serif;font-size:11pt;color:#1e293b;line-height:1.65;position:relative}
@@ -426,7 +425,6 @@ function handlePrintAvaliacao(params) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#f5f3ff}
 #pdf-wrap{width:794px;margin:0 auto;background:#fff;padding:2cm 2.2cm;font-family:'IBM Plex Sans',sans-serif;font-size:11pt;color:#1e293b;line-height:1.65}
@@ -607,7 +605,6 @@ export default function App() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{background:#fefce8;min-height:100vh}
         .app{min-height:100vh;background:#fefce8;background-image:radial-gradient(ellipse at 15% 0%,rgba(251,191,36,.18) 0%,transparent 45%),radial-gradient(ellipse at 85% 100%,rgba(14,116,144,.08) 0%,transparent 45%);display:flex;flex-direction:column;align-items:center;padding:40px 16px 60px;font-family:'IBM Plex Sans',sans-serif}
