@@ -205,12 +205,15 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
     "✓ Formato OBRIGATÓRIO com | separando as colunas. Mínimo 8 pares.\n\n" +
 
     "ORGANIZE AS LETRAS — regras obrigatórias:\n" +
-    "✓ Enunciado: \"Organize as letras e descubra a " + tema + " em inglês:\"\n" +
-    "✓ SEMPRE informe o tema no enunciado para o aluno saber o que procurar.\n" +
-    "✓ Subitens a) b) c) d) e) f) — cada um com letras EMBARALHADAS de uma palavra do tema.\n" +
-    "✓ Formato: a) WERALY = ___________ (resposta: LAWYER)\n" +
-    "✓ CRÍTICO: embaralhe TODAS as letras. Nunca deixe na ordem original.\n" +
-    "✓ Exemplos de embaralhamento: DOCTOR→TRODOC | NURSE→RUNES | TEACHER→RCEAHET | MUSICIAN→SNACIIMU\n\n" +
+    "✓ Enunciado obrigatório: \"Organize as letras e descubra as profissões/palavras do tema \"" + tema + "\" em inglês:\"\n" +
+    "✓ TODAS as palavras usadas nos subitens devem ser vocabulário DIRETAMENTE relacionado ao tema \"" + tema + "\". " +
+    "PROIBIDO usar palavras genéricas, animais, objetos ou qualquer coisa fora do tema.\n" +
+    "✓ Antes de gerar, liste mentalmente 8 palavras em inglês do tema \"" + tema + "\". Use apenas essas.\n" +
+    "✓ Subitens a) b) c) d) e) f) — cada um com letras EMBARALHADAS de UMA palavra do tema.\n" +
+    "✓ Formato: a) WERALY = ___________ (gabarito: LAWYER)\n" +
+    "✓ CRÍTICO: embaralhe TODAS as letras. Nunca deixe na ordem original. Mínimo 3 trocas de posição.\n" +
+    "✓ Embaralhamento correto: DOCTOR→TRODOC | NURSE→RUNES | TEACHER→RCEAHET | MUSICIAN→SNACIIMU\n" +
+    "✓ Embaralhamento ERRADO (não embaralhado): ROLE, GOAT, ou qualquer palavra que não seja do tema \"" + tema + "\".\n\n" +
 
     "INTERPRETAÇÃO DE TEXTO — regras obrigatórias:\n" +
     "✓ Texto autêntico em inglês com Fonte citada. Tamanho: " + (basico ? "3-4 linhas simples" : nivel === "Intermediário" ? "5-7 linhas" : "7-10 linhas") + ".\n" +
@@ -218,10 +221,12 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
     "✓ Questões abertas com linhas de resposta: _______________________\n\n" +
 
     "CHARADA/ENIGMA — regras obrigatórias:\n" +
-    "✓ " + (avancado ? "Charada escrita em inglês." : "Charada escrita em português.") + "\n" +
+    "✓ A charada é SEMPRE escrita em inglês simples, em TODOS os níveis.\n" +
+    "✓ Use inglês básico e acessível: frases curtas, vocabulário simples.\n" +
+    "✓ Exemplo: \"I work in a hospital and help sick people. Who am I? ___________\"\n" +
     "✓ Descreve poeticamente algo relacionado ao tema \"" + tema + "\".\n" +
     "✓ A resposta é SEMPRE uma palavra em inglês do tema.\n" +
-    "✓ Formato: [texto da charada]? ___________\n\n" +
+    "✓ Formato: [charada em inglês simples]? ___________\n\n" +
 
     "══════════════════════════════\n" +
     "GABARITO\n" +
