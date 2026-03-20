@@ -524,7 +524,7 @@ function RadioGroup({ label, options, value, onChange }) {
       <div className="radio-group">
         {options.map(opt => (
           <button key={opt} type="button"
-            className={`chip${value === opt ? " chip-active" : ""}`}
+            className={"chip" + (value === opt ? " chip-active" : "")}
             onClick={() => onChange(opt)}>
             {opt}
           </button>
@@ -751,10 +751,10 @@ export default function App() {
 
         {/* TABS */}
         <div className="mode-tabs">
-          <button className={`mode-tab${modo === "plano" ? " active" : ""}`} onClick={() => setModo("plano")}>
+          <button className={"mode-tab" + (modo === "plano" ? " active" : "")} onClick={() => setModo("plano")}>
             📋 Plano de Aula
           </button>
-          <button className={`mode-tab${modo === "avaliacao" ? " active" : ""}`} onClick={() => setModo("avaliacao")}>
+          <button className={"mode-tab" + (modo === "avaliacao" ? " active" : "")} onClick={() => setModo("avaliacao")}>
             📝 Avaliação
           </button>
         </div>
