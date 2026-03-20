@@ -177,10 +177,15 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
     (efI ? "Anos iniciais (" + ano + "): sem textos longos, foco em vocabulário visual e associações simples.\n\n" : "") +
     "INSTRUÇÕES POR TIPO:\n\n" +
     "MÚLTIPLA ESCOLHA:\n" +
-    "- Enunciado com contexto cultural real: séries, filmes, músicas, datas, fatos curiosos.\n" +
-    "- Formato: a) opcao  b) opcao  c) opcao  d) opcao\n" +
-    (basico ? "- Adicione traducao em portugues entre parenteses em cada alternativa.\n" : "") +
-    "- Varie os contextos entre as questões.\n\n" +
+    "- OBRIGATÓRIO: as alternativas (a, b, c, d) SEMPRE em inglês, independente do nível.\n" +
+    "- O enunciado apresenta um contexto (série, música, fato real) para motivar, mas a resposta correta é sempre uma palavra ou expressão em inglês relacionada ao tema da aula.\n" +
+    "- Exemplos de formato correto:\n" +
+    "  * Enunciado: A personagem Meredith Grey trabalha em qual área? a) Medicine  b) Engineering  c) Law  d) Music\n" +
+    "  * Enunciado: Na música Yellow do Coldplay, qual cor é mencionada? a) Blue  b) Red  c) Yellow  d) Green\n" +
+    "  * Enunciado: Complete: I want to be a __________ when I grow up. a) Doctor  b) Engenheiro  c) Advogado  d) Médico (ERRADO — alternativas devem ser TODAS em inglês)\n" +
+    "- O contexto cultural é apenas o gancho; o conteúdo avaliado é sempre o vocabulário/estrutura em inglês do tema.\n" +
+    (basico ? "- Nível BÁSICO: adicione a tradução em português entre parênteses após cada alternativa. Ex: a) Doctor (Médico).\n" : "") +
+    "- Varie os contextos entre as questões (séries, filmes, músicas, fatos, curiosidades).\n\n" +
     "RELACIONE COLUNAS:\n" +
     "- Enunciado: Relacione a 2ª coluna de acordo com a 1ª.\n" +
     "- FORMATO OBRIGATORIO em duas colunas lado a lado separadas por | (pipe):\n" +
