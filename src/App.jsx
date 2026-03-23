@@ -490,6 +490,7 @@ export default function App() {
   const [resultAv, setResultAv] = useState(null);
   const [errorAv, setErrorAv] = useState(null);
   const [providerAv, setProviderAv] = useState("");
+  const [diagAv, setDiagAv] = useState("");
 
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstall, setShowInstall] = useState(false);
@@ -529,6 +530,7 @@ export default function App() {
       const res = await callAvaliacao({ ano: anoAv, tema: temaAv, nivel: nivelAv, qtd: qtdAv });
       setResultAv(res.text);
       setProviderAv(res.provider);
+      setDiagAv(res.diag || "");
     } catch (e) { setErrorAv(e.message); }
     finally { setLoadingAv(false); }
   };
@@ -699,7 +701,7 @@ export default function App() {
             <div className="av-result-header">
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <span className="av-result-tag">Avaliação Gerada</span>
-                {providerAv && <span className="av-badge">{providerAv === "gemini" ? "Gemini 2.0 Flash" : providerAv === "groq-fallback" ? "Groq · Fallback" : providerAv}</span>}
+                {providerAv && <span className="av-badge" title={diagAv || ""}>{providerAv === "gemini" ? "Gemini 2.5 Flash ✓" : providerAv === "groq-fallback" ? "⚠ Groq Fallback" : providerAv}</span>}
               </div>
               <div style={{display:"flex",gap:8}}>
               <button className="av-pdf-btn" onClick={() => handlePrintAvaliacao({ ano: anoAv, tema: temaAv })}>↓ PDF</button>

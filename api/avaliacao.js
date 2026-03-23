@@ -15,18 +15,21 @@ export default async function handler(req, res) {
   const userMsg  = messages.filter(m => m.role === 'user').map(m => m.content).join('\n')
   const sysMsg   = messages.filter(m => m.role === 'system').map(m => m.content).join('\n')
 
-  // Modelos Gemini para tentar em ordem
   const geminiModels = [
     'gemini-2.5-flash-preview-05-20',
     'gemini-2.0-flash',
     'gemini-1.5-flash',
   ]
 
-  // ── 1. Gemini (prioritário para avaliações) ─────────────────────
+  // Diagnóstico — acumula erros para retornar se tudo falhar
+  const diagnostico = []
+
+  // ── 1. Gemini (prioritário) ─────────────────────────────────────
   if (geminiKey) {
     for (const model of geminiModels) {
       try {
-        console.log(`Tentando Gemini: ${model}`)
+        console.log(`[avaliacao] Tentando Gemini: ${model}`)
+
         const geminiRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
           {
@@ -44,33 +47,52 @@ export default async function handler(req, res) {
         )
 
         const data = await geminiRes.json()
+        const status = geminiRes.status
 
         if (geminiRes.ok) {
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
           if (text.trim().length > 100) {
-            console.log(`Gemini OK: ${model}`)
+            console.log(`[avaliacao] Gemini OK: ${model}`)
             return res.status(200).json({
-              _provider: `gemini-${model}`,
+              _provider: `gemini`,
+              _model: model,
               choices: [{ message: { role: 'assistant', content: text } }],
             })
           }
+          diagnostico.push(`${model}: resposta vazia`)
+          continue // tenta próximo modelo
         }
 
-        console.warn(`Gemini ${model} falhou:`, geminiRes.status, JSON.stringify(data).slice(0, 200))
+        const errMsg = data?.error?.message || data?.error?.status || `HTTP ${status}`
+        console.warn(`[avaliacao] Gemini ${model} erro ${status}: ${errMsg}`)
+        diagnostico.push(`${model}: ${status} — ${errMsg}`)
 
-        // Só tenta próximo modelo em erros de modelo não encontrado
-        if (geminiRes.status !== 404 && geminiRes.status !== 400) break
+        // 404/400 = modelo não existe → tenta próximo
+        // 403 = chave inválida → não adianta tentar outros modelos
+        // 429 = rate limit → tenta próximo modelo
+        if (status === 403) {
+          console.error('[avaliacao] Gemini 403 — chave inválida ou sem permissão')
+          break
+        }
+        // Para qualquer outro erro, tenta o próximo modelo
+        continue
 
       } catch (e) {
-        console.warn(`Gemini ${model} erro de rede:`, e.message)
+        console.warn(`[avaliacao] Gemini ${model} erro de rede: ${e.message}`)
+        diagnostico.push(`${model}: network error — ${e.message}`)
+        continue
       }
     }
+  } else {
+    diagnostico.push('GEMINI_API_KEY não configurada no Vercel')
+    console.error('[avaliacao] GEMINI_API_KEY não encontrada nas env vars!')
   }
 
   // ── 2. Fallback: Groq ──────────────────────────────────────────
+  console.log(`[avaliacao] Usando Groq. Diagnóstico Gemini: ${diagnostico.join(' | ')}`)
+
   if (groqKey) {
     try {
-      console.log('Usando Groq como fallback...')
       const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -87,14 +109,18 @@ export default async function handler(req, res) {
 
       const data = await groqRes.json()
       if (groqRes.ok) {
-        return res.status(200).json({ ...data, _provider: 'groq-fallback' })
+        return res.status(200).json({
+          ...data,
+          _provider: 'groq-fallback',
+          _gemini_diagnostico: diagnostico,
+        })
       }
       return res.status(groqRes.status).json(data)
     } catch (e) {
-      console.error('Groq fallback erro:', e.message)
-      return res.status(500).json({ error: `Groq falhou: ${e.message}` })
+      console.error('[avaliacao] Groq erro:', e.message)
+      return res.status(500).json({ error: `Groq falhou: ${e.message}`, _gemini_diagnostico: diagnostico })
     }
   }
 
-  return res.status(500).json({ error: 'Nenhuma API disponível.' })
+  return res.status(500).json({ error: 'Nenhuma API disponível.', _gemini_diagnostico: diagnostico })
 }
