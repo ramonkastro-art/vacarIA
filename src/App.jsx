@@ -239,6 +239,29 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
     "Essas seções são instruções para VOCÊ, não para o aluno. O aluno não pode vê-las.";
 }
 
+async function callAPI(params) {
+  const response = await fetch("/api/grok", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messages: [
+        {
+          role: "system",
+          content: "Você é um especialista pedagógico em Língua Inglesa da Rede Municipal de Vacaria/RS. Responda sempre em português brasileiro, com precisão técnica e linguagem acessível a professores.",
+        },
+        { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos) },
+      ],
+      temperature: 0.65,
+      max_tokens: 4000,
+    }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data?.error?.message || data?.error || response.statusText);
+  const text = data.choices?.[0]?.message?.content;
+  if (!text || text.trim().length === 0) throw new Error("A API retornou uma resposta vazia.");
+  return { text, provider: data._provider || "ia" };
+}
+
 async function callAvaliacao(params) {
   const response = await fetch("/api/avaliacao", {
     method: "POST",
