@@ -455,8 +455,7 @@ function handlePrintAvaliacao(params) {
 }
 
 function handleDocx(text, filename) {
-  sessionStorage.setItem("docx_text", text);
-  sessionStorage.setItem("docx_filename", filename);
+  sessionStorage.setItem("docx_data", JSON.stringify({ text, filename }));
   var win = window.open('/docx-generator.html', '_blank');
   if (!win) alert('Permita pop-ups para baixar o DOCX.');
 }
