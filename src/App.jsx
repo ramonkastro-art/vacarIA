@@ -455,8 +455,9 @@ function handlePrintAvaliacao(params) {
 }
 
 function handleDocx(text, filename) {
-  var hash = encodeURIComponent(JSON.stringify({text: text, filename: filename}));
-  var win = window.open('/docx-generator.html#' + hash, '_blank');
+  sessionStorage.setItem("docx_text", text);
+  sessionStorage.setItem("docx_filename", filename);
+  var win = window.open('/docx-generator.html', '_blank');
   if (!win) alert('Permita pop-ups para baixar o DOCX.');
 }
 

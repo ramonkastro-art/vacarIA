@@ -168,8 +168,10 @@ async function generate(text, filename) {
 window.addEventListener('load', async function() {
   try {
     // Read data from URL hash
-    var hash = decodeURIComponent(window.location.hash.slice(1));
-    var data = JSON.parse(hash);
+    var raw = sessionStorage.getItem("docx_data");
+    if (!raw) throw new Error("Nenhum dado encontrado. Tente gerar novamente.");
+    var data = JSON.parse(raw);
+    sessionStorage.removeItem("docx_data"); // limpa após uso
 
     document.getElementById('msg').textContent = 'Gerando ' + data.filename + '...';
 
