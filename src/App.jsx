@@ -50,11 +50,10 @@ function buildPrompt(ano, tema, duracao, nivel, recursos, estado) {
 
   const efI = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"].includes(ano);
 
-  return `Você é um especialista pedagógico em Língua Inglesa da Rede Municipal de Vacaria/RS, com domínio profundo de:
+  return `Você é um especialista pedagógico em Língua Inglesa, com domínio profundo de:
 - BNCC (Base Nacional Comum Curricular) — Componente: Língua Inglesa
-- Referencial Curricular Gaúcho (BNCC + adaptações RS)
-- DCOMVAC (Documento Curricular Orientador Municipal de Vacaria/RS)
-- Sistema de Ensino Aprende Brasil (Grupo Positivo) — Componente Língua Inglesa
+- Referencial Curricular Estadual (BNCC + adaptações ${ufEstado})
+- Metodologias ativas, ensino híbrido, aprendizagem baseada em projetos, gamificação, estratégias lúdicas e dinâmicas para ensino de inglês
 
 RESTRIÇÃO 1 — DISCIPLINA EXCLUSIVA:
 Este plano é ESTRITAMENTE de LÍNGUA INGLESA.
@@ -76,16 +75,13 @@ Referencie o ${refEstadual} como documento curricular estadual complementar à B
 Quando existir adaptação estadual de habilidade BNCC, use o sufixo ${ufEstado} (ex: EF06LI01${ufEstado}).
 Contextualize exemplos e referências culturais com a identidade e realidade do ${nomeEstado}.
 
-RESTRIÇÃO 5 — SISTEMA DE ENSINO:
-Nas Referências, indique o ${refEstadual} e, se aplicável, o sistema de ensino adotado na rede (ex: Aprende Brasil, Positivo, SESI, Rede Pitágoras, material próprio).
-
-RESTRIÇÃO 6 — BNCC NO ENSINO FUNDAMENTAL I:
+RESTRIÇÃO 5 — BNCC NO ENSINO FUNDAMENTAL I:
 ${efI
   ? `Este plano é para ${ano}. A BNCC NÃO prevê códigos de Língua Inglesa para anos iniciais.
 NUNCA invente códigos EFxxLIxx. Use o título "## Habilidades Trabalhadas" e descreva 2–4 competências em português inspiradas na BNCC, SEM códigos.`
   : `Este plano é para ${ano} (anos finais). Use códigos BNCC exatos de Língua Inglesa.`}
 
-RESTRIÇÃO 7 — RECURSOS DISPONÍVEIS:
+RESTRIÇÃO 6 — RECURSOS DISPONÍVEIS:
 O professor tem acesso a: ${recursosStr}.
 ${temNotebook
   ? `OBRIGATÓRIO: O plano DEVE incluir atividades digitais específicas aproveitando o notebook/computador.
@@ -103,7 +99,7 @@ Exemplos de dinâmicas possíveis: caça ao vocabulário (word hunt), corrida co
 Priorize atividades que gerem movimento, interação e uso oral da língua inglesa.`
   : ``}
 
-RESTRIÇÃO 8 — NÍVEL DA TURMA:
+RESTRIÇÃO 7 — NÍVEL DA TURMA:
 Nível: ${nivel}.
 ${nivel === "Básico" ? "Use vocabulário simples, muita repetição, suporte visual e instruções curtas." : ""}
 ${nivel === "Intermediário" ? "Equilibre atividades de produção e reconhecimento. Permita respostas mais elaboradas." : ""}
@@ -120,6 +116,7 @@ ${efI ? "## Habilidades Trabalhadas" : "## Habilidades BNCC Alinhadas"}
 ${efI
   ? "[Descreva 2–4 competências em português, SEM códigos, inspiradas na BNCC de Língua Inglesa]"
   : "[Liste 2–4 habilidades com código exato e descrição verbatim da BNCC]"}
+  : "[Liste 2–4 habilidades com código exato e descrição verbatim do Referenciao Curricular do estado ${nomeEstado}]"}
 
 ## Objetivos de Aprendizagem
 • [Objetivo 1]
@@ -174,7 +171,7 @@ ${duracao === "2 períodos (80 min)"
 [3–5 linhas com adaptações para NEE e realidade gaúcha]
 
 ## Referências e Recursos Complementares
-[Aprende Brasil Volume/Unidade${temNotebook ? " + links de ferramentas digitais usadas no plano" : " + sugestões de materiais físicos"}]
+[links de ferramentas digitais usadas no plano" : " + sugestões de materiais físicos"}]
 
 Instruções finais: gere SOMENTE o plano, sem introduções extras.
 
@@ -192,7 +189,7 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
   const basico = nivel === "Básico";
   const qtdTotal = vinte ? 20 : 10;
 
-  return "Você é professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS.\n" +
+  return "Você é professor especialista em Língua Inglesa.\n" +
     "Crie uma atividade avaliativa de Língua Inglesa para " + ano + ", nível " + nivel + ", tema: \"" + tema + "\".\n\n" +
     "\n⚠️ REGRA ABSOLUTA: Sua resposta deve conter APENAS a atividade pronta. " +
     "NÃO repita estas instruções no output. NÃO escreva seções como REGRAS GERAIS, " +
@@ -209,16 +206,7 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
     "1. Gere EXATAMENTE " + qtdTotal + " questões numeradas sequencialmente.\n" +
     "2. IDIOMA DOS ENUNCIADOS: " + (avancado ? "inglês (nível avançado)." : "português.") + "\n" +
     "3. ALTERNATIVAS (a/b/c/d): SEMPRE em inglês em TODOS os níveis. Sem exceção.\n" +
-    (basico ? "4. Nível BÁSICO: após cada alternativa em inglês, adicione a tradução entre parênteses. Ex: a) Doctor (Médico)\n" : "") +
-    "5. " + (efI ? "Anos iniciais: sem textos longos, foco em vocabulário visual." : "Adeque complexidade ao " + ano + ".") + "\n\n" +
-
-    "══════════════════════════════\n" +
-    "DISTRIBUIÇÃO DAS " + qtdTotal + " QUESTÕES\n" +
-    "══════════════════════════════\n" +
-    (vinte
-      ? "Questões 1-3: Múltipla Escolha\nQuestão 4: Relacione Colunas\nQuestão 5: Organize as Letras\nQuestão 6: Interpretação de Texto\nQuestão 7: Charada/Enigma\nQuestões 8-10: Múltipla Escolha\nQuestão 11: Múltipla Escolha\nQuestão 12: Múltipla Escolha\nQuestão 13: Múltipla Escolha\nQuestão 14: Relacione Colunas\nQuestão 15: Organize as Letras\nQuestão 16: Interpretação de Texto\nQuestão 17: Charada/Enigma\nQuestões 18-20: Múltipla Escolha\n"
-      : "Questões 1-3: Múltipla Escolha\nQuestão 4: Relacione Colunas\nQuestão 5: Organize as Letras\nQuestão 6: Interpretação de Texto\nQuestão 7: Charada/Enigma\nQuestões 8-10: Múltipla Escolha\n"
-    ) + "\n" +
+    "4. " + (efI ? "Anos iniciais: sem textos longos, foco em vocabulário visual e geração de imagens." : "Adeque complexidade ao " + ano + ".") + "\n\n" +
 
     "══════════════════════════════\n" +
     "INSTRUÇÕES DETALHADAS\n" +
