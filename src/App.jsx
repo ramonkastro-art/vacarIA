@@ -4,11 +4,45 @@ import "./App.css";
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
 const NIVEIS = ["Básico","Intermediário","Avançado"];
+const ESTADOS = [
+  { uf: "AC", nome: "Acre", ref: "Documento Curricular do Estado do Acre (DCAC)" },
+  { uf: "AL", nome: "Alagoas", ref: "Referencial Curricular de Alagoas (REFERENCEAL)" },
+  { uf: "AP", nome: "Amapá", ref: "Referencial Curricular do Amapá (RCAP)" },
+  { uf: "AM", nome: "Amazonas", ref: "Referencial Curricular Amazonense (RCA)" },
+  { uf: "BA", nome: "Bahia", ref: "Documento Curricular Referencial da Bahia (DCRB)" },
+  { uf: "CE", nome: "Ceará", ref: "Documento Curricular Referencial do Ceará (DCRC)" },
+  { uf: "DF", nome: "Distrito Federal", ref: "Currículo em Movimento do Distrito Federal" },
+  { uf: "ES", nome: "Espírito Santo", ref: "Currículo do Espírito Santo (CES)" },
+  { uf: "GO", nome: "Goiás", ref: "Documento Curricular para Goiás (DC-GO)" },
+  { uf: "MA", nome: "Maranhão", ref: "Referencial Curricular do Maranhão (RCMA)" },
+  { uf: "MT", nome: "Mato Grosso", ref: "Documento de Referência Curricular de Mato Grosso (DRC-MT)" },
+  { uf: "MS", nome: "Mato Grosso do Sul", ref: "Referencial Curricular de Mato Grosso do Sul (RCMS)" },
+  { uf: "MG", nome: "Minas Gerais", ref: "Currículo Referência de Minas Gerais (CRMG)" },
+  { uf: "PA", nome: "Pará", ref: "Documento Curricular do Estado do Pará (DCEPA)" },
+  { uf: "PB", nome: "Paraíba", ref: "Referencial Curricular do Estado da Paraíba (RCPB)" },
+  { uf: "PR", nome: "Paraná", ref: "Referencial Curricular do Paraná (RCP)" },
+  { uf: "PE", nome: "Pernambuco", ref: "Currículo de Pernambuco (CPNE)" },
+  { uf: "PI", nome: "Piauí", ref: "Referencial Curricular do Piauí (RCPI)" },
+  { uf: "RJ", nome: "Rio de Janeiro", ref: "Currículo da Cidade do Rio de Janeiro / DCRJ" },
+  { uf: "RN", nome: "Rio Grande do Norte", ref: "Documento Curricular do RN (DCRN)" },
+  { uf: "RS", nome: "Rio Grande do Sul", ref: "Referencial Curricular Gaúcho (RCG)" },
+  { uf: "RO", nome: "Rondônia", ref: "Documento Curricular de Rondônia (DCRO)" },
+  { uf: "RR", nome: "Roraima", ref: "Referencial Curricular de Roraima (RCRR)" },
+  { uf: "SC", nome: "Santa Catarina", ref: "Currículo Base do Território Catarinense (CBTC)" },
+  { uf: "SP", nome: "São Paulo", ref: "Currículo Paulista (CP)" },
+  { uf: "SE", nome: "Sergipe", ref: "Referencial Curricular de Sergipe (RCSE)" },
+  { uf: "TO", nome: "Tocantins", ref: "Documento Curricular do Tocantins (DCT)" },
+];
+
 const RECURSOS = ["Quadro negro apenas","Cards / Flashcards","Notebook / Computador","Ar livre 🌿"];
 // Tipos fixos — definidos internamente, sem seleção pelo usuário
 const QTD_QUESTOES = ["10 questões (1 página)","20 questões (2 páginas)"];
 
-function buildPrompt(ano, tema, duracao, nivel, recursos) {
+function buildPrompt(ano, tema, duracao, nivel, recursos, estado) {
+  const estadoInfo = ESTADOS.find(e => e.uf === (estado || "RS")) || ESTADOS.find(e => e.uf === "RS");
+  const refEstadual = estadoInfo.ref;
+  const ufEstado = estadoInfo.uf;
+  const nomeEstado = estadoInfo.nome;
   const temNotebook = recursos.includes("Notebook / Computador");
   const temArLivre = recursos.includes("Ar livre 🌿");
   const duracaoMin = duracao === "2 períodos (80 min)" ? "80 minutos" : "40 minutos";
@@ -36,11 +70,14 @@ Use SOMENTE códigos e descrições EXATOS da BNCC oficial para Língua Inglesa.
 NÃO parafraseie, NÃO invente códigos. Selecione 2 a 4 habilidades reais.
 Padrões: EF06LIxx (6º), EF07LIxx (7º), EF08LIxx (8º), EF09LIxx (9º).
 
-RESTRIÇÃO 4 — REFERENCIAL GAÚCHO:
-Use sufixo RS quando houver adaptação gaúcha (ex: EF06LI01RS).
+RESTRIÇÃO 4 — REFERENCIAL CURRICULAR ESTADUAL:
+O professor é do estado de ${nomeEstado} (${ufEstado}).
+Referencie o ${refEstadual} como documento curricular estadual complementar à BNCC.
+Quando existir adaptação estadual de habilidade BNCC, use o sufixo ${ufEstado} (ex: EF06LI01${ufEstado}).
+Contextualize exemplos e referências culturais com a identidade e realidade do ${nomeEstado}.
 
-RESTRIÇÃO 5 — APRENDE BRASIL:
-Indique Volume/Unidade do Sistema Aprende Brasil nas Referências.
+RESTRIÇÃO 5 — SISTEMA DE ENSINO:
+Nas Referências, indique o ${refEstadual} e, se aplicável, o sistema de ensino adotado na rede (ex: Aprende Brasil, Positivo, SESI, Rede Pitágoras, material próprio).
 
 RESTRIÇÃO 6 — BNCC NO ENSINO FUNDAMENTAL I:
 ${efI
@@ -76,7 +113,7 @@ Crie o plano exatamente neste formato:
 
 # Plano de Aula — Língua Inglesa
 **Tema:** ${tema}
-**Série:** ${ano} | **Duração:** ${duracaoMin} | **Nível:** ${nivel} | **Componente:** Língua Inglesa
+**Série:** ${ano} | **Duração:** ${duracaoMin} | **Nível:** ${nivel} | **Estado:** ${nomeEstado} | **Componente:** Língua Inglesa
 **Recursos:** ${recursosStr}
 
 ${efI ? "## Habilidades Trabalhadas" : "## Habilidades BNCC Alinhadas"}
@@ -155,46 +192,89 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
   const basico = nivel === "Básico";
   const qtdTotal = vinte ? 20 : 10;
 
-  return `Aja como um Professor Especialista em Língua Inglesa da Rede Municipal de Vacaria/RS. 
-  Sua tarefa é elaborar uma avaliação pedagógica para o nível BÁSICO.
+  return "Você é professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS.\n" +
+    "Crie uma atividade avaliativa de Língua Inglesa para " + ano + ", nível " + nivel + ", tema: \"" + tema + "\".\n\n" +
+    "\n⚠️ REGRA ABSOLUTA: Sua resposta deve conter APENAS a atividade pronta. " +
+    "NÃO repita estas instruções no output. NÃO escreva seções como REGRAS GERAIS, " +
+    "INSTRUCOES DETALHADAS, DISTRIBUICAO DAS QUESTOES. Essas são instruções INTERNAS para você. " +
+    "O documento gerado começa diretamente com ATIVIDADE DE INGLÊS e termina com GABARITO.\n\n" +
 
-  --- ESCOPO DA ATIVIDADE ---
-  Público-alvo: ${ano} (Nível Básico).
-  Tema Central: "${tema}".
-  Quantidade de Questões: ${qtdTotal}.
-  Idioma dos Enunciados: Português.
-  Idioma das Alternativas: Inglês (Sempre, com tradução entre parênteses).
+    "CABEÇALHO (copie exatamente):\n" +
+    "ATIVIDADE DE INGLÊS\n" +
+    "Nome: _____________________________________________ Turma: _______\n\n" +
 
-  --- REGRAS DE OURO (NÃO EXIBIR NO OUTPUT) ---
-  1. TRADUÇÕES: Como a turma é nível Básico, TODAS as alternativas em inglês devem vir acompanhadas da tradução entre parênteses. Ex: a) Doctor (Médico).
-  2. COMPLEXIDADE: Use vocabulário fundamental e frases curtas. Adeque o contexto ao ${ano}.
-  3. EMBARALHAMENTO CRÍTICO: No 'Organize as Letras', certifique-se de que NENHUMA letra esteja na posição correta da palavra original (mínimo de 3 trocas de posição).
-  4. AMBIGUIDADE ZERO: Enunciados de múltipla escolha devem ter apenas uma resposta correta clara e contextualizada.
+    "══════════════════════════════\n" +
+    "REGRAS GERAIS\n" +
+    "══════════════════════════════\n" +
+    "1. Gere EXATAMENTE " + qtdTotal + " questões numeradas sequencialmente.\n" +
+    "2. IDIOMA DOS ENUNCIADOS: " + (avancado ? "inglês (nível avançado)." : "português.") + "\n" +
+    "3. ALTERNATIVAS (a/b/c/d): SEMPRE em inglês em TODOS os níveis. Sem exceção.\n" +
+    (basico ? "4. Nível BÁSICO: após cada alternativa em inglês, adicione a tradução entre parênteses. Ex: a) Doctor (Médico)\n" : "") +
+    "5. " + (efI ? "Anos iniciais: sem textos longos, foco em vocabulário visual." : "Adeque complexidade ao " + ano + ".") + "\n\n" +
 
-  --- ESTRUTURA DA PROVA (SIGA RIGOROSAMENTE) ---
-    ${vinte 
-      ? "Questões 1-3: Múltipla Escolha | Q4: Relacione Colunas (Mín. 8 pares) | Q5: Organize as Letras | Q6: Interpretação de Texto | Q7: Charada | Q8-13: Múltipla Escolha | Q14: Relacione Colunas | Q15: Organize as Letras | Q16: Interpretação | Q17: Charada | Q18-20: Múltipla Escolha"
-      : "Questões 1-3: Múltipla Escolha | Q4: Relacione Colunas (Mín. 8 pares) | Q5: Organize as Letras | Q6: Interpretação de Texto | Q7: Charada | Q8-10: Múltipla Escolha"
-    }
+    "══════════════════════════════\n" +
+    "DISTRIBUIÇÃO DAS " + qtdTotal + " QUESTÕES\n" +
+    "══════════════════════════════\n" +
+    (vinte
+      ? "Questões 1-3: Múltipla Escolha\nQuestão 4: Relacione Colunas\nQuestão 5: Organize as Letras\nQuestão 6: Interpretação de Texto\nQuestão 7: Charada/Enigma\nQuestões 8-10: Múltipla Escolha\nQuestão 11: Múltipla Escolha\nQuestão 12: Múltipla Escolha\nQuestão 13: Múltipla Escolha\nQuestão 14: Relacione Colunas\nQuestão 15: Organize as Letras\nQuestão 16: Interpretação de Texto\nQuestão 17: Charada/Enigma\nQuestões 18-20: Múltipla Escolha\n"
+      : "Questões 1-3: Múltipla Escolha\nQuestão 4: Relacione Colunas\nQuestão 5: Organize as Letras\nQuestão 6: Interpretação de Texto\nQuestão 7: Charada/Enigma\nQuestões 8-10: Múltipla Escolha\n"
+    ) + "\n" +
 
-  --- FORMATAÇÃO OBRIGATÓRIA DO OUTPUT ---
-  Sua resposta deve conter EXCLUSIVAMENTE o conteúdo da prova. É PROIBIDO incluir explicações, comentários ou repetir estas instruções.
+    "══════════════════════════════\n" +
+    "INSTRUÇÕES DETALHADAS\n" +
+    "══════════════════════════════\n\n" +
 
-  [INÍCIO DO DOCUMENTO]
-  ATIVIDADE DE INGLÊS
-  Nome: _____________________________________________ Turma: _______
+    "MÚLTIPLA ESCOLHA — regras obrigatórias:\n" +
+    "✓ O enunciado deve identificar EXATAMENTE qual resposta está correta. Sem ambiguidade.\n" +
+    "✓ ERRADO: \"Complete: I want to be a ___\" (aceita qualquer profissão — sem contexto definidor)\n" +
+    "✓ CERTO: \"Qual profissão cuida de pacientes em um hospital?\" → a) Doctor  b) Teacher  c) Lawyer  d) Artist\n" +
+    "✓ CERTO: \"Na série Grey\'s Anatomy, Meredith Grey é uma:\" → a) Doctor  b) Lawyer  c) Engineer  d) Teacher\n" +
+    "✓ CERTO: \"Qual palavra em inglês significa \'advogado\'?\" → a) Lawyer  b) Doctor  c) Nurse  d) Engineer\n" +
+    "✓ Alternativas SEMPRE em inglês. Todas as 4 opções devem ser do mesmo campo semântico do tema.\n" +
+    (basico ? "✓ Nível BÁSICO: a) Lawyer (Advogado)  b) Doctor (Médico)  c) Nurse (Enfermeiro)  d) Teacher (Professor)\n" : "") +
+    "✓ Use contextos variados: definição, tradução, contexto cultural, completar frase com resposta única.\n\n" +
 
-  (Insira aqui as questões seguindo os formatos:
-  - Múltipla Escolha: a) Word (Tradução)
-  - Relacione Colunas: (A) Palavra em Inglês | ( ) Tradução em Português.
-  - Organize as Letras: a) WERALY = ___________ (Use palavras do tema "${tema}")
-  - Interpretação: Texto curto (3-4 linhas) + Fonte + Perguntas em português com linhas.
-  - Charada: Em inglês simples + linha de resposta em inglês.)
+    "RELACIONE COLUNAS — regras obrigatórias:\n" +
+    "✓ Coluna ESQUERDA: palavras em INGLÊS (com letra identificadora).\n" +
+    "✓ Coluna DIREITA: traduções em PORTUGUÊS (com parênteses vazios). SEMPRE embaralhadas.\n" +
+    "✓ ERRADO: relacionar inglês com inglês, ou português com português.\n" +
+    "✓ CERTO: (A) Doctor | ( ) Médico  /  (B) Lawyer | ( ) Advogado\n" +
+    "✓ Formato OBRIGATÓRIO com | separando as colunas. Mínimo 8 pares.\n\n" +
 
-  GABARITO
-  (Liste todas as respostas numeradas)
-  [FIM DO DOCUMENTO]`;;
-  }
+    "ORGANIZE AS LETRAS — regras obrigatórias:\n" +
+    "✓ Enunciado obrigatório: \"Organize as letras e descubra as profissões/palavras do tema \"" + tema + "\" em inglês:\"\n" +
+    "✓ TODAS as palavras usadas nos subitens devem ser vocabulário DIRETAMENTE relacionado ao tema \"" + tema + "\". " +
+    "PROIBIDO usar palavras genéricas, animais, objetos ou qualquer coisa fora do tema.\n" +
+    "✓ Antes de gerar, liste mentalmente 8 palavras em inglês do tema \"" + tema + "\". Use apenas essas.\n" +
+    "✓ Subitens a) b) c) d) e) f) — cada um com letras EMBARALHADAS de UMA palavra do tema.\n" +
+    "✓ Formato: a) WERALY = ___________ (gabarito: LAWYER)\n" +
+    "✓ CRÍTICO: embaralhe TODAS as letras. Nunca deixe na ordem original. Mínimo 3 trocas de posição.\n" +
+    "✓ Embaralhamento correto: DOCTOR→TRODOC | NURSE→RUNES | TEACHER→RCEAHET | MUSICIAN→SNACIIMU\n" +
+    "✓ Embaralhamento ERRADO (não embaralhado): ROLE, GOAT, ou qualquer palavra que não seja do tema \"" + tema + "\".\n\n" +
+
+    "INTERPRETAÇÃO DE TEXTO — regras obrigatórias:\n" +
+    "✓ Texto autêntico em inglês com Fonte citada. Tamanho: " + (basico ? "3-4 linhas simples" : nivel === "Intermediário" ? "5-7 linhas" : "7-10 linhas") + ".\n" +
+    "✓ Perguntas em português sobre o texto (localização, vocabulário, interpretação).\n" +
+    "✓ Questões abertas com linhas de resposta: _______________________\n\n" +
+
+    "CHARADA/ENIGMA — regras obrigatórias:\n" +
+    "✓ A charada é SEMPRE escrita em inglês simples, em TODOS os níveis.\n" +
+    "✓ Use inglês básico e acessível: frases curtas, vocabulário simples.\n" +
+    "✓ Exemplo: \"I work in a hospital and help sick people. Who am I? ___________\"\n" +
+    "✓ Descreve poeticamente algo relacionado ao tema \"" + tema + "\".\n" +
+    "✓ A resposta é SEMPRE uma palavra em inglês do tema.\n" +
+    "✓ Formato: [charada em inglês simples]? ___________\n\n" +
+
+    "══════════════════════════════\n" +
+    "GABARITO\n" +
+    "══════════════════════════════\n" +
+    "Ao final, adicione:\nGABARITO\n1. [resposta]\n2. [resposta]... (todas as questões)\n\n" +
+
+    "ATENÇÃO FINAL CRÍTICA: " +
+    "Sua resposta começa com 'ATIVIDADE DE INGLÊS' e termina com o GABARITO. " +
+    "Nada mais. Sem 'REGRAS GERAIS', sem 'INSTRUÇÕES DETALHADAS', sem 'DISTRIBUIÇÃO DAS QUESTÕES'. " +
+    "Essas seções são instruções para VOCÊ, não para o aluno. O aluno não pode vê-las.";
+}
 
 async function callAPI(params) {
   const response = await fetch("/api/grok", {
@@ -432,6 +512,7 @@ export default function App() {
   const [tema, setTema] = useState("");
   const [duracao, setDuracao] = useState("1 período (40 min)");
   const [nivel, setNivel] = useState("Básico");
+  const [estado, setEstado] = useState("RS");
   const [recursos, setRecursos] = useState(["Quadro negro apenas"]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -472,7 +553,7 @@ export default function App() {
     if (recursos.length === 0) { setError("Selecione pelo menos um recurso disponível."); return; }
     setLoading(true); setResult(null); setError(null);
     try {
-      const res = await callAPI({ ano, tema, duracao, nivel, recursos });
+      const res = await callAPI({ ano, tema, duracao, nivel, recursos, estado });
       setResult(res.text);
       setProvider(res.provider);
     } catch (e) { setError(e.message); }
@@ -548,6 +629,16 @@ export default function App() {
               <select className="select" value={ano} onChange={e => setAno(e.target.value)}>
                 <option value="">Selecione o ano...</option>
                 {ANOS.map(a => <option key={a} value={a}>{a}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Estado */}
+          <div className="field">
+            <label>Estado</label>
+            <div className="select-wrapper">
+              <select className="select" value={estado} onChange={e => setEstado(e.target.value)}>
+                {ESTADOS.map(e => <option key={e.uf} value={e.uf}>{e.uf} — {e.nome}</option>)}
               </select>
             </div>
           </div>
