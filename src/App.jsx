@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
@@ -114,10 +114,14 @@ Crie o plano exatamente neste formato:
 
 ${efI ? "## Habilidades Trabalhadas" : "## Habilidades BNCC Alinhadas"}
 ${efI
-  ? "[Descreva 2–4 competências em português, SEM códigos, inspiradas na BNCC de Língua Inglesa]"
-  : "[Liste 2–4 habilidades com código exato e descrição verbatim da BNCC]"}
-  : "[Liste 2–4 habilidades com código exato e descrição verbatim do Referenciao Curricular do estado ${nomeEstado}]"}
+  ? `[Descreva 2–4 competências em português, SEM códigos, inspiradas na BNCC de Língua Inglesa para ${ano}]`
+  : `[Liste 2–4 habilidades com código exato e descrição verbatim da BNCC — padrão EF0${ano.charAt(0)}LIxx]`}
 
+  ## Referencial Curricular Estadual — ${refEstadual}
+${efI
+  ? `[Descreva como as competências acima se alinham às orientações do ${refEstadual} para anos iniciais de ${nomeEstado}. Mencione adaptações locais se houver.]`
+  : `[Liste 1–2 habilidades ou orientações específicas do ${refEstadual} complementares às habilidades BNCC acima. Quando existir código estadual, use o sufixo ${ufEstado} — ex: EF06LI01${ufEstado}.]`}
+ 
 ## Objetivos de Aprendizagem
 • [Objetivo 1]
 • [Objetivo 2]
@@ -522,11 +526,11 @@ export default function App() {
   const [showInstall, setShowInstall] = useState(false);
 
   // Captura o evento de instalação PWA
-  useState(() => {
-    const handler = (e) => { e.preventDefault(); setInstallPrompt(e); setShowInstall(true); };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  });
+    useEffect(() => {
+   const handler = (e) => { e.preventDefault(); setInstallPrompt(e); setShowInstall(true); };
+   window.addEventListener('beforeinstallprompt', handler);
+   return () => window.removeEventListener('beforeinstallprompt', handler);
+   }, []);
 
   const handleInstall = async () => {
     if (!installPrompt) return;
@@ -559,12 +563,6 @@ export default function App() {
       setDiagAv(res.diag || "");
     } catch (e) { setErrorAv(e.message); }
     finally { setLoadingAv(false); }
-  };
-
-  const handleLink = () => {
-    handleShareLink(result, { ano, tema, duracao, nivel, recursos });
-    setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 2500);
   };
 
   return (
