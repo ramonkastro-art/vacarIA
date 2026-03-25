@@ -272,9 +272,9 @@ async function callAPI(params) {
       messages: [
         {
           role: "system",
-          content: "Você é um especialista pedagógico em Língua Inglesa da Rede Municipal de Vacaria/RS. Responda sempre em português brasileiro, com precisão técnica e linguagem acessível a professores.",
+          content: "Você é um especialista pedagógico em Língua Inglesa. Responda sempre em português brasileiro, com precisão técnica e linguagem acessível a professores.",
         },
-        { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos) },
+        { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos, params.estado) },
       ],
       temperature: 0.65,
       max_tokens: 4000,
@@ -295,7 +295,7 @@ async function callAvaliacao(params) {
       messages: [
         {
           role: "system",
-          content: "Você é um professor especialista em Língua Inglesa da Rede Municipal de Vacaria/RS. Siga as instruções com precisão absoluta. Crie avaliações pedagógicas corretas, sem erros de lógica, com alternativas sempre em inglês e relacionamentos sempre inglês↔português.",
+          content: "Você é um professor especialista em Língua Inglesa. Siga as instruções com precisão absoluta. Crie avaliações pedagógicas corretas, sem erros de lógica, com alternativas sempre em inglês e relacionamentos sempre inglês↔português.",
         },
         { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.qtd) },
       ],
@@ -392,7 +392,7 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
     "<style>" + css + "</style></head><body>" +
     "<div id=\"pdf-wrap\">" +
     "<div class=\"pdf-header\"><div class=\"pdf-title\">Vacar<span>IA</span>" + (subtitle ? " — " + subtitle : "") + "</div>" +
-    "<div class=\"pdf-sub\">Rede Municipal de Vacaria/RS<br/>" + title + "</div></div>" +
+    "<div class=\"pdf-sub\">Rede de Ensino de Inglês<br/>" + title + "</div></div>" +
     printEl.innerHTML +
     "<div class=\"pdf-footer\">" +
     "<div><div>VacarIA · Assistente Pedagógico para Professores de Inglês</div>" +
