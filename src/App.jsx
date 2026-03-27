@@ -459,7 +459,7 @@ function handlePrintAvaliacao(params) {
 }
 
 function handleDocx(text, filename) {
-  sessionStorage.setItem("docx_data", JSON.stringify({ text, filename }));
+  sessionStorage.setItem('vacaria_docx', JSON.stringify({ text, filename }));
   var win = window.open('/docx-generator.html', '_blank');
   if (!win) alert('Permita pop-ups para baixar o DOCX.');
 }
