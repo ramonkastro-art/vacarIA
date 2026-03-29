@@ -768,6 +768,12 @@ export default function App() {
               <div className="game-card-desc">Adivinhe a profissão em inglês antes que o tempo acabe. Multijogador em tempo real!</div>
               <span className="game-card-tag">🌐 Multiplayer · Firebase</span>
             </a>
+            <a className="game-card" href="/game-english-quest.html" target="_blank" rel="noopener noreferrer">
+              <div className="game-card-icon">🦊</div>
+              <div className="game-card-name">English Quest Kids</div>
+              <div className="game-card-desc">Flashcards, Quiz, Memória e Ordem. Cores, dias, animais e meses em inglês!</div>
+              <span className="game-card-tag">🎮 4 jogos · Para crianças</span>
+            </a>
           </div>
         </div>
 

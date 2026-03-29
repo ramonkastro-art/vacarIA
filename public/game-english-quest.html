@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>English Quest Kids 🦊</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;color:#1f2937}
+.screen{display:none;min-height:100vh;padding:16px;animation:fadeIn .3s ease}
+.screen.active{display:flex;flex-direction:column;align-items:center}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+h1{font-size:clamp(2rem,6vw,3.5rem);font-weight:900;text-align:center;color:#fff;text-shadow:0 3px 10px rgba(0,0,0,.3);margin-bottom:8px}
+h2{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;text-align:center;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.25);margin-bottom:12px}
+
+.card{background:#fff;border-radius:24px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.15);width:100%;max-width:480px}
+.btn{border:none;border-radius:16px;padding:14px 24px;font-size:1rem;font-weight:800;cursor:pointer;transition:all .15s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff}
+.btn-secondary{background:rgba(255,255,255,.25);color:#fff;border:2px solid rgba(255,255,255,.5)}
+.btn-back{background:rgba(255,255,255,.2);color:#fff;padding:10px 18px;font-size:.9rem;border-radius:12px;margin-bottom:12px;align-self:flex-start}
+.btn-green{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+.btn-red{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+
+.score-badge{background:rgba(255,255,255,.25);color:#fff;border-radius:100px;padding:6px 16px;font-weight:800;font-size:1rem}
+.progress-bar{width:100%;height:12px;background:rgba(255,255,255,.3);border-radius:100px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:100px;transition:width .4s ease}
+.timer{font-size:1.5rem;font-weight:900;color:#fbbf24}
+.timer.warning{color:#ef4444;animation:bounce .5s infinite}
+
+/* HOME */
+#home{background:linear-gradient(135deg,#667eea,#764ba2)}
+.logo-emoji{font-size:5rem;margin-bottom:4px;display:block;text-align:center}
+.subtitle{color:rgba(255,255,255,.85);font-size:1.1rem;text-align:center;margin-bottom:24px}
+.player-row{display:flex;align-items:center;gap:10px;margin-bottom:24px;width:100%;max-width:400px}
+.player-input{flex:1;padding:12px 16px;border-radius:14px;border:none;font-size:1rem;font-weight:700;outline:none;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.stats-row{display:flex;gap:16px;margin-bottom:24px}
+.stat-box{background:rgba(255,255,255,.2);border-radius:16px;padding:12px 20px;text-align:center;color:#fff}
+.stat-num{font-size:1.8rem;font-weight:900;display:block}
+.stat-label{font-size:.75rem;opacity:.8}
+
+/* CATEGORIES */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:480px}
+.cat-card{border:none;border-radius:20px;padding:24px 16px;cursor:pointer;transition:all .2s;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.cat-card:hover{transform:translateY(-4px) scale(1.02)}
+.cat-emoji{font-size:3rem;display:block;margin-bottom:8px}
+.cat-name{font-size:1rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+.cat-desc{font-size:.78rem;color:rgba(255,255,255,.85);margin-top:4px}
+
+/* GAME SELECT */
+.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:480px}
+.game-card{background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);border-radius:18px;padding:20px;cursor:pointer;text-align:center;transition:all .2s;color:#fff}
+.game-card:hover{background:rgba(255,255,255,.3);transform:translateY(-3px)}
+.game-icon{font-size:2.5rem;display:block;margin-bottom:8px}
+.game-title{font-weight:800;font-size:1rem}
+.game-desc{font-size:.78rem;opacity:.85;margin-top:4px}
+
+/* FLASHCARDS */
+.flashcard-wrap{perspective:1000px;width:100%;max-width:380px;height:260px;cursor:pointer;margin:16px 0}
+.flashcard{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .5s}
+.flashcard.flipped{transform:rotateY(180deg)}
+.flashcard-front,.flashcard-back{position:absolute;inset:0;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.flashcard-front{background:linear-gradient(135deg,#fff,#f8f9fa)}
+.flashcard-back{background:linear-gradient(135deg,#a855f7,#ec4899);transform:rotateY(180deg);color:#fff}
+.fc-emoji{font-size:5rem;margin-bottom:12px}
+.fc-word{font-size:2rem;font-weight:900;color:#1f2937}
+.fc-pt{font-size:1.2rem;font-weight:600;opacity:.85}
+.fc-hint{font-size:.85rem;color:#9ca3af;margin-top:8px}
+.nav-row{display:flex;gap:16px;align-items:center;margin-top:8px}
+.nav-btn{background:rgba(255,255,255,.25);border:none;border-radius:50%;width:52px;height:52px;font-size:1.5rem;cursor:pointer;color:#fff;transition:all .2s}
+.nav-btn:hover{background:rgba(255,255,255,.4)}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* QUIZ */
+.quiz-question{background:#fff;border-radius:24px;padding:28px;text-align:center;margin:12px 0;width:100%;max-width:480px;box-shadow:0 6px 24px rgba(0,0,0,.12)}
+.q-emoji{font-size:6rem;display:block;margin-bottom:12px;animation:bounce 2s infinite}
+.q-text{font-size:1.2rem;font-weight:700;color:#374151}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:480px}
+.opt-btn{padding:18px 12px;border-radius:16px;border:none;font-size:1.1rem;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;transition:all .2s;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.opt-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.opt-btn:disabled{cursor:not-allowed}
+.opt-btn.correct{background:linear-gradient(135deg,#10b981,#059669)!important;animation:pop .4s ease}
+.opt-btn.wrong{background:linear-gradient(135deg,#ef4444,#dc2626)!important;animation:shake .4s ease}
+
+/* MEMORY */
+.memory-grid{display:grid;gap:10px;width:100%;max-width:480px;margin:12px 0}
+.mem-card{aspect-ratio:1;border-radius:16px;border:none;cursor:pointer;font-size:2rem;font-weight:800;transition:all .3s;box-shadow:0 4px 12px rgba(0,0,0,.15);background:linear-gradient(135deg,#6366f1,#8b5cf6);color:transparent;position:relative;overflow:hidden}
+.mem-card.revealed,.mem-card.matched{background:#fff;color:#1f2937}
+.mem-card.matched{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+.mem-card-inner{display:flex;align-items:center;justify-content:center;height:100%;font-size:inherit}
+.mem-card:not(.revealed):not(.matched) .mem-card-inner::after{content:"❓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+
+/* SORT */
+.sort-zone{width:100%;max-width:480px}
+.sort-pool{display:flex;flex-wrap:wrap;gap:8px;padding:16px;background:rgba(255,255,255,.15);border-radius:20px;min-height:80px;margin-bottom:12px}
+.sort-target{display:flex;flex-wrap:wrap;gap:8px;padding:16px;background:rgba(255,255,255,.25);border:2px dashed rgba(255,255,255,.5);border-radius:20px;min-height:80px}
+.sort-item{padding:10px 16px;border-radius:12px;border:none;cursor:pointer;font-size:1rem;font-weight:800;background:#fff;color:#1f2937;transition:all .2s;box-shadow:0 3px 10px rgba(0,0,0,.15)}
+.sort-item:hover{transform:translateY(-2px)}
+.sort-item.selected{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff}
+.sort-label{color:rgba(255,255,255,.85);font-size:.85rem;font-weight:700;margin-bottom:6px}
+
+/* RESULTS */
+.result-card{background:linear-gradient(135deg,#a855f7,#ec4899);border-radius:28px;padding:32px;text-align:center;color:#fff;width:100%;max-width:400px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.result-emoji{font-size:6rem;display:block;margin-bottom:12px}
+.result-title{font-size:2.5rem;font-weight:900;margin-bottom:8px}
+.result-score{font-size:3rem;font-weight:900;margin:16px 0}
+.result-stars{font-size:2.5rem;margin:8px 0}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;width:10px;height:10px;top:-20px;animation:confettiFall 3s ease-in forwards;border-radius:2px;z-index:9999;pointer-events:none}
+
+/* RESPONSIVE */
+@media(max-width:400px){
+  .cat-grid,.quiz-options,.game-grid{grid-template-columns:1fr}
+  .fc-emoji{font-size:4rem}
+  .fc-word{font-size:1.6rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <span class="logo-emoji">🦊</span>
+  <h1>English Quest Kids</h1>
+  <p class="subtitle">Learn English with fun mini-games! 🎮</p>
+  <div class="player-row">
+    <input class="player-input" id="playerName" type="text" placeholder="Your name..." maxlength="16"/>
+    <button class="btn btn-primary" onclick="saveName()" style="padding:12px 18px">✓</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><span class="stat-num" id="totalScore">0</span><span class="stat-label">Points</span></div>
+    <div class="stat-box"><span class="stat-num" id="gamesPlayed">0</span><span class="stat-label">Games</span></div>
+    <div class="stat-box"><span class="stat-num" id="streak">0</span><span class="stat-label">Streak 🔥</span></div>
+  </div>
+  <button class="btn btn-primary" onclick="showCategories()" style="width:100%;max-width:300px;font-size:1.1rem;padding:16px">
+    🚀 Start Playing!
+  </button>
+</div>
+
+<!-- CATEGORIES -->
+<div id="categories" class="screen">
+  <h2>🌟 Choose a Category</h2>
+  <div class="cat-grid">
+    <button class="cat-card" style="background:linear-gradient(135deg,#f472b6,#a855f7)" onclick="selectCategory('colors')">
+      <span class="cat-emoji">🎨</span>
+      <span class="cat-name">Colors</span>
+      <span class="cat-desc">11 words</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#38bdf8,#0ea5e9)" onclick="selectCategory('days')">
+      <span class="cat-emoji">📅</span>
+      <span class="cat-name">Days of the Week</span>
+      <span class="cat-desc">7 words</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#4ade80,#16a34a)" onclick="selectCategory('animals')">
+      <span class="cat-emoji">🦁</span>
+      <span class="cat-name">Animals</span>
+      <span class="cat-desc">15 words</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#fb923c,#f59e0b)" onclick="selectCategory('months')">
+      <span class="cat-emoji">📆</span>
+      <span class="cat-name">Months</span>
+      <span class="cat-desc">12 words</span>
+    </button>
+  </div>
+  <button class="btn btn-secondary" onclick="showScreen('home')" style="margin-top:20px">⬅ Back</button>
+</div>
+
+<!-- GAME SELECT -->
+<div id="gameSelect" class="screen">
+  <h2 id="catTitle">Choose a Game</h2>
+  <div class="game-grid">
+    <div class="game-card" onclick="startGame('flashcards')">
+      <span class="game-icon">🃏</span>
+      <div class="game-title">Flashcards</div>
+      <div class="game-desc">Learn words with pictures</div>
+    </div>
+    <div class="game-card" onclick="startGame('quiz')">
+      <span class="game-icon">❓</span>
+      <div class="game-title">Quiz Challenge</div>
+      <div class="game-desc">Test your knowledge!</div>
+    </div>
+    <div class="game-card" onclick="startGame('memory')">
+      <span class="game-icon">🧠</span>
+      <div class="game-title">Memory Match</div>
+      <div class="game-desc">Match pairs to win</div>
+    </div>
+    <div class="game-card" onclick="startGame('sort')">
+      <span class="game-icon">🎯</span>
+      <div class="game-title">Sort & Order</div>
+      <div class="game-desc">Put them in order!</div>
+    </div>
+  </div>
+  <button class="btn btn-secondary" onclick="showScreen('categories')" style="margin-top:20px">⬅ Back</button>
+</div>
+
+<!-- FLASHCARDS -->
+<div id="flashcards" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:480px;margin-bottom:8px">
+    <button class="btn btn-back" onclick="showScreen('gameSelect')">⬅ Back</button>
+    <span class="score-badge" id="fcProgress">1 / 11</span>
+  </div>
+  <div class="progress-bar" style="max-width:480px;width:100%"><div class="progress-fill" id="fcBar" style="width:10%"></div></div>
+  <div class="flashcard-wrap" onclick="flipCard()">
+    <div class="flashcard" id="flashcard">
+      <div class="flashcard-front">
+        <span class="fc-emoji" id="fcEmoji">🔴</span>
+        <span class="fc-word" id="fcWord">red</span>
+        <span class="fc-hint">Tap to see translation</span>
+      </div>
+      <div class="flashcard-back">
+        <span class="fc-emoji" id="fcEmojiBack">🔴</span>
+        <span class="fc-word" style="color:#fff" id="fcWordBack">red</span>
+        <span class="fc-pt" id="fcPt">vermelho</span>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="nav-btn" id="fcPrev" onclick="fcNav(-1)">◀</button>
+    <button class="btn btn-primary" onclick="speakCurrent()" style="border-radius:50%;width:52px;height:52px;padding:0;font-size:1.4rem">🔊</button>
+    <button class="nav-btn" id="fcNext" onclick="fcNav(1)">▶</button>
+  </div>
+  <p style="color:rgba(255,255,255,.7);font-size:.85rem;margin-top:8px">Tap card to flip • 🔊 to listen</p>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:480px;margin-bottom:4px">
+    <button class="btn btn-back" onclick="showScreen('gameSelect')">⬅ Back</button>
+    <span class="score-badge" id="quizScore">Score: 0</span>
+    <span class="timer" id="quizTimer">15s</span>
+  </div>
+  <div class="progress-bar" style="max-width:480px;width:100%"><div class="progress-fill" id="quizBar" style="width:10%"></div></div>
+  <div class="quiz-question">
+    <span class="q-emoji" id="qEmoji">🔴</span>
+    <p class="q-text" id="qText">What is this in English?</p>
+  </div>
+  <div class="quiz-options" id="quizOptions"></div>
+</div>
+
+<!-- MEMORY -->
+<div id="memory" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:480px;margin-bottom:8px">
+    <button class="btn btn-back" onclick="showScreen('gameSelect')">⬅ Back</button>
+    <span class="score-badge" id="memMoves">Moves: 0</span>
+    <span class="score-badge" id="memPairs">0 / 6</span>
+  </div>
+  <div class="memory-grid" id="memoryGrid" style="grid-template-columns:repeat(4,1fr)"></div>
+</div>
+
+<!-- SORT -->
+<div id="sort" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:480px;margin-bottom:8px">
+    <button class="btn btn-back" onclick="showScreen('gameSelect')">⬅ Back</button>
+    <span class="score-badge" id="sortInfo">Put in order!</span>
+  </div>
+  <h2 id="sortTitle" style="font-size:1.1rem;margin-bottom:8px">Tap in the correct order:</h2>
+  <div class="sort-zone">
+    <div class="sort-label" id="sortHint">Tap the items in the correct order ↓</div>
+    <div class="sort-pool" id="sortPool"></div>
+    <div class="sort-label">Your order:</div>
+    <div class="sort-target" id="sortTarget"></div>
+  </div>
+  <button class="btn btn-primary" onclick="checkSort()" style="margin-top:12px;width:100%;max-width:480px">✓ Check Answer</button>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-card">
+    <span class="result-emoji" id="resultEmoji">🏆</span>
+    <div class="result-title" id="resultTitle">Amazing!</div>
+    <div id="resultMsg" style="font-size:1rem;opacity:.9;margin-bottom:8px"></div>
+    <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+    <div class="result-score" id="resultScore">+100</div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+      <button class="btn" style="background:#fff;color:#7c3aed;flex:1;min-width:120px" onclick="replayGame()">🔄 Play Again</button>
+      <button class="btn btn-secondary" onclick="showScreen('gameSelect')" style="flex:1;min-width:120px">🎮 More Games</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+var vocab = {
+  colors:[
+    {id:'red',en:'red',pt:'vermelho',emoji:'🔴',color:'#ef4444'},
+    {id:'blue',en:'blue',pt:'azul',emoji:'🔵',color:'#3b82f6'},
+    {id:'green',en:'green',pt:'verde',emoji:'🟢',color:'#22c55e'},
+    {id:'yellow',en:'yellow',pt:'amarelo',emoji:'🟡',color:'#eab308'},
+    {id:'orange',en:'orange',pt:'laranja',emoji:'🟠',color:'#f97316'},
+    {id:'purple',en:'purple',pt:'roxo',emoji:'🟣',color:'#a855f7'},
+    {id:'pink',en:'pink',pt:'rosa',emoji:'🩷',color:'#ec4899'},
+    {id:'black',en:'black',pt:'preto',emoji:'⚫',color:'#1f2937'},
+    {id:'white',en:'white',pt:'branco',emoji:'⚪',color:'#f3f4f6'},
+    {id:'brown',en:'brown',pt:'marrom',emoji:'🟤',color:'#92400e'},
+    {id:'gray',en:'gray',pt:'cinza',emoji:'🌫️',color:'#6b7280'},
+  ],
+  days:[
+    {id:'mon',en:'Monday',pt:'Segunda-feira',emoji:'📅',order:1},
+    {id:'tue',en:'Tuesday',pt:'Terça-feira',emoji:'📆',order:2},
+    {id:'wed',en:'Wednesday',pt:'Quarta-feira',emoji:'🗓️',order:3},
+    {id:'thu',en:'Thursday',pt:'Quinta-feira',emoji:'📋',order:4},
+    {id:'fri',en:'Friday',pt:'Sexta-feira',emoji:'🎉',order:5},
+    {id:'sat',en:'Saturday',pt:'Sábado',emoji:'🎈',order:6},
+    {id:'sun',en:'Sunday',pt:'Domingo',emoji:'☀️',order:7},
+  ],
+  animals:[
+    {id:'dog',en:'dog',pt:'cachorro',emoji:'🐕'},
+    {id:'cat',en:'cat',pt:'gato',emoji:'🐈'},
+    {id:'bird',en:'bird',pt:'pássaro',emoji:'🐦'},
+    {id:'fish',en:'fish',pt:'peixe',emoji:'🐟'},
+    {id:'lion',en:'lion',pt:'leão',emoji:'🦁'},
+    {id:'elephant',en:'elephant',pt:'elefante',emoji:'🐘'},
+    {id:'tiger',en:'tiger',pt:'tigre',emoji:'🐅'},
+    {id:'monkey',en:'monkey',pt:'macaco',emoji:'🐒'},
+    {id:'horse',en:'horse',pt:'cavalo',emoji:'🐴'},
+    {id:'cow',en:'cow',pt:'vaca',emoji:'🐄'},
+    {id:'pig',en:'pig',pt:'porco',emoji:'🐷'},
+    {id:'chicken',en:'chicken',pt:'galinha',emoji:'🐔'},
+    {id:'rabbit',en:'rabbit',pt:'coelho',emoji:'🐰'},
+    {id:'snake',en:'snake',pt:'cobra',emoji:'🐍'},
+    {id:'frog',en:'frog',pt:'sapo',emoji:'🐸'},
+  ],
+  months:[
+    {id:'jan',en:'January',pt:'Janeiro',emoji:'❄️',order:1},
+    {id:'feb',en:'February',pt:'Fevereiro',emoji:'💝',order:2},
+    {id:'mar',en:'March',pt:'Março',emoji:'🌸',order:3},
+    {id:'apr',en:'April',pt:'Abril',emoji:'🌧️',order:4},
+    {id:'may',en:'May',pt:'Maio',emoji:'🌺',order:5},
+    {id:'jun',en:'June',pt:'Junho',emoji:'☀️',order:6},
+    {id:'jul',en:'July',pt:'Julho',emoji:'🏖️',order:7},
+    {id:'aug',en:'August',pt:'Agosto',emoji:'🌻',order:8},
+    {id:'sep',en:'September',pt:'Setembro',emoji:'🍂',order:9},
+    {id:'oct',en:'October',pt:'Outubro',emoji:'🎃',order:10},
+    {id:'nov',en:'November',pt:'Novembro',emoji:'🍁',order:11},
+    {id:'dec',en:'December',pt:'Dezembro',emoji:'🎄',order:12},
+  ]
+};
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+var state = {
+  player: localStorage.getItem('eqk_name') || 'Player',
+  score: parseInt(localStorage.getItem('eqk_score') || '0'),
+  games: parseInt(localStorage.getItem('eqk_games') || '0'),
+  streak: parseInt(localStorage.getItem('eqk_streak') || '0'),
+  lastPlay: localStorage.getItem('eqk_lastplay') || '',
+  category: 'animals',
+  game: '',
+  // flashcards
+  fcIndex: 0, fcWords: [],
+  // quiz
+  qWords: [], qIndex: 0, qScore: 0, qTimer: null, qTimeLeft: 15, qAnswered: false,
+  // memory
+  memCards: [], memFlipped: [], memMatched: 0, memMoves: 0, memLocked: false,
+  // sort
+  sortWords: [], sortSelected: [],
+};
+
+function saveState() {
+  localStorage.setItem('eqk_name', state.player);
+  localStorage.setItem('eqk_score', state.score);
+  localStorage.setItem('eqk_games', state.games);
+  localStorage.setItem('eqk_streak', state.streak);
+  localStorage.setItem('eqk_lastplay', state.lastPlay);
+}
+
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function pick(arr, n) { return shuffle(arr).slice(0, n); }
+function speak(word) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(word);
+  u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1.1;
+  window.speechSynthesis.speak(u);
+}
+function playSound(type) {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if (type === 'correct') { osc.frequency.value = 523; osc.frequency.setTargetAtTime(784, ctx.currentTime, 0.1); }
+    else if (type === 'wrong') { osc.frequency.value = 220; osc.frequency.setTargetAtTime(165, ctx.currentTime, 0.1); }
+    else if (type === 'win') { osc.frequency.value = 523; osc.frequency.setTargetAtTime(1046, ctx.currentTime, 0.15); }
+    else { osc.frequency.value = 440; }
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+  } catch(e) {}
+}
+function confetti() {
+  var colors = ['#f43f5e','#a855f7','#3b82f6','#10b981','#fbbf24','#ec4899'];
+  for (var i = 0; i < 60; i++) {
+    (function(i) {
+      setTimeout(function() {
+        var el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
+        el.style.animationDuration = (2 + Math.random()) + 's';
+        el.style.animationDelay = (Math.random() * 0.5) + 's';
+        document.body.appendChild(el);
+        setTimeout(function() { el.remove(); }, 4000);
+      }, i * 30);
+    })(i);
+  }
+}
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+function showCategories() { showScreen('categories'); }
+function saveName() {
+  var v = document.getElementById('playerName').value.trim();
+  if (v) { state.player = v; saveState(); }
+}
+function selectCategory(cat) {
+  state.category = cat;
+  var names = {colors:'🎨 Colors',days:'📅 Days of the Week',animals:'🦁 Animals',months:'📆 Months'};
+  document.getElementById('catTitle').textContent = names[cat] || cat;
+  showScreen('gameSelect');
+}
+function startGame(game) {
+  state.game = game;
+  if (game === 'flashcards') initFlashcards();
+  else if (game === 'quiz') initQuiz();
+  else if (game === 'memory') initMemory();
+  else if (game === 'sort') initSort();
+}
+
+// ══════════════════════════════════════
+// HOME STATS
+// ══════════════════════════════════════
+function updateHomeStats() {
+  document.getElementById('totalScore').textContent = state.score;
+  document.getElementById('gamesPlayed').textContent = state.games;
+  document.getElementById('streak').textContent = state.streak;
+  document.getElementById('playerName').value = state.player !== 'Player' ? state.player : '';
+}
+
+// ══════════════════════════════════════
+// FLASHCARDS
+// ══════════════════════════════════════
+function initFlashcards() {
+  state.fcWords = vocab[state.category];
+  state.fcIndex = 0;
+  renderFlashcard();
+  showScreen('flashcards');
+}
+function renderFlashcard() {
+  var w = state.fcWords[state.fcIndex];
+  var total = state.fcWords.length;
+  document.getElementById('fcProgress').textContent = (state.fcIndex+1) + ' / ' + total;
+  document.getElementById('fcBar').style.width = ((state.fcIndex+1)/total*100) + '%';
+  document.getElementById('fcEmoji').textContent = w.emoji;
+  document.getElementById('fcWord').textContent = w.en;
+  document.getElementById('fcEmojiBack').textContent = w.emoji;
+  document.getElementById('fcWordBack').textContent = w.en;
+  document.getElementById('fcPt').textContent = w.pt;
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('fcPrev').disabled = state.fcIndex === 0;
+  document.getElementById('fcNext').disabled = state.fcIndex === total - 1;
+}
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+  speak(state.fcWords[state.fcIndex].en);
+  playSound('click');
+}
+function fcNav(dir) {
+  var next = state.fcIndex + dir;
+  if (next >= 0 && next < state.fcWords.length) {
+    state.fcIndex = next;
+    renderFlashcard();
+    playSound('click');
+    if (next === state.fcWords.length - 1) {
+      addScore(50);
+      setTimeout(function() { showResult('🎉','All Done!','You studied all the words!', 50, 3); }, 800);
+    }
+  }
+}
+function speakCurrent() { speak(state.fcWords[state.fcIndex].en); }
+
+// ══════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════
+function initQuiz() {
+  clearInterval(state.qTimer);
+  var words = vocab[state.category];
+  state.qWords = pick(words, Math.min(10, words.length));
+  state.qIndex = 0;
+  state.qScore = 0;
+  renderQuiz();
+  showScreen('quiz');
+}
+function renderQuiz() {
+  var words = vocab[state.category];
+  var q = state.qWords[state.qIndex];
+  var total = state.qWords.length;
+  document.getElementById('quizBar').style.width = ((state.qIndex+1)/total*100)+'%';
+  document.getElementById('quizScore').textContent = 'Score: ' + state.qScore;
+  document.getElementById('qEmoji').textContent = q.emoji;
+  document.getElementById('qText').textContent = 'What is this in English?';
+  state.qAnswered = false;
+  // Options: 1 correct + 3 wrong
+  var wrong = pick(words.filter(function(w){ return w.id !== q.id; }), 3);
+  var opts = shuffle([q].concat(wrong));
+  var html = '';
+  opts.forEach(function(o) {
+    html += '<button class="opt-btn" onclick="answerQuiz(\''+o.en+'\',this)">'+o.en+'</button>';
+  });
+  document.getElementById('quizOptions').innerHTML = html;
+  startTimer();
+}
+function startTimer() {
+  clearInterval(state.qTimer);
+  state.qTimeLeft = 15;
+  document.getElementById('quizTimer').textContent = '15s';
+  document.getElementById('quizTimer').classList.remove('warning');
+  state.qTimer = setInterval(function() {
+    state.qTimeLeft--;
+    document.getElementById('quizTimer').textContent = state.qTimeLeft + 's';
+    if (state.qTimeLeft <= 5) document.getElementById('quizTimer').classList.add('warning');
+    if (state.qTimeLeft <= 0) { clearInterval(state.qTimer); answerQuiz(null, null); }
+  }, 1000);
+}
+function answerQuiz(answer, btn) {
+  if (state.qAnswered) return;
+  state.qAnswered = true;
+  clearInterval(state.qTimer);
+  var correct = state.qWords[state.qIndex].en;
+  var isRight = answer === correct;
+  // Highlight buttons
+  document.querySelectorAll('.opt-btn').forEach(function(b) {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+    else if (b === btn) b.classList.add('wrong');
+  });
+  if (isRight) { state.qScore += 10; playSound('correct'); speak(correct); }
+  else playSound('wrong');
+  setTimeout(function() {
+    if (state.qIndex < state.qWords.length - 1) {
+      state.qIndex++;
+      renderQuiz();
+    } else {
+      var pts = Math.round((state.qScore / (state.qWords.length * 10)) * 100);
+      var stars = pts >= 80 ? 3 : pts >= 50 ? 2 : 1;
+      addScore(pts);
+      showResult(
+        pts >= 80 ? '🏆' : pts >= 50 ? '🌟' : '👍',
+        pts >= 80 ? 'Amazing!' : pts >= 50 ? 'Great Job!' : 'Good Try!',
+        'You scored ' + state.qScore + ' out of ' + (state.qWords.length * 10) + ' points!',
+        pts, stars
+      );
+    }
+  }, 1500);
+}
+
+// ══════════════════════════════════════
+// MEMORY
+// ══════════════════════════════════════
+function initMemory() {
+  var words = pick(vocab[state.category], 6);
+  state.memCards = [];
+  state.memFlipped = [];
+  state.memMatched = 0;
+  state.memMoves = 0;
+  state.memLocked = false;
+  words.forEach(function(w) {
+    state.memCards.push({id: w.id+'-e', type:'emoji', content:w.emoji, word:w.en, matched:false});
+    state.memCards.push({id: w.id+'-t', type:'text', content:w.en, word:w.en, matched:false});
+  });
+  state.memCards = shuffle(state.memCards);
+  renderMemory();
+  showScreen('memory');
+}
+function renderMemory() {
+  document.getElementById('memMoves').textContent = 'Moves: ' + state.memMoves;
+  document.getElementById('memPairs').textContent = state.memMatched + ' / 6';
+  var grid = document.getElementById('memoryGrid');
+  grid.innerHTML = '';
+  state.memCards.forEach(function(card, idx) {
+    var btn = document.createElement('button');
+    btn.className = 'mem-card' + (card.matched ? ' matched' : '') + (state.memFlipped.indexOf(idx) >= 0 ? ' revealed' : '');
+    btn.innerHTML = '<div class="mem-card-inner">' + (card.matched || state.memFlipped.indexOf(idx) >= 0 ? card.content : '') + '</div>';
+    btn.onclick = (function(i){ return function(){ flipMemory(i); }; })(idx);
+    grid.appendChild(btn);
+  });
+}
+function flipMemory(idx) {
+  if (state.memLocked) return;
+  if (state.memCards[idx].matched) return;
+  if (state.memFlipped.indexOf(idx) >= 0) return;
+  if (state.memFlipped.length >= 2) return;
+  playSound('click');
+  state.memFlipped.push(idx);
+  renderMemory();
+  if (state.memFlipped.length === 2) {
+    state.memMoves++;
+    state.memLocked = true;
+    var a = state.memCards[state.memFlipped[0]];
+    var b = state.memCards[state.memFlipped[1]];
+    if (a.word === b.word) {
+      playSound('correct'); speak(a.word);
+      state.memCards[state.memFlipped[0]].matched = true;
+      state.memCards[state.memFlipped[1]].matched = true;
+      state.memMatched++;
+      state.memFlipped = [];
+      state.memLocked = false;
+      renderMemory();
+      if (state.memMatched === 6) {
+        var pts = Math.max(10, 100 - state.memMoves * 5);
+        addScore(pts);
+        confetti();
+        setTimeout(function() {
+          showResult('🧠','Memory Master!','You matched all pairs in '+state.memMoves+' moves!', pts, state.memMoves <= 8 ? 3 : state.memMoves <= 12 ? 2 : 1);
+        }, 600);
+      }
+    } else {
+      playSound('wrong');
+      setTimeout(function() {
+        state.memFlipped = [];
+        state.memLocked = false;
+        renderMemory();
+      }, 1000);
+    }
+  }
+}
+
+// ══════════════════════════════════════
+// SORT & ORDER
+// ══════════════════════════════════════
+function initSort() {
+  var words = vocab[state.category];
+  var isOrder = state.category === 'days' || state.category === 'months';
+  state.sortWords = isOrder ? words.slice() : pick(words, 8);
+  state.sortSelected = [];
+  var titles = {days:'Put the days in order!',months:'Put the months in order!',colors:'Tap all the colors!',animals:'Tap all the animals!'};
+  document.getElementById('sortTitle').textContent = titles[state.category] || 'Tap in order!';
+  var hints = {days:'Monday → Sunday',months:'January → December',colors:'Tap each color',animals:'Tap each animal'};
+  document.getElementById('sortHint').textContent = hints[state.category];
+  document.getElementById('sortInfo').textContent = isOrder ? 'Put in order!' : 'Tap all!';
+  renderSort();
+  showScreen('sort');
+}
+function renderSort() {
+  var pool = document.getElementById('sortPool');
+  var target = document.getElementById('sortTarget');
+  var shuffled = shuffle(state.sortWords);
+  pool.innerHTML = '';
+  shuffled.forEach(function(w) {
+    if (state.sortSelected.indexOf(w.id) < 0) {
+      var btn = document.createElement('button');
+      btn.className = 'sort-item';
+      btn.textContent = w.emoji + ' ' + w.en;
+      btn.onclick = (function(word){ return function(){ selectSort(word.id); }; })(w);
+      pool.appendChild(btn);
+    }
+  });
+  target.innerHTML = '';
+  state.sortSelected.forEach(function(id) {
+    var w = state.sortWords.find(function(x){ return x.id === id; });
+    if (w) {
+      var btn = document.createElement('button');
+      btn.className = 'sort-item selected';
+      btn.textContent = w.emoji + ' ' + w.en;
+      btn.onclick = (function(wid){ return function(){ unselectSort(wid); }; })(id);
+      target.appendChild(btn);
+    }
+  });
+}
+function selectSort(id) {
+  playSound('click');
+  state.sortSelected.push(id);
+  renderSort();
+  // Auto-check when all selected
+  if (state.sortSelected.length === state.sortWords.length) {
+    setTimeout(checkSort, 400);
+  }
+}
+function unselectSort(id) {
+  state.sortSelected = state.sortSelected.filter(function(x){ return x !== id; });
+  renderSort();
+}
+function checkSort() {
+  if (state.sortSelected.length === 0) return;
+  var isOrder = state.category === 'days' || state.category === 'months';
+  var correct = false;
+  if (isOrder) {
+    var sorted = state.sortWords.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
+    correct = state.sortSelected.every(function(id, i){ return sorted[i] && sorted[i].id === id; });
+  } else {
+    correct = state.sortSelected.length === state.sortWords.length;
+  }
+  if (correct) {
+    playSound('win'); confetti();
+    addScore(75);
+    showResult('🎯','Perfect!','You got them all right!', 75, 3);
+  } else {
+    playSound('wrong');
+    state.sortSelected = [];
+    renderSort();
+    // Flash feedback
+    var pool = document.getElementById('sortPool');
+    pool.style.background = 'rgba(239,68,68,.3)';
+    setTimeout(function(){ pool.style.background = 'rgba(255,255,255,.15)'; }, 600);
+  }
+}
+
+// ══════════════════════════════════════
+// RESULTS & SCORE
+// ══════════════════════════════════════
+function addScore(pts) {
+  state.score += pts;
+  state.games++;
+  // Streak: check if played today
+  var today = new Date().toDateString();
+  if (state.lastPlay !== today) {
+    var yesterday = new Date(Date.now() - 86400000).toDateString();
+    state.streak = state.lastPlay === yesterday ? state.streak + 1 : 1;
+    state.lastPlay = today;
+  }
+  saveState();
+}
+function showResult(emoji, title, msg, pts, stars) {
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('resultScore').textContent = '+' + pts + ' pts';
+  var s = '';
+  for (var i = 0; i < stars; i++) s += '⭐';
+  document.getElementById('resultStars').textContent = s;
+  if (stars === 3) confetti();
+  else if (stars >= 2) playSound('win');
+  updateHomeStats();
+  showScreen('result');
+}
+function replayGame() { startGame(state.game); }
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+updateHomeStats();
+</script>
+</body>
+</html>
