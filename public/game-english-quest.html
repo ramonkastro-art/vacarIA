@@ -363,7 +363,7 @@ var state = {
   // memory
   memCards: [], memFlipped: [], memMatched: 0, memMoves: 0, memLocked: false,
   // sort
-  sortWords: [], sortSelected: [],
+  sortWords: [], sortSelected: [], sortShowEmoji: true,
 };
 
 function saveState() {
@@ -475,13 +475,19 @@ function initFlashcards() {
 function renderFlashcard() {
   var w = state.fcWords[state.fcIndex];
   var total = state.fcWords.length;
+  var isDaysOrMonths = state.category === 'days' || state.category === 'months';
   document.getElementById('fcProgress').textContent = (state.fcIndex+1) + ' / ' + total;
   document.getElementById('fcBar').style.width = ((state.fcIndex+1)/total*100) + '%';
-  document.getElementById('fcEmoji').textContent = w.emoji;
-  document.getElementById('fcWord').textContent = w.en;
+  // Front: for days/months show PT word; for others show emoji
+  document.getElementById('fcEmoji').textContent = isDaysOrMonths ? w.pt : w.emoji;
+  document.getElementById('fcEmoji').style.fontSize = isDaysOrMonths ? '2rem' : '5rem';
+  document.getElementById('fcWord').textContent = isDaysOrMonths ? 'Tap to see in English' : w.en;
+  document.getElementById('fcWord').style.fontSize = isDaysOrMonths ? '1rem' : '2rem';
+  document.getElementById('fcWord').style.color = isDaysOrMonths ? '#9ca3af' : '#1f2937';
+  // Back: always show EN word + emoji
   document.getElementById('fcEmojiBack').textContent = w.emoji;
   document.getElementById('fcWordBack').textContent = w.en;
-  document.getElementById('fcPt').textContent = w.pt;
+  document.getElementById('fcPt').textContent = isDaysOrMonths ? '' : w.pt;
   document.getElementById('flashcard').classList.remove('flipped');
   document.getElementById('fcPrev').disabled = state.fcIndex === 0;
   document.getElementById('fcNext').disabled = state.fcIndex === total - 1;
@@ -523,8 +529,10 @@ function renderQuiz() {
   var total = state.qWords.length;
   document.getElementById('quizBar').style.width = ((state.qIndex+1)/total*100)+'%';
   document.getElementById('quizScore').textContent = 'Score: ' + state.qScore;
-  document.getElementById('qEmoji').textContent = q.emoji;
-  document.getElementById('qText').textContent = 'What is this in English?';
+  var isDaysOrMonths = state.category === 'days' || state.category === 'months';
+  document.getElementById('qEmoji').textContent = isDaysOrMonths ? q.pt : q.emoji;
+  document.getElementById('qEmoji').style.fontSize = isDaysOrMonths ? '2.5rem' : '6rem';
+  document.getElementById('qText').textContent = isDaysOrMonths ? 'How do you say this in English?' : 'What is this in English?';
   state.qAnswered = false;
   // Options: 1 correct + 3 wrong
   var wrong = pick(words.filter(function(w){ return w.id !== q.id; }), 3);
@@ -585,14 +593,18 @@ function answerQuiz(answer, btn) {
 // ══════════════════════════════════════
 function initMemory() {
   var words = pick(vocab[state.category], 6);
+  var isDaysOrMonths = state.category === 'days' || state.category === 'months';
   state.memCards = [];
   state.memFlipped = [];
   state.memMatched = 0;
   state.memMoves = 0;
   state.memLocked = false;
   words.forEach(function(w) {
-    state.memCards.push({id: w.id+'-e', type:'emoji', content:w.emoji, word:w.en, matched:false});
-    state.memCards.push({id: w.id+'-t', type:'text', content:w.en, word:w.en, matched:false});
+    // For days/months: pair PT word ↔ EN word (emoji is decorative, not meaningful)
+    // For colors/animals: pair emoji ↔ EN word
+    var sideA = isDaysOrMonths ? w.pt : w.emoji;
+    state.memCards.push({id: w.id+'-a', type: isDaysOrMonths ? 'pt' : 'emoji', content: sideA, word: w.en, matched: false});
+    state.memCards.push({id: w.id+'-t', type:'text', content: w.en, word: w.en, matched: false});
   });
   state.memCards = shuffle(state.memCards);
   renderMemory();
@@ -657,7 +669,9 @@ function flipMemory(idx) {
 function initSort() {
   var words = vocab[state.category];
   var isOrder = state.category === 'days' || state.category === 'months';
+  var showEmoji = !isOrder; // emoji is meaningful only for colors/animals
   state.sortWords = isOrder ? words.slice() : pick(words, 8);
+  state.sortShowEmoji = showEmoji;
   state.sortSelected = [];
   var titles = {days:'Put the days in order!',months:'Put the months in order!',colors:'Tap all the colors!',animals:'Tap all the animals!'};
   document.getElementById('sortTitle').textContent = titles[state.category] || 'Tap in order!';
@@ -676,7 +690,7 @@ function renderSort() {
     if (state.sortSelected.indexOf(w.id) < 0) {
       var btn = document.createElement('button');
       btn.className = 'sort-item';
-      btn.textContent = w.emoji + ' ' + w.en;
+      btn.textContent = (state.sortShowEmoji ? w.emoji + ' ' : '') + w.en;
       btn.onclick = (function(word){ return function(){ selectSort(word.id); }; })(w);
       pool.appendChild(btn);
     }
@@ -687,7 +701,7 @@ function renderSort() {
     if (w) {
       var btn = document.createElement('button');
       btn.className = 'sort-item selected';
-      btn.textContent = w.emoji + ' ' + w.en;
+      btn.textContent = (state.sortShowEmoji ? w.emoji + ' ' : '') + w.en;
       btn.onclick = (function(wid){ return function(){ unselectSort(wid); }; })(id);
       target.appendChild(btn);
     }
