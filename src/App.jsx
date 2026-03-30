@@ -360,82 +360,89 @@ const LOGO_B64 = "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BS
 function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) {
   const css = [
     "*{box-sizing:border-box;margin:0;padding:0}",
-    "html,body{background:#fff}",
+    "html,body{background:#f1f5f9}",
     "#pdf-wrap{width:794px;margin:0 auto;background:#fff;padding:44px 60px;font-family:Arial,sans-serif;font-size:10.5pt;color:#1e293b;line-height:1.6}",
     ".pdf-header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid " + headerColor + ";padding-bottom:6px;margin-bottom:14px}",
     ".pdf-title{font-size:20pt;font-weight:700;color:" + headerColor + ";letter-spacing:-1px}",
     ".pdf-title span{color:#0e7490}",
     ".pdf-sub{font-size:9pt;color:#78716c;text-align:right;line-height:1.5}",
-    ".md-h1{font-size:13pt;font-weight:700;color:" + headerColor + ";margin:14px 0 5px;padding-bottom:4px;border-bottom:1.5px solid #fde68a;page-break-after:avoid}",
-    ".md-h2{font-size:9pt;font-weight:700;color:#0e7490;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 5px;page-break-after:avoid}",
-    ".md-h3{font-size:10pt;font-weight:700;color:#7c3aed;margin:10px 0 4px;page-break-after:avoid}",
-    ".md-bold{font-weight:700;color:#0f172a;margin:4px 0;page-break-inside:avoid}",
-    ".md-p{margin:3px 0;line-height:1.6;page-break-inside:avoid}",
-    ".md-li{display:flex;gap:8px;margin:2px 0;padding-left:4px;page-break-inside:avoid}",
+    ".md-h1{font-size:13pt;font-weight:700;color:" + headerColor + ";margin:14px 0 5px;padding-bottom:4px;border-bottom:1.5px solid #fde68a}",
+    ".md-h2{font-size:9pt;font-weight:700;color:#0e7490;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 5px}",
+    ".md-h3{font-size:10pt;font-weight:700;color:#7c3aed;margin:10px 0 4px}",
+    ".md-bold{font-weight:700;color:#0f172a;margin:4px 0}",
+    ".md-p{margin:3px 0;line-height:1.6}",
+    ".md-li{display:flex;gap:8px;margin:2px 0;padding-left:4px}",
     ".md-bullet{color:#d97706;flex-shrink:0}",
     ".md-li strong{color:#92400e}",
     ".md-hr{border:none;border-top:1px solid #e2e8f0;margin:10px 0}",
-    ".pdf-footer{margin-top:28px;padding-top:8px;border-top:1px solid " + footerBorderColor + ";font-size:8pt;color:#a8a29e;display:flex;align-items:center;justify-content:space-between;page-break-inside:avoid}",
+    ".pdf-footer{margin-top:28px;padding-top:8px;border-top:1px solid " + footerBorderColor + ";font-size:8pt;color:#a8a29e;display:flex;align-items:center;justify-content:space-between}",
     ".pdf-footer-logo{width:32px;height:32px;object-fit:contain;opacity:0.6;border-radius:6px}",
     "#btn-baixar{position:fixed;bottom:24px;right:24px;padding:14px 28px;background:" + headerColor + ";color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.3)}",
     "#btn-baixar:disabled{opacity:.6;cursor:not-allowed}",
-    "#status{position:fixed;bottom:76px;right:24px;font-size:13px;color:#92400e;font-family:monospace}"
+    "#msg{position:fixed;bottom:76px;right:24px;font-size:13px;color:#374151;background:#fff;padding:8px 14px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)}"
   ].join("\n");
 
-  const footerHtml =
+  const footer =
     "<div class='pdf-footer'>" +
     "<div><div>VacarIA · Assistente Pedagógico para Professores de Inglês</div>" +
     "<div style='font-size:7.5pt;color:#c4b5a0'>Desenvolvido por Ramon Castro · " + new Date().toLocaleDateString("pt-BR") + "</div></div>" +
     "<img class='pdf-footer-logo' src='" + LOGO_B64 + "' alt='VacarIA'/></div>";
 
+  const filename = (title + ".pdf").replace(/ /g,"_").replace(/[—–]/g,"-");
+
   return "<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'/>" +
     "<title>" + title + "</title>" +
-    "<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'><" + "/script>" +
     "<script src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'><" + "/script>" +
+    "<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'><" + "/script>" +
     "<style>" + css + "</style></head><body>" +
     "<div id='pdf-wrap'>" +
     "<div class='pdf-header'><div class='pdf-title'>Vacar<span>IA</span>" + (subtitle ? " — " + subtitle : "") + "</div>" +
     "<div class='pdf-sub'>Rede de Ensino de Inglês<br/>" + title + "</div></div>" +
     printEl.innerHTML +
-    footerHtml +
+    footer +
     "</div>" +
-    "<div id='status'>Aguarde, gerando PDF...</div>" +
+    "<div id='msg'>Gerando PDF...</div>" +
     "<button id='btn-baixar' disabled>⏳ Gerando...</button>" +
     "<script>" +
-    "window.addEventListener('load', async function(){" +
-    "  var btn = document.getElementById('btn-baixar');" +
-    "  var status = document.getElementById('status');" +
-    "  try {" +
+    "async function gerarPdf(){" +
+    "  var btn=document.getElementById('btn-baixar');" +
+    "  var msg=document.getElementById('msg');" +
+    "  try{" +
     "    await document.fonts.ready;" +
-    "    var { jsPDF } = window.jspdf;" +
-    "    var pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });" +
-    "    var el = document.getElementById('pdf-wrap');" +
-    "    await pdf.html(el, {" +
-    "      autoPaging: 'text'," +
-    "      margin: [12, 10, 12, 10]," +
-    "      width: 190," +
-    "      windowWidth: 794," +
-    "      html2canvas: { scale: 1.5, useCORS: true, logging: false }," +
-    "      callback: function(doc) {" +
-    "        doc.save('" + title.replace(/ /g, "_").replace(/[—–]/g, "-") + ".pdf');" +
-    "        btn.textContent = '✓ PDF Baixado!';" +
-    "        btn.disabled = false;" +
-    "        status.textContent = 'Pronto!';" +
-    "        btn.addEventListener('click', function() {" +
-    "          doc.save('" + title.replace(/ /g, "_").replace(/[—–]/g, "-") + ".pdf');" +
-    "        });" +
-    "      }" +
-    "    });" +
-    "  } catch(e) {" +
-    "    status.textContent = 'Erro: ' + e.message;" +
-    "    btn.textContent = '⬇ Tentar novamente';" +
-    "    btn.disabled = false;" +
-    "    btn.addEventListener('click', () => location.reload());" +
+    "    var el=document.getElementById('pdf-wrap');" +
+    "    var canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,width:794,windowWidth:794});" +
+    "    var jsPDF=window.jspdf.jsPDF;" +
+    "    var pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});" +
+    "    var pw=pdf.internal.pageSize.getWidth();" +
+    "    var ph=pdf.internal.pageSize.getHeight();" +
+    "    var mg=10;" +
+    "    var imgW=pw-2*mg;" +
+    "    var imgH=(canvas.height*imgW)/canvas.width;" +
+    "    var pageH=ph-2*mg;" +
+    "    var numPages=Math.ceil(imgH/pageH);" +
+    "    var imgData=canvas.toDataURL('image/jpeg',0.95);" +
+    "    for(var p=0;p<numPages;p++){" +
+    "      if(p>0)pdf.addPage();" +
+    "      pdf.addImage(imgData,'JPEG',mg,mg-(p*pageH),imgW,imgH);" +
+    "      pdf.setFillColor(255,255,255);" +
+    "      pdf.rect(0,0,pw,mg,'F');" +
+    "      pdf.rect(0,ph-mg,pw,mg+1,'F');" +
+    "    }" +
+    "    pdf.save('" + filename + "');" +
+    "    btn.textContent='✓ PDF Salvo!';" +
+    "    btn.disabled=false;" +
+    "    msg.textContent='Pronto! Clique no botão para baixar novamente.';" +
+    "    btn.onclick=function(){pdf.save('" + filename + "');};" +
+    "  }catch(e){" +
+    "    msg.textContent='Erro: '+e.message;" +
+    "    btn.textContent='⬇ Tentar novamente';" +
+    "    btn.disabled=false;" +
+    "    btn.onclick=function(){location.reload();};" +
     "    console.error(e);" +
     "  }" +
-    "});" +
-    "<" + "/script>" +
-    "</body></html>";
+    "}" +
+    "window.addEventListener('load',function(){setTimeout(gerarPdf,800);});" +
+    "<" + "/script></body></html>";
 }
 
 function handlePrint(params) {
