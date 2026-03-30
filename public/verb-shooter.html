@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Verb Shooter 🎯</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a1a;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    user-select: none;
+  }
+  #hud {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    background: rgba(0,0,0,0.6);
+    border-bottom: 2px solid #00ffcc;
+    z-index: 100;
+  }
+  #hud .score { font-size: 20px; color: #00ffcc; }
+  #hud .lives { font-size: 20px; color: #ff4466; }
+  #hud .timer { font-size: 20px; color: #ffdd00; }
+  #hud .title { font-size: 18px; color: #aaa; }
+  #canvas-area {
+    position: fixed;
+    top: 56px; left: 0; right: 0; bottom: 0;
+    cursor: crosshair;
+  }
+  canvas { display: block; }
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+  #overlay h1 { font-size: 48px; color: #00ffcc; margin-bottom: 10px; }
+  #overlay p { font-size: 18px; color: #ccc; margin-bottom: 6px; text-align: center; max-width: 500px; }
+  #overlay .hint { font-size: 14px; color: #888; margin-top: 10px; }
+  #overlay button {
+    margin-top: 28px;
+    padding: 14px 40px;
+    font-size: 20px;
+    background: #00ffcc;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.1s;
+  }
+  #overlay button:hover { transform: scale(1.05); }
+  #overlay .final-score { font-size: 32px; color: #ffdd00; margin: 16px 0; }
+  #msg {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 22px;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 150;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  #legend {
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: #555;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <div class="score">⭐ Pontos: <span id="scoreVal">0</span></div>
+  <div class="title">🎯 VERB SHOOTER</div>
+  <div class="timer">⏱ <span id="timerVal">60</span>s</div>
+  <div class="lives">❤️ <span id="livesVal">3</span></div>
+</div>
+
+<div id="canvas-area">
+  <canvas id="gameCanvas"></canvas>
+</div>
+
+<div id="msg"></div>
+<div id="legend">🟢 Atire nos VERBOS | 🔴 Evite as outras palavras | CLIQUE para atirar</div>
+
+<div id="overlay">
+  <h1>🎯 VERB SHOOTER</h1>
+  <p>Atire <strong style="color:#00ffcc">apenas nos verbos em inglês</strong> que aparecerem na tela!</p>
+  <p>✅ Acertar um verbo = <strong style="color:#00ffcc">+10 pontos</strong></p>
+  <p>❌ Atirar em não-verbo = <strong style="color:#ff4466">-5 pontos + perde vida</strong></p>
+  <p>⏱ Você tem <strong>60 segundos</strong> e <strong>3 vidas</strong></p>
+  <div class="hint">Dica: RUN, EAT, JUMP são verbos. TABLE, HOUSE, BLUE não são!</div>
+  <button onclick="startGame()">▶ JOGAR</button>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const canvasArea = document.getElementById('canvas-area');
+
+// ─── AUDIO ENGINE (Web Audio API — 100% offline) ──────────────────────────
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playShot() {
+  const ac = getAudio();
+  const osc = ac.createOscillator(), gain = ac.createGain();
+  osc.connect(gain); gain.connect(ac.destination);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(900, ac.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(200, ac.currentTime + 0.12);
+  gain.gain.setValueAtTime(0.25, ac.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.13);
+  osc.start(ac.currentTime); osc.stop(ac.currentTime + 0.14);
+}
+function playHitVerb() {
+  const ac = getAudio();
+  [523, 659, 784].forEach((freq, i) => {
+    const osc = ac.createOscillator(), gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = 'sine';
+    const t = ac.currentTime + i * 0.08;
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.3, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    osc.start(t); osc.stop(t + 0.2);
+  });
+}
+function playHitNonVerb() {
+  const ac = getAudio();
+  const osc = ac.createOscillator(), gain = ac.createGain();
+  osc.connect(gain); gain.connect(ac.destination);
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(180, ac.currentTime);
+  osc.frequency.setValueAtTime(120, ac.currentTime + 0.1);
+  osc.frequency.setValueAtTime(90,  ac.currentTime + 0.2);
+  gain.gain.setValueAtTime(0.2, ac.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.35);
+  osc.start(ac.currentTime); osc.stop(ac.currentTime + 0.36);
+}
+function playMiss() {
+  const ac = getAudio();
+  const osc = ac.createOscillator(), gain = ac.createGain();
+  osc.connect(gain); gain.connect(ac.destination);
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(300, ac.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(100, ac.currentTime + 0.06);
+  gain.gain.setValueAtTime(0.08, ac.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.07);
+  osc.start(ac.currentTime); osc.stop(ac.currentTime + 0.08);
+}
+function playGameOver() {
+  const ac = getAudio();
+  [440, 370, 311, 220].forEach((freq, i) => {
+    const osc = ac.createOscillator(), gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = 'triangle';
+    const t = ac.currentTime + i * 0.2;
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.25, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    osc.start(t); osc.stop(t + 0.3);
+  });
+}
+function playVictory() {
+  const ac = getAudio();
+  [523, 659, 784, 1047].forEach((freq, i) => {
+    const osc = ac.createOscillator(), gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = 'square';
+    const t = ac.currentTime + i * 0.13;
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.15, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    osc.start(t); osc.stop(t + 0.25);
+  });
+}
+let bgTimers = [];
+function startBGMusic() {
+  stopBGMusic();
+  const ac = getAudio();
+  const notes = [110, 110, 138, 110, 110, 146, 110, 110];
+  let step = 0;
+  function tick() {
+    if (!gameRunning) return;
+    const osc = ac.createOscillator(), gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(notes[step % notes.length], ac.currentTime);
+    gain.gain.setValueAtTime(0.04, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.18);
+    osc.start(ac.currentTime); osc.stop(ac.currentTime + 0.2);
+    step++;
+    bgTimers.push(setTimeout(tick, 220));
+  }
+  tick();
+}
+function stopBGMusic() {
+  bgTimers.forEach(t => clearTimeout(t));
+  bgTimers = [];
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+function resize() {
+  canvas.width = canvasArea.clientWidth;
+  canvas.height = canvasArea.clientHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Word lists
+const VERBS = [
+  'RUN','EAT','JUMP','SWIM','FLY','WALK','TALK','SING','DANCE','WRITE',
+  'READ','PLAY','SLEEP','DRIVE','COOK','CLIMB','PUSH','PULL','THROW','CATCH',
+  'KICK','HIT','OPEN','CLOSE','HELP','CALL','SEND','GIVE','TAKE','MAKE',
+  'BUILD','BREAK','FIND','LOSE','WIN','FIGHT','LAUGH','CRY','THINK','FEEL',
+  'HEAR','SEE','TOUCH','SMELL','TASTE','GROW','FALL','RISE','TURN','STOP'
+];
+
+const NON_VERBS = [
+  'TABLE','HOUSE','BLUE','CHAIR','APPLE','RIVER','CLOUD','STONE','BREAD','MUSIC',
+  'HAPPY','FAST','GREEN','BOOK','DOOR','WINDOW','FLOWER','TREE','WATER','FIRE',
+  'EARTH','MOON','STAR','CITY','ROAD','BRIDGE','SCHOOL','PAPER','PHONE','CLOCK',
+  'SHIRT','SHOES','GLASS','KNIFE','FORK','PLATE','BOTTLE','LAMP','PILLOW','CARPET',
+  'YELLOW','SMALL','LARGE','COLD','HOT','DARK','LIGHT','LOUD','QUIET','HEAVY'
+];
+
+let words = [], bullets = [], particles = [], score = 0, lives = 3, timeLeft = 60;
+let gameRunning = false, gameInterval, timerInterval;
+let spawnRate = 2800, lastSpawn = 0;
+let wordSpeedMult = 1.0;
+
+class Word {
+  constructor() {
+    const isVerb = Math.random() < 0.5;
+    this.isVerb = isVerb;
+    const list = isVerb ? VERBS : NON_VERBS;
+    this.text = list[Math.floor(Math.random() * list.length)];
+    this.x = 60 + Math.random() * (canvas.width - 120);
+    this.y = -40;
+    this.speed = (0.4 + Math.random() * 0.6) * wordSpeedMult;
+    this.size = 18 + Math.floor(Math.random() * 10);
+    this.color = '#e8e8ff';
+    this.alpha = 1;
+    this.hit = false;
+    this.wobble = Math.random() * Math.PI * 2;
+    this.wobbleSpeed = 0.02 + Math.random() * 0.02;
+  }
+  update() {
+    this.y += this.speed;
+    this.wobble += this.wobbleSpeed;
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.font = `bold ${this.size}px Courier New`;
+    ctx.textAlign = 'center';
+    // Glow
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = this.color;
+    ctx.fillText(this.text, this.x + Math.sin(this.wobble) * 3, this.y);
+    // Border box
+    const w = ctx.measureText(this.text).width;
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = this.alpha * 0.3;
+    ctx.strokeRect(this.x - w/2 - 8, this.y - this.size, w + 16, this.size + 8);
+    ctx.restore();
+  }
+  getBounds() {
+    ctx.font = `bold ${this.size}px Courier New`;
+    const w = ctx.measureText(this.text).width;
+    return { x: this.x - w/2 - 8, y: this.y - this.size, w: w + 16, h: this.size + 8 };
+  }
+}
+
+class Bullet {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    this.vy = -14;
+    this.r = 5;
+    this.alpha = 1;
+  }
+  update() { this.y += this.vy; }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+    ctx.fillStyle = '#ffdd00';
+    ctx.shadowColor = '#ffdd00';
+    ctx.shadowBlur = 10;
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+class Particle {
+  constructor(x, y, color) {
+    this.x = x; this.y = y;
+    this.vx = (Math.random()-0.5)*6;
+    this.vy = (Math.random()-0.5)*6;
+    this.alpha = 1;
+    this.color = color;
+    this.r = 2 + Math.random()*3;
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy;
+    this.alpha -= 0.04;
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function spawnWord() {
+  if (words.length < 8) words.push(new Word());
+}
+
+function showMsg(text, color) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.style.color = color;
+  el.style.opacity = 1;
+  setTimeout(() => el.style.opacity = 0, 900);
+}
+
+function explode(x, y, color, count=12) {
+  for (let i=0; i<count; i++) particles.push(new Particle(x, y, color));
+}
+
+function shoot(cx, cy) {
+  if (!gameRunning) return;
+  playShot();
+  const b = new Bullet(cx, cy);
+  checkHit(b, cx, cy);
+}
+
+function checkHit(b, cx, cy) {
+  let hit = false;
+  for (let i = words.length-1; i >= 0; i--) {
+    const w = words[i];
+    if (w.hit) continue;
+    const bounds = w.getBounds();
+    if (cx >= bounds.x && cx <= bounds.x+bounds.w && cy >= bounds.y && cy <= bounds.y+bounds.h) {
+      w.hit = true;
+      hit = true;
+      if (w.isVerb) {
+        score += 10;
+        showMsg(`✅ ${w.text} = verbo! +10`, '#00ffcc');
+        explode(w.x, w.y, '#00ffcc', 16);
+        playHitVerb();
+      } else {
+        score = Math.max(0, score - 5);
+        lives--;
+        showMsg(`❌ ${w.text} não é verbo! -5`, '#ff4466');
+        explode(w.x, w.y, '#ff4466', 16);
+        shakeScreen();
+        playHitNonVerb();
+      }
+      words.splice(i, 1);
+      updateHUD();
+      if (lives <= 0) endGame();
+      break;
+    }
+  }
+  if (!hit) {
+    explode(cx, cy, '#ffdd0066', 5);
+    playMiss();
+  }
+}
+
+function shakeScreen() {
+  canvas.style.transform = 'translate(4px,4px)';
+  setTimeout(()=>canvas.style.transform='translate(-4px,0)', 80);
+  setTimeout(()=>canvas.style.transform='', 160);
+}
+
+function updateHUD() {
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('livesVal').textContent = lives;
+  document.getElementById('timerVal').textContent = timeLeft;
+}
+
+function gameLoop(ts) {
+  if (!gameRunning) return;
+
+  // Spawn — velocidade aumenta gradativamente com o tempo
+  if (ts - lastSpawn > spawnRate) {
+    spawnWord();
+    lastSpawn = ts;
+    const elapsed = 60 - timeLeft; // segundos passados
+    wordSpeedMult = 1.0 + elapsed * 0.04; // +4% por segundo
+    spawnRate = Math.max(700, 2800 - elapsed * 35); // spawn mais rápido com o tempo
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Stars bg
+  drawStars();
+
+  // Update & draw words
+  for (let i = words.length-1; i >= 0; i--) {
+    words[i].update();
+    words[i].draw();
+    if (words[i].y > canvas.height + 60) {
+      words.splice(i, 1);
+    }
+  }
+
+  // Particles
+  for (let i = particles.length-1; i >= 0; i--) {
+    particles[i].update();
+    particles[i].draw();
+    if (particles[i].alpha <= 0) particles.splice(i, 1);
+  }
+
+  // Crosshair hint at bottom
+  drawCrosshair();
+
+  requestAnimationFrame(gameLoop);
+}
+
+let stars = [];
+function initStars() {
+  stars = [];
+  for (let i=0; i<80; i++) {
+    stars.push({
+      x: Math.random()*canvas.width,
+      y: Math.random()*canvas.height,
+      r: Math.random()*1.5,
+      a: Math.random()
+    });
+  }
+}
+
+function drawStars() {
+  stars.forEach(s => {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,${s.a*0.5})`;
+    ctx.fill();
+  });
+}
+
+let mouseX = 0, mouseY = 0;
+canvasArea.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseX = e.clientX - r.left;
+  mouseY = e.clientY - r.top;
+});
+
+function drawCrosshair() {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(mouseX-20, mouseY); ctx.lineTo(mouseX+20, mouseY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(mouseX, mouseY-20); ctx.lineTo(mouseX, mouseY+20); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.arc(mouseX, mouseY, 10, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(255,220,0,0.5)';
+  ctx.stroke();
+  ctx.restore();
+}
+
+canvasArea.addEventListener('click', e => {
+  const r = canvas.getBoundingClientRect();
+  shoot(e.clientX - r.left, e.clientY - r.top);
+});
+
+function startGame() {
+  document.getElementById('overlay').style.display = 'none';
+  score = 0; lives = 3; timeLeft = 60;
+  words = []; bullets = []; particles = [];
+  spawnRate = 2000; lastSpawn = 0;
+  gameRunning = true;
+  updateHUD();
+  initStars();
+  startBGMusic();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateHUD();
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+  requestAnimationFrame(gameLoop);
+}
+
+function endGame() {
+  gameRunning = false;
+  clearInterval(timerInterval);
+  const ov = document.getElementById('overlay');
+  ov.innerHTML = `
+    <h1>🏁 FIM DE JOGO</h1>
+    <div class="final-score">⭐ ${score} pontos</div>
+    <p>${getRating(score)}</p>
+    <button onclick="startGame()">🔄 Jogar Novamente</button>
+  `;
+  ov.style.display = 'flex';
+}
+
+function getRating(s) {
+  if (s >= 150) return '🏆 Incrível! Você é um mestre dos verbos!';
+  if (s >= 100) return '🥇 Muito bem! Seu inglês está ótimo!';
+  if (s >= 60)  return '🥈 Bom trabalho! Continue praticando!';
+  if (s >= 30)  return '🥉 Não desista! Pratique mais os verbos!';
+  return '📚 Estude mais os verbos em inglês e tente de novo!';
+}
+</script>
+</body>
+</html>

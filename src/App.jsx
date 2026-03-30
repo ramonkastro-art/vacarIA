@@ -781,6 +781,12 @@ export default function App() {
               <div className="game-card-desc">Flashcards, Quiz, Memória e Ordem. Cores, dias, animais e meses em inglês!</div>
               <span className="game-card-tag">🎮 4 jogos · Para crianças</span>
             </a>
+            <a className="game-card" href="/game-verb-shooter.html" target="_blank" rel="noopener noreferrer">
+              <div className="game-card-icon">🔫</div>
+              <div className="game-card-name">Verb Shooter Game</div>
+              <div className="game-card-desc">Acerte o maior número de Verbos</div>
+              <span className="game-card-tag">🎮  · Para crianças</span>
+            </a>
           </div>
         </div>
 
