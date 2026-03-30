@@ -130,6 +130,7 @@ h2{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;text-align:center;color:#fff
   <span class="logo-emoji">🦊</span>
   <h1>English Quest Kids</h1>
   <p class="subtitle">Learn English with fun mini-games! 🎮</p>
+  <p style="color:rgba(255,255,255,.5);font-size:.78rem;margin-top:-16px;margin-bottom:8px;text-align:center">Desenvolvido por Prof. Ramon Castro</p>
   <div class="player-row">
     <input class="player-input" id="playerName" type="text" placeholder="Your name..." maxlength="16"/>
     <button class="btn btn-primary" onclick="saveName()" style="padding:12px 18px">✓</button>
@@ -153,20 +154,20 @@ h2{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;text-align:center;color:#fff
       <span class="cat-name">Colors</span>
       <span class="cat-desc">11 words</span>
     </button>
-    <button class="cat-card" style="background:linear-gradient(135deg,#38bdf8,#0ea5e9)" onclick="selectCategory('days')">
-      <span class="cat-emoji">📅</span>
-      <span class="cat-name">Days of the Week</span>
-      <span class="cat-desc">7 words</span>
+    <button class="cat-card" style="background:linear-gradient(135deg,#38bdf8,#0ea5e9)" onclick="selectCategory('calendar')">
+      <span class="cat-emoji">🗓️</span>
+      <span class="cat-name">Calendar</span>
+      <span class="cat-desc">19 words</span>
     </button>
     <button class="cat-card" style="background:linear-gradient(135deg,#4ade80,#16a34a)" onclick="selectCategory('animals')">
       <span class="cat-emoji">🦁</span>
       <span class="cat-name">Animals</span>
       <span class="cat-desc">15 words</span>
     </button>
-    <button class="cat-card" style="background:linear-gradient(135deg,#fb923c,#f59e0b)" onclick="selectCategory('months')">
-      <span class="cat-emoji">📆</span>
-      <span class="cat-name">Months</span>
-      <span class="cat-desc">12 words</span>
+    <button class="cat-card" style="background:linear-gradient(135deg,#fb923c,#f59e0b)" onclick="selectCategory('foods')">
+      <span class="cat-emoji">🍎</span>
+      <span class="cat-name">Foods</span>
+      <span class="cat-desc">16 words</span>
     </button>
   </div>
   <button class="btn btn-secondary" onclick="showScreen('home')" style="margin-top:20px">⬅ Back</button>
@@ -303,14 +304,26 @@ var vocab = {
     {id:'brown',en:'brown',pt:'marrom',emoji:'🟤',color:'#92400e'},
     {id:'gray',en:'gray',pt:'cinza',emoji:'🌫️',color:'#6b7280'},
   ],
-  days:[
-    {id:'mon',en:'Monday',pt:'Segunda-feira',emoji:'📅',order:1},
-    {id:'tue',en:'Tuesday',pt:'Terça-feira',emoji:'📆',order:2},
-    {id:'wed',en:'Wednesday',pt:'Quarta-feira',emoji:'🗓️',order:3},
-    {id:'thu',en:'Thursday',pt:'Quinta-feira',emoji:'📋',order:4},
-    {id:'fri',en:'Friday',pt:'Sexta-feira',emoji:'🎉',order:5},
-    {id:'sat',en:'Saturday',pt:'Sábado',emoji:'🎈',order:6},
-    {id:'sun',en:'Sunday',pt:'Domingo',emoji:'☀️',order:7},
+  calendar:[
+    {id:'mon',en:'Monday',pt:'Segunda-feira',emoji:'📅',order:1,group:'day'},
+    {id:'tue',en:'Tuesday',pt:'Terça-feira',emoji:'📅',order:2,group:'day'},
+    {id:'wed',en:'Wednesday',pt:'Quarta-feira',emoji:'📅',order:3,group:'day'},
+    {id:'thu',en:'Thursday',pt:'Quinta-feira',emoji:'📅',order:4,group:'day'},
+    {id:'fri',en:'Friday',pt:'Sexta-feira',emoji:'📅',order:5,group:'day'},
+    {id:'sat',en:'Saturday',pt:'Sábado',emoji:'📅',order:6,group:'day'},
+    {id:'sun',en:'Sunday',pt:'Domingo',emoji:'📅',order:7,group:'day'},
+    {id:'jan',en:'January',pt:'Janeiro',emoji:'❄️',order:8,group:'month'},
+    {id:'feb',en:'February',pt:'Fevereiro',emoji:'💝',order:9,group:'month'},
+    {id:'mar',en:'March',pt:'Março',emoji:'🌸',order:10,group:'month'},
+    {id:'apr',en:'April',pt:'Abril',emoji:'🌧️',order:11,group:'month'},
+    {id:'may',en:'May',pt:'Maio',emoji:'🌺',order:12,group:'month'},
+    {id:'jun',en:'June',pt:'Junho',emoji:'☀️',order:13,group:'month'},
+    {id:'jul',en:'July',pt:'Julho',emoji:'🏖️',order:14,group:'month'},
+    {id:'aug',en:'August',pt:'Agosto',emoji:'🌻',order:15,group:'month'},
+    {id:'sep',en:'September',pt:'Setembro',emoji:'🍂',order:16,group:'month'},
+    {id:'oct',en:'October',pt:'Outubro',emoji:'🎃',order:17,group:'month'},
+    {id:'nov',en:'November',pt:'Novembro',emoji:'🍁',order:18,group:'month'},
+    {id:'dec',en:'December',pt:'Dezembro',emoji:'🎄',order:19,group:'month'},
   ],
   animals:[
     {id:'dog',en:'dog',pt:'cachorro',emoji:'🐕'},
@@ -329,20 +342,24 @@ var vocab = {
     {id:'snake',en:'snake',pt:'cobra',emoji:'🐍'},
     {id:'frog',en:'frog',pt:'sapo',emoji:'🐸'},
   ],
-  months:[
-    {id:'jan',en:'January',pt:'Janeiro',emoji:'❄️',order:1},
-    {id:'feb',en:'February',pt:'Fevereiro',emoji:'💝',order:2},
-    {id:'mar',en:'March',pt:'Março',emoji:'🌸',order:3},
-    {id:'apr',en:'April',pt:'Abril',emoji:'🌧️',order:4},
-    {id:'may',en:'May',pt:'Maio',emoji:'🌺',order:5},
-    {id:'jun',en:'June',pt:'Junho',emoji:'☀️',order:6},
-    {id:'jul',en:'July',pt:'Julho',emoji:'🏖️',order:7},
-    {id:'aug',en:'August',pt:'Agosto',emoji:'🌻',order:8},
-    {id:'sep',en:'September',pt:'Setembro',emoji:'🍂',order:9},
-    {id:'oct',en:'October',pt:'Outubro',emoji:'🎃',order:10},
-    {id:'nov',en:'November',pt:'Novembro',emoji:'🍁',order:11},
-    {id:'dec',en:'December',pt:'Dezembro',emoji:'🎄',order:12},
-  ]
+  foods:[
+    {id:'apple',en:'apple',pt:'maçã',emoji:'🍎'},
+    {id:'banana',en:'banana',pt:'banana',emoji:'🍌'},
+    {id:'bread',en:'bread',pt:'pão',emoji:'🍞'},
+    {id:'cake',en:'cake',pt:'bolo',emoji:'🎂'},
+    {id:'cheese',en:'cheese',pt:'queijo',emoji:'🧀'},
+    {id:'chicken',en:'chicken',pt:'frango',emoji:'🍗'},
+    {id:'cookie',en:'cookie',pt:'biscoito',emoji:'🍪'},
+    {id:'egg',en:'egg',pt:'ovo',emoji:'🥚'},
+    {id:'fish2',en:'fish',pt:'peixe',emoji:'🐟'},
+    {id:'ice_cream',en:'ice cream',pt:'sorvete',emoji:'🍦'},
+    {id:'juice',en:'juice',pt:'suco',emoji:'🧃'},
+    {id:'milk',en:'milk',pt:'leite',emoji:'🥛'},
+    {id:'pizza',en:'pizza',pt:'pizza',emoji:'🍕'},
+    {id:'rice',en:'rice',pt:'arroz',emoji:'🍚'},
+    {id:'salad',en:'salad',pt:'salada',emoji:'🥗'},
+    {id:'strawberry',en:'strawberry',pt:'morango',emoji:'🍓'},
+  ],
 };
 
 // ══════════════════════════════════════
@@ -441,7 +458,7 @@ function saveName() {
 }
 function selectCategory(cat) {
   state.category = cat;
-  var names = {colors:'🎨 Colors',days:'📅 Days of the Week',animals:'🦁 Animals',months:'📆 Months'};
+  var names = {colors:'🎨 Colors',calendar:'🗓️ Calendar',animals:'🦁 Animals',foods:'🍎 Foods'};
   document.getElementById('catTitle').textContent = names[cat] || cat;
   showScreen('gameSelect');
 }
@@ -475,8 +492,7 @@ function initFlashcards() {
 function renderFlashcard() {
   var w = state.fcWords[state.fcIndex];
   var total = state.fcWords.length;
-  var isDaysOrMonths = state.category === 'days' || state.category === 'months';
-  document.getElementById('fcProgress').textContent = (state.fcIndex+1) + ' / ' + total;
+  var isDaysOrMonths = state.category === 'calendar';
   document.getElementById('fcBar').style.width = ((state.fcIndex+1)/total*100) + '%';
   // Front: for days/months show PT word; for others show emoji
   document.getElementById('fcEmoji').textContent = isDaysOrMonths ? w.pt : w.emoji;
@@ -529,7 +545,7 @@ function renderQuiz() {
   var total = state.qWords.length;
   document.getElementById('quizBar').style.width = ((state.qIndex+1)/total*100)+'%';
   document.getElementById('quizScore').textContent = 'Score: ' + state.qScore;
-  var isDaysOrMonths = state.category === 'days' || state.category === 'months';
+  var isDaysOrMonths = state.category === 'calendar';
   document.getElementById('qEmoji').textContent = isDaysOrMonths ? q.pt : q.emoji;
   document.getElementById('qEmoji').style.fontSize = isDaysOrMonths ? '2.5rem' : '6rem';
   document.getElementById('qText').textContent = isDaysOrMonths ? 'How do you say this in English?' : 'What is this in English?';
@@ -593,7 +609,7 @@ function answerQuiz(answer, btn) {
 // ══════════════════════════════════════
 function initMemory() {
   var words = pick(vocab[state.category], 6);
-  var isDaysOrMonths = state.category === 'days' || state.category === 'months';
+  var isDaysOrMonths = state.category === 'calendar';
   state.memCards = [];
   state.memFlipped = [];
   state.memMatched = 0;
@@ -668,14 +684,14 @@ function flipMemory(idx) {
 // ══════════════════════════════════════
 function initSort() {
   var words = vocab[state.category];
-  var isOrder = state.category === 'days' || state.category === 'months';
-  var showEmoji = !isOrder; // emoji is meaningful only for colors/animals
+  var isOrder = state.category === 'calendar';
+  var showEmoji = !isOrder; // emoji is meaningful only for colors/animals/foods
   state.sortWords = isOrder ? words.slice() : pick(words, 8);
   state.sortShowEmoji = showEmoji;
   state.sortSelected = [];
-  var titles = {days:'Put the days in order!',months:'Put the months in order!',colors:'Tap all the colors!',animals:'Tap all the animals!'};
+  var titles = {calendar:'Put the days & months in order!',colors:'Tap all the colors!',animals:'Tap all the animals!',foods:'Tap all the foods!'};
   document.getElementById('sortTitle').textContent = titles[state.category] || 'Tap in order!';
-  var hints = {days:'Monday → Sunday',months:'January → December',colors:'Tap each color',animals:'Tap each animal'};
+  var hints = {calendar:'Monday → Sunday → January → December',colors:'Tap each color',animals:'Tap each animal',foods:'Tap each food'};
   document.getElementById('sortHint').textContent = hints[state.category];
   document.getElementById('sortInfo').textContent = isOrder ? 'Put in order!' : 'Tap all!';
   renderSort();
@@ -722,7 +738,7 @@ function unselectSort(id) {
 }
 function checkSort() {
   if (state.sortSelected.length === 0) return;
-  var isOrder = state.category === 'days' || state.category === 'months';
+  var isOrder = state.category === 'calendar';
   var correct = false;
   if (isOrder) {
     var sorted = state.sortWords.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
