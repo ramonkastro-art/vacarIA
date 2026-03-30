@@ -773,19 +773,19 @@ export default function App() {
               <div className="game-card-icon">🚪</div>
               <div className="game-card-name">Who's at the Door?</div>
               <div className="game-card-desc">Adivinhe a profissão em inglês antes que o tempo acabe. Multijogador em tempo real!</div>
-              <span className="game-card-tag">🌐 Multiplayer · Firebase</span>
+              <span className="game-card-tag">🌐 Multiplayer</span>
             </a>
             <a className="game-card" href="/game-english-quest.html" target="_blank" rel="noopener noreferrer">
               <div className="game-card-icon">🦊</div>
               <div className="game-card-name">English Quest Kids</div>
               <div className="game-card-desc">Flashcards, Quiz, Memória e Ordem. Cores, dias, animais e meses em inglês!</div>
-              <span className="game-card-tag">🎮 4 jogos · Para crianças</span>
+              <span className="game-card-tag">🎮 4 jogos · Para Adultos e crianças</span>
             </a>
             <a className="game-card" href="/game-verb-shooter.html" target="_blank" rel="noopener noreferrer">
               <div className="game-card-icon">🔫</div>
               <div className="game-card-name">Verb Shooter Game</div>
-              <div className="game-card-desc">Acerte o maior número de Verbos</div>
-              <span className="game-card-tag">🎮  · Para crianças</span>
+              <div className="game-card-desc">Acerte o maior número de Verbos e não cometa erros nessa aventura!</div>
+              <span className="game-card-tag">🎯  · Para Acertar no Alvo</span>
             </a>
           </div>
         </div>
