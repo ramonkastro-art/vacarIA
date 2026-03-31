@@ -1,7 +1,7 @@
 import AdminPanel from './AdminPanel';
 import { useState, useEffect } from "react";
 import "./App.css";
-import { trackPageAccess } from './tracker';
+import { trackPageAccess, trackInteraction } from './tracker';
 
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
@@ -563,11 +563,30 @@ export default function App() {
     if (!ano || !tema.trim()) { setError("Selecione o ano e digite o tema da aula."); return; }
     if (recursos.length === 0) { setError("Selecione pelo menos um recurso disponível."); return; }
     setLoading(true); setResult(null); setError(null);
+    const inicio = Date.now();
     try {
       const res = await callAPI({ ano, tema, duracao, nivel, recursos, estado });
       setResult(res.text);
       setProvider(res.provider);
-    } catch (e) { setError(e.message); }
+      trackInteraction({
+        type: "plano_de_aula",
+        prompt: `${ano} | ${tema} | ${nivel} | ${duracao}`,
+        responseSummary: res.text?.slice(0, 200),
+        feature: "Plano de Aula",
+        durationMs: Date.now() - inicio,
+        success: true
+      });
+    } catch (e) {
+      setError(e.message);
+      trackInteraction({
+        type: "plano_de_aula",
+        prompt: `${ano} | ${tema} | ${nivel} | ${duracao}`,
+        feature: "Plano de Aula",
+        durationMs: Date.now() - inicio,
+        success: false,
+        errorMessage: e.message
+      });
+    }
     finally { setLoading(false); }
   };
 
@@ -575,12 +594,31 @@ export default function App() {
   const handleGerarAvaliacao = async () => {
     if (!anoAv || !temaAv.trim()) { setErrorAv("Selecione o ano e digite o tema da avaliação."); return; }
     setLoadingAv(true); setResultAv(null); setErrorAv(null);
+    const inicio = Date.now();
     try {
       const res = await callAvaliacao({ ano: anoAv, tema: temaAv, nivel: nivelAv, qtd: qtdAv });
       setResultAv(res.text);
       setProviderAv(res.provider);
       setDiagAv(res.diag || "");
-    } catch (e) { setErrorAv(e.message); }
+      trackInteraction({
+        type: "avaliacao",
+        prompt: `${anoAv} | ${temaAv} | ${nivelAv} | ${qtdAv}`,
+        responseSummary: res.text?.slice(0, 200),
+        feature: "Avaliação",
+        durationMs: Date.now() - inicio,
+        success: true
+      });
+    } catch (e) {
+      setErrorAv(e.message);
+      trackInteraction({
+        type: "avaliacao",
+        prompt: `${anoAv} | ${temaAv} | ${nivelAv} | ${qtdAv}`,
+        feature: "Avaliação",
+        durationMs: Date.now() - inicio,
+        success: false,
+        errorMessage: e.message
+      });
+    }
     finally { setLoadingAv(false); }
   };
 
