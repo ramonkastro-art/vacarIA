@@ -1,5 +1,17 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+// src/App.jsx - Adicione isto no useEffect principal
+import { useEffect } from 'react';
+import { logAccess } from './supabaseClient';
+
+function App() {
+  useEffect(() => {
+    // ✅ Registra acesso quando a página carrega
+    logAccess(window.location.pathname);
+  }, []);
+
+  // ... resto do código
+}
 
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
