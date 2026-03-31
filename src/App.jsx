@@ -1,3 +1,4 @@
+import AdminPanel from './AdminPanel';
 import { useState, useEffect } from "react";
 import "./App.css";
 import { trackPageAccess } from './tracker';
@@ -512,6 +513,7 @@ function RadioGroup({ label, options, value, onChange }) {
 }
 
 export default function App() {
+  const [showAdmin, setShowAdmin] = useState(false);
   const [ano, setAno] = useState("");
   const [tema, setTema] = useState("");
   const [duracao, setDuracao] = useState("1 período (40 min)");
@@ -796,8 +798,17 @@ export default function App() {
           </div>
         </div>
 
-        <footer className="footer">VacarIA · Desenvolvido por Ramon Castro</footer>
+        <footer className="footer">
+          VacarIA · Desenvolvido por Ramon Castro
+          <button
+            onClick={() => setShowAdmin(true)}
+            style={{background:"transparent", border:"none", color:"transparent", cursor:"pointer", fontSize:"0.5rem", marginLeft:"8px"}}
+            title="Admin"
+          >·</button>
+        </footer>
       </div>
+
+      {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
     </>
   );
 }
