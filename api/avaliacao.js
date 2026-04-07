@@ -16,10 +16,11 @@ export default async function handler(req, res) {
   const sysMsg   = messages.filter(m => m.role === 'system').map(m => m.content).join('\n')
 
   const geminiModels = [
-    'gemini-2.5-flash-preview-05-20',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
-  ]
+    'gemini-2.0-flash',       // O estado da arte em velocidade e inteligência
+    'gemini-1.5-flash',       // Extremamente estável e com janela de contexto gigante
+    'gemini-1.5-flash-8b',    // Versão mais leve, ótima para tarefas simples e alta escala
+    'gemini-1.5-pro',         // Para avaliações muito complexas que exigem raciocínio profundo
+ ];
 
   // Diagnóstico — acumula erros para retornar se tudo falhar
   const diagnostico = []

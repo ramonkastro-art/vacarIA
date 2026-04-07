@@ -197,7 +197,7 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
 
   return "Você é professor especialista em Língua Inglesa.\n" +
     "Crie uma atividade avaliativa de Língua Inglesa para " + ano + ", nível " + nivel + ", tema: \"" + tema + "\".\n\n" +
-    "\n⚠️ REGRA ABSOLUTA: Sua resposta deve conter APENAS a atividade pronta. " +
+    "\n REGRA ABSOLUTA: Sua resposta deve conter APENAS a atividade pronta. " +
     "NÃO repita estas instruções no output. NÃO escreva seções como REGRAS GERAIS, " +
     "INSTRUCOES DETALHADAS, DISTRIBUICAO DAS QUESTOES. Essas são instruções INTERNAS para você. " +
     "O documento gerado começa diretamente com ATIVIDADE DE INGLÊS e termina com GABARITO.\n\n" +
@@ -225,7 +225,7 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
     "✓ CERTO: \"Na série Grey\'s Anatomy, Meredith Grey é uma:\" → a) Doctor  b) Lawyer  c) Engineer  d) Teacher\n" +
     "✓ CERTO: \"Qual palavra em inglês significa \'advogado\'?\" → a) Lawyer  b) Doctor  c) Nurse  d) Engineer\n" +
     "✓ Alternativas SEMPRE em inglês. Todas as 4 opções devem ser do mesmo campo semântico do tema.\n" +
-    (basico ? "✓ Nível BÁSICO: a) Lawyer (Advogado)  b) Doctor (Médico)  c) Nurse (Enfermeiro)  d) Teacher (Professor)\n" : "") +
+    (basico ? "✓ Exemplo - Nível BÁSICO: a) Lawyer (Advogado)  b) Doctor (Médico)  c) Nurse (Enfermeiro)  d) Teacher (Professor)\n" : "") +
     "✓ Use contextos variados: definição, tradução, contexto cultural, completar frase com resposta única.\n\n" +
 
     "RELACIONE COLUNAS — regras obrigatórias:\n" +
@@ -234,18 +234,7 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
     "✓ ERRADO: relacionar inglês com inglês, ou português com português.\n" +
     "✓ CERTO: (A) Doctor | ( ) Médico  /  (B) Lawyer | ( ) Advogado\n" +
     "✓ Formato OBRIGATÓRIO com | separando as colunas. Mínimo 8 pares.\n\n" +
-
-    "ORGANIZE AS LETRAS — regras obrigatórias:\n" +
-    "✓ Enunciado obrigatório: \"Organize as letras e descubra as profissões/palavras do tema \"" + tema + "\" em inglês:\"\n" +
-    "✓ TODAS as palavras usadas nos subitens devem ser vocabulário DIRETAMENTE relacionado ao tema \"" + tema + "\". " +
-    "PROIBIDO usar palavras genéricas, animais, objetos ou qualquer coisa fora do tema.\n" +
-    "✓ Antes de gerar, liste mentalmente 8 palavras em inglês do tema \"" + tema + "\". Use apenas essas.\n" +
-    "✓ Subitens a) b) c) d) e) f) — cada um com letras EMBARALHADAS de UMA palavra do tema.\n" +
-    "✓ Formato: a) WERALY = ___________ (gabarito: LAWYER)\n" +
-    "✓ CRÍTICO: embaralhe TODAS as letras. Nunca deixe na ordem original. Mínimo 3 trocas de posição.\n" +
-    "✓ Embaralhamento correto: DOCTOR→TRODOC | NURSE→RUNES | TEACHER→RCEAHET | MUSICIAN→SNACIIMU\n" +
-    "✓ Embaralhamento ERRADO (não embaralhado): ROLE, GOAT, ou qualquer palavra que não seja do tema \"" + tema + "\".\n\n" +
-
+    
     "INTERPRETAÇÃO DE TEXTO — regras obrigatórias:\n" +
     "✓ Texto autêntico em inglês com Fonte citada. Tamanho: " + (basico ? "3-4 linhas simples" : nivel === "Intermediário" ? "5-7 linhas" : "7-10 linhas") + ".\n" +
     "✓ Perguntas em português sobre o texto (localização, vocabulário, interpretação).\n" +
