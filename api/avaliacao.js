@@ -46,7 +46,7 @@ export default async function handler(req, res) {
 
         // Adiciona instrução de sistema apenas se houver conteúdo
         if (sysMsg && sysMsg.trim().length > 0) {
-          payload.system_instruction = { parts: [{ text: sysMsg }] }
+          payload.systemInstruction = { parts: [{ text: sysMsg }] }
         }
 
         const geminiRes = await fetch(url, {
