@@ -19,12 +19,11 @@ export default async function handler(req, res) {
   const userMsg  = messages.filter(m => m.role === 'user').map(m => m.content).join('\n')
   const sysMsg   = messages.filter(m => m.role === 'system').map(m => m.content).join('\n')
 
-  // Lista atualizada com as versões experimentais como segurança
   const geminiModels = [
-    'gemini-1.5-flash',       // Rápido, estável e liberado para todas as contas
-    'gemini-1.5-flash-8b',    // Backup super rápido
-    'gemini-1.5-pro',         // Backup mais robusto e inteligente
-    // 'gemini-2.0-flash'     <-- Removido até que o Google libere para sua conta
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest', 
+    'gemini-1.5-flash-8b',
+    'gemini-1.5-pro'
   ];
 
   const diagnostico = []
@@ -35,8 +34,7 @@ export default async function handler(req, res) {
       try {
         console.log(`[avaliacao] Tentando Gemini: ${model}`)
 
-        // Usando v1beta que é mais resiliente para modelos novos/exp
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`
+        const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${geminiKey}`
 
         const payload = {
           contents: [{ role: 'user', parts: [{ text: userMsg }] }],
