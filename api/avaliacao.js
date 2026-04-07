@@ -21,11 +21,10 @@ export default async function handler(req, res) {
 
   // Lista atualizada com as versões experimentais como segurança
   const geminiModels = [
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-exp',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b',
-    'gemini-1.5-pro'
+    'gemini-1.5-flash',       // Rápido, estável e liberado para todas as contas
+    'gemini-1.5-flash-8b',    // Backup super rápido
+    'gemini-1.5-pro',         // Backup mais robusto e inteligente
+    // 'gemini-2.0-flash'     <-- Removido até que o Google libere para sua conta
   ];
 
   const diagnostico = []
