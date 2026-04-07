@@ -36,17 +36,18 @@ export default async function handler(req, res) {
 
         const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${geminiKey}`
 
+        // A MÁGICA ACONTECE AQUI: Mesclamos a instrução do sistema com o prompt do usuário.
+        // Isso evita qualquer erro 400 relacionado a campos não reconhecidos pela API REST.
+        const promptFinal = sysMsg && sysMsg.trim().length > 0 
+          ? `[INSTRUÇÕES DE SISTEMA - SIGA RIGOROSAMENTE]:\n${sysMsg}\n\n[REQUISIÇÃO DO USUÁRIO]:\n${userMsg}` 
+          : userMsg;
+
         const payload = {
-          contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+          contents: [{ role: 'user', parts: [{ text: promptFinal }] }],
           generationConfig: {
             temperature: body.temperature ?? 0.3,
             maxOutputTokens: body.max_tokens ?? 4000,
           },
-        }
-
-        // Adiciona instrução de sistema apenas se houver conteúdo
-        if (sysMsg && sysMsg.trim().length > 0) {
-          payload.systemInstruction = { parts: [{ text: sysMsg }] }
         }
 
         const geminiRes = await fetch(url, {
@@ -61,7 +62,7 @@ export default async function handler(req, res) {
         if (geminiRes.ok) {
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
           
-          // Reduzi a trava para 5 caracteres para não ignorar respostas válidas/curtas
+          // Trava de 5 caracteres para garantir que respostas curtas ou JSONs passem
           if (text.trim().length > 5) {
             console.log(`[avaliacao] Gemini OK: ${model}`)
             return res.status(200).json({
