@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Configuração de CORS
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -19,84 +18,104 @@ export default async function handler(req, res) {
   const userMsg  = messages.filter(m => m.role === 'user').map(m => m.content).join('\n')
   const sysMsg   = messages.filter(m => m.role === 'system').map(m => m.content).join('\n')
 
-  const geminiModels = [
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-latest', 
-    'gemini-1.5-flash-8b',
-    'gemini-1.5-pro'
-  ];
-
   const diagnostico = []
 
-  // ── 1. Gemini (prioritário) ─────────────────────────────────────
+  // ── 1. Gemini (prioritário com Autodescoberta) ─────────────────────
   if (geminiKey) {
-    for (const model of geminiModels) {
-      try {
-        console.log(`[avaliacao] Tentando Gemini: ${model}`)
+    try {
+      console.log('[avaliacao] Buscando modelos liberados na API do Google...')
+      
+      // Consulta a API para saber O QUE está disponível para esta chave específica
+      const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}`)
+      const listData = await listRes.json()
 
-        const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${geminiKey}`
+      let geminiModels = []
 
-        // A MÁGICA ACONTECE AQUI: Mesclamos a instrução do sistema com o prompt do usuário.
-        // Isso evita qualquer erro 400 relacionado a campos não reconhecidos pela API REST.
-        const promptFinal = sysMsg && sysMsg.trim().length > 0 
-          ? `[INSTRUÇÕES DE SISTEMA - SIGA RIGOROSAMENTE]:\n${sysMsg}\n\n[REQUISIÇÃO DO USUÁRIO]:\n${userMsg}` 
-          : userMsg;
+      if (listData.models) {
+        // Filtra modelos que suportam geração de texto e limpa o prefixo 'models/'
+        geminiModels = listData.models
+          .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+          .map(m => m.name.replace('models/', ''))
+          .filter(name => name.includes('gemini') && !name.includes('vision') && !name.includes('embedding'));
 
-        const payload = {
-          contents: [{ role: 'user', parts: [{ text: promptFinal }] }],
-          generationConfig: {
-            temperature: body.temperature ?? 0.3,
-            maxOutputTokens: body.max_tokens ?? 4000,
-          },
-        }
+        // Prioriza as versões "flash" colocando-as no topo da lista
+        geminiModels.sort((a, b) => {
+          if (a.includes('flash') && !b.includes('flash')) return -1;
+          if (!a.includes('flash') && b.includes('flash')) return 1;
+          return 0;
+        });
 
-        const geminiRes = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-
-        const data = await geminiRes.json()
-        const status = geminiRes.status
-
-        if (geminiRes.ok) {
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-          
-          // Trava de 5 caracteres para garantir que respostas curtas ou JSONs passem
-          if (text.trim().length > 5) {
-            console.log(`[avaliacao] Gemini OK: ${model}`)
-            return res.status(200).json({
-              _provider: `gemini`,
-              _model: model,
-              choices: [{ message: { role: 'assistant', content: text } }],
-            })
-          }
-          diagnostico.push(`${model}: resposta insuficiente ou vazia`)
-          continue 
-        }
-
-        const errMsg = data?.error?.message || data?.error?.status || `HTTP ${status}`
-        console.warn(`[avaliacao] Gemini ${model} erro ${status}: ${errMsg}`)
-        diagnostico.push(`${model}: ${status} — ${errMsg}`)
-
-        if (status === 403) {
-          console.error('[avaliacao] Gemini 403 — verifique se a API Key é válida')
-          break // Para o loop se a chave estiver errada
-        }
-        
-        continue // Tenta o próximo modelo da lista
-
-      } catch (e) {
-        console.warn(`[avaliacao] Gemini ${model} erro de rede: ${e.message}`)
-        diagnostico.push(`${model}: erro de rede — ${e.message}`)
-        continue
+        console.log(`[avaliacao] Modelos compatíveis encontrados: ${geminiModels.slice(0, 5).join(', ')}...`)
       }
+
+      if (geminiModels.length === 0) {
+        diagnostico.push('Nenhum modelo compatível retornado pela API listModels.')
+      }
+
+      // Tenta gerar a resposta usando até 3 modelos disponíveis
+      for (const model of geminiModels.slice(0, 3)) {
+        try {
+          console.log(`[avaliacao] Tentando Gemini: ${model}`)
+
+          // Usamos v1beta que é o padrão da maioria das contas
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`
+
+          const promptFinal = sysMsg && sysMsg.trim().length > 0 
+            ? `[INSTRUÇÕES DE SISTEMA - SIGA RIGOROSAMENTE]:\n${sysMsg}\n\n[REQUISIÇÃO DO USUÁRIO]:\n${userMsg}` 
+            : userMsg;
+
+          const payload = {
+            contents: [{ role: 'user', parts: [{ text: promptFinal }] }],
+            generationConfig: {
+              temperature: body.temperature ?? 0.3,
+              maxOutputTokens: body.max_tokens ?? 4000,
+            },
+          }
+
+          const geminiRes = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+
+          const data = await geminiRes.json()
+          const status = geminiRes.status
+
+          if (geminiRes.ok) {
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+            
+            if (text.trim().length > 5) {
+              console.log(`[avaliacao] Gemini OK: ${model}`)
+              return res.status(200).json({
+                _provider: `gemini`,
+                _model: model,
+                choices: [{ message: { role: 'assistant', content: text } }],
+              })
+            }
+            diagnostico.push(`${model}: resposta insuficiente ou vazia`)
+            continue 
+          }
+
+          const errMsg = data?.error?.message || data?.error?.status || `HTTP ${status}`
+          console.warn(`[avaliacao] Gemini ${model} erro ${status}: ${errMsg}`)
+          diagnostico.push(`${model}: ${status} — ${errMsg}`)
+
+          if (status === 403) break; // Para se a chave for inválida
+
+        } catch (e) {
+          console.warn(`[avaliacao] Gemini ${model} erro de rede: ${e.message}`)
+          diagnostico.push(`${model}: erro de rede — ${e.message}`)
+        }
+      }
+    } catch (error) {
+      console.error('[avaliacao] Erro fatal ao consultar lista de modelos:', error)
+      diagnostico.push(`Erro ao listar modelos: ${error.message}`)
     }
   } else {
     diagnostico.push('GEMINI_API_KEY ausente')
   }
 
-  // ── 2. Fallback: Groq (só chega aqui se todos os modelos Gemini falharem) ──
+  // ── 2. Fallback: Groq (só chega aqui se tudo falhar) ──
   console.log(`[avaliacao] Iniciando Fallback Groq. Erros: ${diagnostico.join(' | ')}`)
 
   if (groqKey) {
