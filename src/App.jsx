@@ -793,41 +793,53 @@ export default function App() {
             </div>
           </div>
         )}
+        
+{/* GAMIFICAÇÃO */}
+<div className="games-section">
+  <div className="games-section-title">🎮 Gamificação</div>
+  <div className="games-grid">
+    <a className="game-card" href="/game-tobe-racer.html" target="_blank" rel="noopener noreferrer"
+      onClick={() => trackInteraction({ type: "jogo", feature: "To BE Racer", success: true })}>
+      <div className="game-card-icon">🏎️</div>
+      <div className="game-card-name">To BE Racer</div>
+      <div className="game-card-desc">Corrida de carros com conjugações do Verb To Be. Escolha o pronome e acelere!</div>
+      <span className="game-card-tag">⚡ Solo · Ranking</span>
+    </a>
+    <a className="game-card" href="/game-whos-door.html" target="_blank" rel="noopener noreferrer"
+      onClick={() => trackInteraction({ type: "jogo", feature: "Who's at the Door", success: true })}>
+      <div className="game-card-icon">🚪</div>
+      <div className="game-card-name">Who's at the Door?</div>
+      <div className="game-card-desc">Adivinhe a profissão em inglês antes que o tempo acabe. Multijogador em tempo real!</div>
+      <span className="game-card-tag">🌐 Multiplayer</span>
+    </a>
+    <a className="game-card" href="/game-english-quest.html" target="_blank" rel="noopener noreferrer"
+      onClick={() => trackInteraction({ type: "jogo", feature: "English Quest Kids", success: true })}>
+      <div className="game-card-icon">🦊</div>
+      <div className="game-card-name">English Quest Kids</div>
+      <div className="game-card-desc">Flashcards, Quiz, Memória e Ordem. Cores, dias, animais e meses em inglês!</div>
+      <span className="game-card-tag">🎮 4 jogos · Para Adultos e crianças</span>
+    </a>
+    <a className="game-card" href="/game-verb-shooter.html" target="_blank" rel="noopener noreferrer"
+      onClick={() => trackInteraction({ type: "jogo", feature: "Verb Shooter Game", success: true })}>
+      <div className="game-card-icon">🔫</div>
+      <div className="game-card-name">Verb Shooter Game</div>
+      <div className="game-card-desc">Acerte o maior número de Verbos e não cometa erros nessa aventura!</div>
+      <span className="game-card-tag">🎯 · Para Acertar no Alvo</span>
+    </a>
+  </div>
 
-       {/* GAMIFICAÇÃO */}
-        <div className="games-section">
-          <div className="games-section-title">🎮 Gamificação</div>
-          <div className="games-grid">
-            <a className="game-card" href="/game-tobe-racer.html" target="_blank" rel="noopener noreferrer"
-              onClick={() => trackInteraction({ type: "jogo", feature: "To BE Racer", success: true })}>
-              <div className="game-card-icon">🏎️</div>
-              <div className="game-card-name">To BE Racer</div>
-              <div className="game-card-desc">Corrida de carros com conjugações do Verb To Be. Escolha o pronome e acelere!</div>
-              <span className="game-card-tag">⚡ Solo · Ranking</span>
-            </a>
-            <a className="game-card" href="/game-whos-door.html" target="_blank" rel="noopener noreferrer"
-              onClick={() => trackInteraction({ type: "jogo", feature: "Who's at the Door", success: true })}>
-              <div className="game-card-icon">🚪</div>
-              <div className="game-card-name">Who's at the Door?</div>
-              <div className="game-card-desc">Adivinhe a profissão em inglês antes que o tempo acabe. Multijogador em tempo real!</div>
-              <span className="game-card-tag">🌐 Multiplayer</span>
-            </a>
-            <a className="game-card" href="/game-english-quest.html" target="_blank" rel="noopener noreferrer"
-              onClick={() => trackInteraction({ type: "jogo", feature: "English Quest Kids", success: true })}>
-              <div className="game-card-icon">🦊</div>
-              <div className="game-card-name">English Quest Kids</div>
-              <div className="game-card-desc">Flashcards, Quiz, Memória e Ordem. Cores, dias, animais e meses em inglês!</div>
-              <span className="game-card-tag">🎮 4 jogos · Para Adultos e crianças</span>
-            </a>
-            <a className="game-card" href="/game-verb-shooter.html" target="_blank" rel="noopener noreferrer"
-              onClick={() => trackInteraction({ type: "jogo", feature: "Verb Shooter Game", success: true })}>
-              <div className="game-card-icon">🔫</div>
-              <div className="game-card-name">Verb Shooter Game</div>
-              <div className="game-card-desc">Acerte o maior número de Verbos e não cometa erros nessa aventura!</div>
-              <span className="game-card-tag">🎯 · Para Acertar no Alvo</span>
-            </a>
-          </div>
-        </div>
+  {/* Card largo embaixo, fora do grid para ocupar todo o espaço */}
+  <a className="game-card" href="/game-english-vocab.html" target="_blank" rel="noopener noreferrer"
+    style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "1.5rem", marginTop: "1rem" }}
+    onClick={() => trackInteraction({ type: "jogo", feature: "English Vocab Game", success: true })}>
+    <div className="game-card-icon">🦉</div>
+    <div style={{ textAlign: "left" }}>
+      <div className="game-card-name">English Vocabulary Quest Pro</div>
+      <div className="game-card-desc">Domine o vocabulário essencial, Phrasal Verbs e expressões para conversação real!</div>
+      <span className="game-card-tag">🎯 · As 500 palavras mais usadas e vocabulário avançado</span>
+    </div>
+  </a>
+</div>
 
         <footer className="footer">
           VacarIA · Desenvolvido por Ramon Castro

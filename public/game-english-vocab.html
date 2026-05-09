@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>English Vocabulary Quest 🧠</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);min-height:100vh;color:#1f2937}
+.screen{display:none;min-height:100vh;padding:16px;animation:fadeIn .3s ease}
+.screen.active{display:flex;flex-direction:column;align-items:center}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(99,102,241,.4)}50%{box-shadow:0 0 40px rgba(99,102,241,.8)}}
+
+h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;text-align:center;color:#fff;text-shadow:0 3px 10px rgba(0,0,0,.4);margin-bottom:6px}
+h2{font-size:clamp(1.1rem,3.5vw,1.8rem);font-weight:800;text-align:center;color:#e2e8f0;text-shadow:0 2px 6px rgba(0,0,0,.3);margin-bottom:12px}
+
+.card{background:#fff;border-radius:24px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.3);width:100%;max-width:480px}
+.btn{border:none;border-radius:16px;padding:14px 24px;font-size:1rem;font-weight:800;cursor:pointer;transition:all .15s;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.btn-secondary{background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3)}
+.btn-back{background:rgba(255,255,255,.1);color:#e2e8f0;padding:10px 18px;font-size:.9rem;border-radius:12px;margin-bottom:12px;align-self:flex-start;border:1px solid rgba(255,255,255,.2)}
+.btn-green{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+
+.score-badge{background:rgba(255,255,255,.15);color:#e2e8f0;border-radius:100px;padding:6px 16px;font-weight:800;font-size:.95rem;border:1px solid rgba(255,255,255,.2)}
+.progress-bar{width:100%;height:10px;background:rgba(255,255,255,.15);border-radius:100px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:100px;transition:width .4s ease}
+.timer{font-size:1.4rem;font-weight:900;color:#fbbf24}
+.timer.warning{color:#ef4444;animation:bounce .5s infinite}
+
+/* HOME */
+.logo-wrap{text-align:center;margin-bottom:8px}
+.logo-icon{font-size:4rem;display:block}
+.subtitle{color:rgba(255,255,255,.7);font-size:1rem;text-align:center;margin-bottom:20px}
+.player-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;width:100%;max-width:400px}
+.player-input{flex:1;padding:12px 16px;border-radius:14px;border:none;font-size:1rem;font-weight:700;outline:none;background:rgba(255,255,255,.95);color:#1f2937}
+.stats-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;justify-content:center}
+.stat-box{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:12px 18px;text-align:center;color:#fff;min-width:80px}
+.stat-num{font-size:1.6rem;font-weight:900;display:block;color:#a5b4fc}
+.stat-label{font-size:.72rem;opacity:.75}
+
+/* CATEGORIES */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:500px}
+.cat-card{border:none;border-radius:20px;padding:20px 14px;cursor:pointer;transition:all .2s;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.3);position:relative;overflow:hidden}
+.cat-card:hover{transform:translateY(-4px) scale(1.02)}
+.cat-card::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.05);opacity:0;transition:.2s}
+.cat-card:hover::before{opacity:1}
+.cat-icon{font-size:2.2rem;display:block;margin-bottom:6px}
+.cat-name{font-size:.95rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+.cat-desc{font-size:.72rem;color:rgba(255,255,255,.8);margin-top:3px}
+.cat-count{position:absolute;top:8px;right:10px;background:rgba(0,0,0,.3);color:#fff;border-radius:100px;padding:2px 8px;font-size:.7rem;font-weight:700}
+
+/* GAME SELECT */
+.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:480px}
+.game-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:18px;padding:20px;cursor:pointer;text-align:center;transition:all .2s;color:#fff}
+.game-card:hover{background:rgba(255,255,255,.15);transform:translateY(-3px);border-color:rgba(255,255,255,.4)}
+.game-icon{font-size:2.2rem;display:block;margin-bottom:8px}
+.game-title{font-weight:800;font-size:.95rem}
+.game-desc{font-size:.75rem;opacity:.75;margin-top:4px}
+
+/* FLASHCARDS */
+.flashcard-wrap{perspective:1000px;width:100%;max-width:400px;height:280px;cursor:pointer;margin:14px 0}
+.flashcard{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .5s}
+.flashcard.flipped{transform:rotateY(180deg)}
+.flashcard-front,.flashcard-back{position:absolute;inset:0;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;padding:20px}
+.flashcard-front{background:linear-gradient(135deg,#1e293b,#334155);border:1px solid rgba(255,255,255,.1);box-shadow:0 10px 40px rgba(0,0,0,.4)}
+.flashcard-back{background:linear-gradient(135deg,#6366f1,#8b5cf6);transform:rotateY(180deg);box-shadow:0 10px 40px rgba(99,102,241,.4)}
+.fc-category-tag{background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);border-radius:100px;padding:4px 12px;font-size:.72rem;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}
+.fc-word{font-size:2.2rem;font-weight:900;color:#fff;text-align:center;line-height:1.2}
+.fc-phonetic{font-size:.9rem;color:rgba(255,255,255,.5);margin-top:6px;font-style:italic}
+.fc-hint{font-size:.8rem;color:rgba(255,255,255,.4);margin-top:12px}
+.fc-pt{font-size:1.3rem;font-weight:700;color:#fff;text-align:center;margin-top:8px}
+.fc-example{font-size:.82rem;color:rgba(255,255,255,.8);text-align:center;margin-top:10px;font-style:italic;line-height:1.4;padding:0 8px}
+.nav-row{display:flex;gap:16px;align-items:center;margin-top:8px}
+.nav-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:50px;height:50px;font-size:1.3rem;cursor:pointer;color:#fff;transition:all .2s}
+.nav-btn:hover{background:rgba(255,255,255,.2)}
+.nav-btn:disabled{opacity:.25;cursor:not-allowed}
+
+/* QUIZ */
+.quiz-question{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:24px;text-align:center;margin:10px 0;width:100%;max-width:480px}
+.q-word{font-size:2.5rem;font-weight:900;color:#fff;margin-bottom:8px}
+.q-tag{background:rgba(99,102,241,.3);color:#a5b4fc;border-radius:100px;padding:4px 12px;font-size:.75rem;font-weight:700;display:inline-block;margin-bottom:8px}
+.q-text{font-size:1rem;font-weight:600;color:rgba(255,255,255,.7)}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:480px}
+.opt-btn{padding:16px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.2);font-size:1rem;font-weight:700;cursor:pointer;background:rgba(255,255,255,.08);color:#fff;transition:all .2s}
+.opt-btn:hover:not(:disabled){background:rgba(255,255,255,.15);transform:translateY(-2px)}
+.opt-btn:disabled{cursor:not-allowed}
+.opt-btn.correct{background:linear-gradient(135deg,#10b981,#059669)!important;border-color:transparent!important;animation:pop .4s ease}
+.opt-btn.wrong{background:linear-gradient(135deg,#ef4444,#dc2626)!important;border-color:transparent!important;animation:shake .4s ease}
+
+/* MEMORY */
+.memory-grid{display:grid;gap:8px;width:100%;max-width:480px;margin:10px 0}
+.mem-card{aspect-ratio:1;border-radius:14px;border:1px solid rgba(255,255,255,.15);cursor:pointer;font-size:1rem;font-weight:800;transition:all .3s;background:rgba(255,255,255,.06);color:transparent;position:relative;overflow:hidden}
+.mem-card.revealed,.mem-card.matched{background:rgba(255,255,255,.95);color:#1f2937}
+.mem-card.matched{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+.mem-card-inner{display:flex;align-items:center;justify-content:center;height:100%;padding:4px;text-align:center;font-size:.85rem;line-height:1.2}
+.mem-card:not(.revealed):not(.matched) .mem-card-inner::after{content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:rgba(255,255,255,.3)}
+
+/* RESULTS */
+.result-card{background:linear-gradient(135deg,#1e293b,#334155);border:1px solid rgba(255,255,255,.15);border-radius:28px;padding:32px;text-align:center;color:#fff;width:100%;max-width:400px;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.result-emoji{font-size:5rem;display:block;margin-bottom:12px}
+.result-title{font-size:2rem;font-weight:900;margin-bottom:8px;color:#a5b4fc}
+.result-score{font-size:2.5rem;font-weight:900;margin:16px 0;color:#fbbf24}
+.result-stars{font-size:2rem;margin:8px 0}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;width:10px;height:10px;top:-20px;animation:confettiFall 3s ease-in forwards;border-radius:2px;z-index:9999;pointer-events:none}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px;width:100%;max-width:500px}
+.filter-btn{padding:6px 14px;border-radius:100px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s}
+.filter-btn.active{background:rgba(99,102,241,.5);border-color:#6366f1;color:#fff}
+
+/* PROGRESS TRACKER */
+.progress-tracker{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 16px;width:100%;max-width:480px;margin-bottom:12px}
+.pt-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pt-label{color:rgba(255,255,255,.6);font-size:.8rem;font-weight:600}
+.pt-val{color:#a5b4fc;font-size:.85rem;font-weight:800}
+
+@media(max-width:400px){
+  .cat-grid,.quiz-options,.game-grid{grid-template-columns:1fr}
+  .fc-word{font-size:1.8rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="logo-wrap">
+    <span class="logo-icon">🧠</span>
+  </div>
+  <h1>English Vocab Quest</h1>
+  <p class="subtitle">Master the most essential words in English 🚀</p>
+  <p style="color:rgba(255,255,255,.35);font-size:.75rem;margin-top:-14px;margin-bottom:16px;text-align:center">Desenvolvido por Prof. Ramon Castro</p>
+  <div class="player-row">
+    <input class="player-input" id="playerName" type="text" placeholder="Your name..." maxlength="16"/>
+    <button class="btn btn-primary" onclick="saveName()" style="padding:12px 18px">✓</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><span class="stat-num" id="totalScore">0</span><span class="stat-label">Points</span></div>
+    <div class="stat-box"><span class="stat-num" id="gamesPlayed">0</span><span class="stat-label">Games</span></div>
+    <div class="stat-box"><span class="stat-num" id="wordsLearned">0</span><span class="stat-label">Words</span></div>
+    <div class="stat-box"><span class="stat-num" id="streak">0</span><span class="stat-label">Streak 🔥</span></div>
+  </div>
+  <button class="btn btn-primary" onclick="showCategories()" style="width:100%;max-width:320px;font-size:1.05rem;padding:16px;margin-bottom:10px">
+    🚀 Start Learning!
+  </button>
+  <p style="color:rgba(255,255,255,.4);font-size:.75rem;text-align:center;max-width:320px">500+ essential words • Phrasal Verbs • Real examples</p>
+</div>
+
+<!-- CATEGORIES -->
+<div id="categories" class="screen">
+  <h2>📚 Choose a Category</h2>
+  <div class="cat-grid">
+    <button class="cat-card" style="background:linear-gradient(135deg,#6366f1,#4f46e5)" onclick="selectCategory('top100')">
+      <span class="cat-count">100</span>
+      <span class="cat-icon">⭐</span>
+      <span class="cat-name">Top 100 Words</span>
+      <span class="cat-desc">Most used in English</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)" onclick="selectCategory('verbs')">
+      <span class="cat-count">60</span>
+      <span class="cat-icon">⚡</span>
+      <span class="cat-name">Essential Verbs</span>
+      <span class="cat-desc">Action & state verbs</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#06b6d4,#0891b2)" onclick="selectCategory('adjectives')">
+      <span class="cat-count">50</span>
+      <span class="cat-icon">🎨</span>
+      <span class="cat-name">Key Adjectives</span>
+      <span class="cat-desc">Describe everything</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#10b981,#059669)" onclick="selectCategory('phrasalVerbs')">
+      <span class="cat-count">60</span>
+      <span class="cat-icon">🔗</span>
+      <span class="cat-name">Phrasal Verbs</span>
+      <span class="cat-desc">Natural English</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="selectCategory('prepositions')">
+      <span class="cat-count">30</span>
+      <span class="cat-icon">📍</span>
+      <span class="cat-name">Prepositions</span>
+      <span class="cat-desc">In, on, at & more</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#ec4899,#db2777)" onclick="selectCategory('expressions')">
+      <span class="cat-count">50</span>
+      <span class="cat-icon">💬</span>
+      <span class="cat-name">Expressions</span>
+      <span class="cat-desc">Everyday phrases</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#ef4444,#dc2626)" onclick="selectCategory('connectors')">
+      <span class="cat-count">30</span>
+      <span class="cat-icon">🔀</span>
+      <span class="cat-name">Connectors</span>
+      <span class="cat-desc">Link your ideas</span>
+    </button>
+    <button class="cat-card" style="background:linear-gradient(135deg,#64748b,#475569)" onclick="selectCategory('questions')">
+      <span class="cat-count">25</span>
+      <span class="cat-icon">❓</span>
+      <span class="cat-name">Question Words</span>
+      <span class="cat-desc">Who, what, when...</span>
+    </button>
+  </div>
+  <button class="btn btn-secondary" onclick="showScreen('home')" style="margin-top:16px">⬅ Back</button>
+</div>
+
+<!-- GAME SELECT -->
+<div id="gameSelect" class="screen">
+  <h2 id="catTitle">Choose a Game</h2>
+  <div class="progress-tracker">
+    <div class="pt-row">
+      <span class="pt-label">Category progress</span>
+      <span class="pt-val" id="catProgress">0 studied</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="catProgressBar" style="width:0%"></div></div>
+  </div>
+  <div class="game-grid">
+    <div class="game-card" onclick="startGame('flashcards')">
+      <span class="game-icon">🃏</span>
+      <div class="game-title">Flashcards</div>
+      <div class="game-desc">Study with flip cards</div>
+    </div>
+    <div class="game-card" onclick="startGame('quiz')">
+      <span class="game-icon">❓</span>
+      <div class="game-title">Quiz</div>
+      <div class="game-desc">Test your knowledge</div>
+    </div>
+    <div class="game-card" onclick="startGame('memory')">
+      <span class="game-icon">🧠</span>
+      <div class="game-title">Memory Match</div>
+      <div class="game-desc">Match word + meaning</div>
+    </div>
+    <div class="game-card" onclick="startGame('translate')">
+      <span class="game-icon">✍️</span>
+      <div class="game-title">Translate</div>
+      <div class="game-desc">Type the translation</div>
+    </div>
+  </div>
+  <button class="btn btn-secondary" onclick="showScreen('categories')" style="margin-top:16px">⬅ Back</button>
+</div>
+
+<!-- FLASHCARDS -->
+<div id="flashcards" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:480px;margin-bottom:6px">
+    <button class="btn btn-back" onclick="showScreen('gameSelect')">⬅ Back</button>
+    <span class="score-badge" id="fcProgress">1 / 10</span>
+  </div>
+  <div class="progress-bar" style="max-width:480px;width:100%"><div class="progress-fill" id="fcBar" style="width:10%"></div></div>
+  <div class="flashcard-wrap" onclick="flipCard()">
+    <div class="flashcard" id="flashcard">
+      <div class="flashcard-front">
+        <span class="fc-category-tag" id="fcTag">verb</span>
+        <span class="fc-word" id="fcWord">make</span>
+        <span class="fc-phonetic" id="fcPhonetic">/meɪk/</span>
+        <span class="fc-hint">Tap to see translation</span>
+      </div>
+      <div class="flashcard-back">
+        <span class="fc-category-tag" id="fcTagBack">verb</span>
+        <span class="fc-word" id="fcWordBack">make</span>
+        <span class="fc-pt" id="fcPt">fazer / criar</span>
+        <span class="fc-example" id="fcExample">"I need to make a decision."</span>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="nav-btn" id="fcPrev" onclick="fcNav(-1)">◀</button>
+    <button class="btn btn-primary" onclick="speakCurrent()" style="border-radius:50%;width:50px;height:50px;padding:0;font-size:1.3rem">🔊</button>
+    <button class="nav-btn" id="fcNext" onclick="fcNav(1)">▶</button>
+  </div>
+  <p style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:8px">Tap card to flip • 🔊 to listen</p>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:480px;margin-bottom:4px">
+    <button class="btn btn-back" onclick="showScreen('gameSelect')">⬅ Back</button>
+    <span class="score-badge" id="quizScore">Score: 0</span>
+    <span class="timer" id="quizTimer">15s</span>
+  </div>
+  <div class="progress-bar" style="max-width:480px;width:100%"><div class="progress-fill" id="quizBar" style="width:10%"></div></div>
+  <div class="quiz-question">
+    <span class="q-tag" id="qTag">verb</span>
+    <div class="q-word" id="qWord">make</div>
+    <p class="q-text" id="qText">What does this word mean in Portuguese?</p>
+  </div>
+  <div class="quiz-options" id="quizOptions"></div>
+</div>
+
+<!-- MEMORY -->
+<div id="memory" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:480px;margin-bottom:8px">
+    <button class="btn btn-back" onclick="showScreen('gameSelect')">⬅ Back</button>
+    <span class="score-badge" id="memMoves">Moves: 0</span>
+    <span class="score-badge" id="memPairs">0 / 6</span>
+  </div>
+  <p style="color:rgba(255,255,255,.5);font-size:.8rem;margin-bottom:8px">Match the English word with its Portuguese meaning</p>
+  <div class="memory-grid" id="memoryGrid" style="grid-template-columns:repeat(4,1fr)"></div>
+</div>
+
+<!-- TRANSLATE -->
+<div id="translate" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:480px;margin-bottom:4px">
+    <button class="btn btn-back" onclick="showScreen('gameSelect')">⬅ Back</button>
+    <span class="score-badge" id="trScore">Score: 0</span>
+    <span class="score-badge" id="trProgress">1/10</span>
+  </div>
+  <div class="progress-bar" style="max-width:480px;width:100%"><div class="progress-fill" id="trBar" style="width:10%"></div></div>
+  <div class="quiz-question" style="margin:10px 0">
+    <span class="q-tag" id="trTag">verb</span>
+    <div class="q-word" id="trWord" style="font-size:2rem">make</div>
+    <p class="q-text" id="trExample" style="font-size:.85rem;margin-top:6px;font-style:italic"></p>
+  </div>
+  <p style="color:rgba(255,255,255,.6);font-size:.85rem;margin-bottom:8px">Type the Portuguese translation:</p>
+  <div style="display:flex;gap:8px;width:100%;max-width:480px">
+    <input id="trInput" type="text" placeholder="Type here..." style="flex:1;padding:14px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:1rem;font-weight:600;outline:none" onkeydown="if(event.key==='Enter')checkTranslate()"/>
+    <button class="btn btn-primary" onclick="checkTranslate()" style="padding:14px 20px">✓</button>
+  </div>
+  <div id="trFeedback" style="margin-top:12px;font-size:.95rem;font-weight:700;min-height:24px;text-align:center"></div>
+  <div id="trHintArea" style="margin-top:8px;text-align:center">
+    <button class="btn" onclick="showHint()" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);font-size:.8rem;padding:8px 16px;border:1px solid rgba(255,255,255,.15)">💡 Hint</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-card">
+    <span class="result-emoji" id="resultEmoji">🏆</span>
+    <div class="result-title" id="resultTitle">Amazing!</div>
+    <div id="resultMsg" style="font-size:.95rem;opacity:.75;margin-bottom:8px;color:#e2e8f0"></div>
+    <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+    <div class="result-score" id="resultScore">+100</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="replayGame()" style="flex:1;min-width:120px">🔄 Play Again</button>
+      <button class="btn btn-secondary" onclick="showScreen('gameSelect')" style="flex:1;min-width:120px">🎮 More Games</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// VOCABULARY DATA — 500+ Essential Words
+// ════════════════════════════════════════
+var vocab = {
+
+  top100: [
+    {id:'t1',en:'the',pt:'o / a (artigo)',tag:'article',phonetic:'/ðə/',example:'The book is on the table.'},
+    {id:'t2',en:'be',pt:'ser / estar',tag:'verb',phonetic:'/biː/',example:'I want to be a doctor.'},
+    {id:'t3',en:'to',pt:'para / a (preposição)',tag:'preposition',phonetic:'/tuː/',example:'I go to school every day.'},
+    {id:'t4',en:'of',pt:'de / do / da',tag:'preposition',phonetic:'/ɒv/',example:'A cup of coffee, please.'},
+    {id:'t5',en:'and',pt:'e / e também',tag:'conjunction',phonetic:'/ænd/',example:'She is smart and kind.'},
+    {id:'t6',en:'a / an',pt:'um / uma (artigo)',tag:'article',phonetic:'/eɪ/',example:'I have a dog and an apple.'},
+    {id:'t7',en:'in',pt:'em / dentro de',tag:'preposition',phonetic:'/ɪn/',example:'She lives in Brazil.'},
+    {id:'t8',en:'is',pt:'é / está (3ª pessoa)',tag:'verb',phonetic:'/ɪz/',example:'He is my best friend.'},
+    {id:'t9',en:'it',pt:'isso / ele / ela (neutro)',tag:'pronoun',phonetic:'/ɪt/',example:'It is raining outside.'},
+    {id:'t10',en:'you',pt:'você / tu',tag:'pronoun',phonetic:'/juː/',example:'You are amazing!'},
+    {id:'t11',en:'that',pt:'que / aquele / isso',tag:'pronoun',phonetic:'/ðæt/',example:'I think that you are right.'},
+    {id:'t12',en:'he',pt:'ele',tag:'pronoun',phonetic:'/hiː/',example:'He works at a hospital.'},
+    {id:'t13',en:'was',pt:'era / estava (passado)',tag:'verb',phonetic:'/wɒz/',example:'She was very happy yesterday.'},
+    {id:'t14',en:'for',pt:'para / por',tag:'preposition',phonetic:'/fɔːr/',example:'This gift is for you.'},
+    {id:'t15',en:'on',pt:'em / sobre / ligado',tag:'preposition',phonetic:'/ɒn/',example:'The keys are on the table.'},
+    {id:'t16',en:'are',pt:'são / estão / são (plural)',tag:'verb',phonetic:'/ɑːr/',example:'They are my friends.'},
+    {id:'t17',en:'with',pt:'com',tag:'preposition',phonetic:'/wɪð/',example:'I came with my sister.'},
+    {id:'t18',en:'as',pt:'como / enquanto / tão',tag:'conjunction',phonetic:'/æz/',example:'As a teacher, I love learning.'},
+    {id:'t19',en:'I',pt:'eu',tag:'pronoun',phonetic:'/aɪ/',example:'I love learning English.'},
+    {id:'t20',en:'his',pt:'dele / seu (masculino)',tag:'pronoun',phonetic:'/hɪz/',example:'His car is very fast.'},
+    {id:'t21',en:'they',pt:'eles / elas',tag:'pronoun',phonetic:'/ðeɪ/',example:'They are coming tomorrow.'},
+    {id:'t22',en:'at',pt:'em / às (hora/lugar)',tag:'preposition',phonetic:'/æt/',example:'I arrive at 8 o\'clock.'},
+    {id:'t23',en:'be',pt:'ser / estar (infinitivo)',tag:'verb',phonetic:'/biː/',example:'I want to be happy.'},
+    {id:'t24',en:'this',pt:'este / esta / isso',tag:'pronoun',phonetic:'/ðɪs/',example:'This is my house.'},
+    {id:'t25',en:'from',pt:'de / desde / vindo de',tag:'preposition',phonetic:'/frɒm/',example:'She is from Canada.'},
+    {id:'t26',en:'or',pt:'ou',tag:'conjunction',phonetic:'/ɔːr/',example:'Coffee or tea?'},
+    {id:'t27',en:'one',pt:'um / uma (número)',tag:'number',phonetic:'/wʌn/',example:'I have one brother.'},
+    {id:'t28',en:'had',pt:'tinha / teve (passado)',tag:'verb',phonetic:'/hæd/',example:'She had a great idea.'},
+    {id:'t29',en:'by',pt:'por / perto de / até',tag:'preposition',phonetic:'/baɪ/',example:'The book was written by her.'},
+    {id:'t30',en:'word',pt:'palavra',tag:'noun',phonetic:'/wɜːrd/',example:'What does this word mean?'},
+    {id:'t31',en:'but',pt:'mas / porém',tag:'conjunction',phonetic:'/bʌt/',example:'I like it, but it\'s expensive.'},
+    {id:'t32',en:'not',pt:'não (negação)',tag:'adverb',phonetic:'/nɒt/',example:'I do not understand.'},
+    {id:'t33',en:'what',pt:'o que / qual',tag:'question',phonetic:'/wɒt/',example:'What do you want?'},
+    {id:'t34',en:'all',pt:'todo / tudo / todos',tag:'determiner',phonetic:'/ɔːl/',example:'All students passed the test.'},
+    {id:'t35',en:'were',pt:'eram / estavam (passado)',tag:'verb',phonetic:'/wɜːr/',example:'They were very tired.'},
+    {id:'t36',en:'we',pt:'nós',tag:'pronoun',phonetic:'/wiː/',example:'We are a great team.'},
+    {id:'t37',en:'when',pt:'quando',tag:'question',phonetic:'/wen/',example:'When does the class start?'},
+    {id:'t38',en:'your',pt:'seu / sua / seus',tag:'pronoun',phonetic:'/jɔːr/',example:'Is this your phone?'},
+    {id:'t39',en:'can',pt:'poder / conseguir',tag:'modal',phonetic:'/kæn/',example:'Can you help me, please?'},
+    {id:'t40',en:'said',pt:'disse / falou (passado)',tag:'verb',phonetic:'/sed/',example:'She said she was tired.'},
+    {id:'t41',en:'there',pt:'lá / ali / há',tag:'adverb',phonetic:'/ðer/',example:'There is a problem here.'},
+    {id:'t42',en:'use',pt:'usar / utilizar',tag:'verb',phonetic:'/juːz/',example:'How do you use this tool?'},
+    {id:'t43',en:'an',pt:'um / uma (antes de vogal)',tag:'article',phonetic:'/æn/',example:'She is an engineer.'},
+    {id:'t44',en:'each',pt:'cada / cada um',tag:'determiner',phonetic:'/iːtʃ/',example:'Each student has a book.'},
+    {id:'t45',en:'which',pt:'qual / o qual',tag:'question',phonetic:'/wɪtʃ/',example:'Which one do you prefer?'},
+    {id:'t46',en:'she',pt:'ela',tag:'pronoun',phonetic:'/ʃiː/',example:'She is my best friend.'},
+    {id:'t47',en:'do',pt:'fazer / auxiliar verbal',tag:'verb',phonetic:'/duː/',example:'Do you speak English?'},
+    {id:'t48',en:'how',pt:'como / de que forma',tag:'question',phonetic:'/haʊ/',example:'How are you today?'},
+    {id:'t49',en:'their',pt:'deles / delas / seu (plural)',tag:'pronoun',phonetic:'/ðer/',example:'Their house is beautiful.'},
+    {id:'t50',en:'if',pt:'se (condicional)',tag:'conjunction',phonetic:'/ɪf/',example:'If you study, you will pass.'},
+    {id:'t51',en:'will',pt:'vai / irá (futuro)',tag:'modal',phonetic:'/wɪl/',example:'I will call you later.'},
+    {id:'t52',en:'up',pt:'para cima / acima',tag:'adverb',phonetic:'/ʌp/',example:'Please stand up.'},
+    {id:'t53',en:'other',pt:'outro / outra',tag:'adjective',phonetic:'/ˈʌðər/',example:'Do you have any other ideas?'},
+    {id:'t54',en:'about',pt:'sobre / acerca de',tag:'preposition',phonetic:'/əˈbaʊt/',example:'Tell me about yourself.'},
+    {id:'t55',en:'out',pt:'fora / para fora',tag:'adverb',phonetic:'/aʊt/',example:'She went out for a walk.'},
+    {id:'t56',en:'many',pt:'muitos / muitas',tag:'determiner',phonetic:'/ˈmeni/',example:'How many people are coming?'},
+    {id:'t57',en:'then',pt:'então / depois / naquele momento',tag:'adverb',phonetic:'/ðen/',example:'First study, then relax.'},
+    {id:'t58',en:'them',pt:'eles / elas (objeto)',tag:'pronoun',phonetic:'/ðem/',example:'I saw them at the park.'},
+    {id:'t59',en:'these',pt:'estes / estas',tag:'pronoun',phonetic:'/ðiːz/',example:'These are my books.'},
+    {id:'t60',en:'so',pt:'então / portanto / tão',tag:'conjunction',phonetic:'/soʊ/',example:'It was late, so I left.'},
+    {id:'t61',en:'some',pt:'alguns / algum / um pouco',tag:'determiner',phonetic:'/sʌm/',example:'Can I have some water?'},
+    {id:'t62',en:'her',pt:'ela (objeto) / dela',tag:'pronoun',phonetic:'/hɜːr/',example:'I gave her the book.'},
+    {id:'t63',en:'would',pt:'iria / gostaria (condicional)',tag:'modal',phonetic:'/wʊd/',example:'I would love to travel.'},
+    {id:'t64',en:'make',pt:'fazer / criar / fabricar',tag:'verb',phonetic:'/meɪk/',example:'Let\'s make a plan.'},
+    {id:'t65',en:'like',pt:'gostar / como / parecido',tag:'verb',phonetic:'/laɪk/',example:'I like this idea a lot.'},
+    {id:'t66',en:'him',pt:'ele (objeto)',tag:'pronoun',phonetic:'/hɪm/',example:'I called him yesterday.'},
+    {id:'t67',en:'into',pt:'para dentro de / em',tag:'preposition',phonetic:'/ˈɪntuː/',example:'She walked into the room.'},
+    {id:'t68',en:'time',pt:'tempo / hora / vez',tag:'noun',phonetic:'/taɪm/',example:'What time is it?'},
+    {id:'t69',en:'has',pt:'tem / possui (3ª pessoa)',tag:'verb',phonetic:'/hæz/',example:'She has a great idea.'},
+    {id:'t70',en:'look',pt:'olhar / parecer / aparência',tag:'verb',phonetic:'/lʊk/',example:'Look at that beautiful view!'},
+    {id:'t71',en:'two',pt:'dois / duas',tag:'number',phonetic:'/tuː/',example:'I have two sisters.'},
+    {id:'t72',en:'more',pt:'mais',tag:'adverb',phonetic:'/mɔːr/',example:'I need more time, please.'},
+    {id:'t73',en:'write',pt:'escrever',tag:'verb',phonetic:'/raɪt/',example:'Please write your name here.'},
+    {id:'t74',en:'go',pt:'ir / andar',tag:'verb',phonetic:'/ɡoʊ/',example:'Let\'s go to the beach!'},
+    {id:'t75',en:'see',pt:'ver / enxergar / entender',tag:'verb',phonetic:'/siː/',example:'I can see the mountains.'},
+    {id:'t76',en:'number',pt:'número',tag:'noun',phonetic:'/ˈnʌmbər/',example:'What is your phone number?'},
+    {id:'t77',en:'no',pt:'não / nenhum',tag:'adverb',phonetic:'/noʊ/',example:'No, I don\'t agree.'},
+    {id:'t78',en:'way',pt:'caminho / jeito / maneira',tag:'noun',phonetic:'/weɪ/',example:'Is there a better way?'},
+    {id:'t79',en:'could',pt:'poderia / conseguia (passado)',tag:'modal',phonetic:'/kʊd/',example:'Could you repeat that?'},
+    {id:'t80',en:'people',pt:'pessoas / povo',tag:'noun',phonetic:'/ˈpiːpəl/',example:'Many people love music.'},
+    {id:'t81',en:'my',pt:'meu / minha',tag:'pronoun',phonetic:'/maɪ/',example:'This is my favorite song.'},
+    {id:'t82',en:'than',pt:'do que (comparação)',tag:'conjunction',phonetic:'/ðæn/',example:'She is taller than me.'},
+    {id:'t83',en:'first',pt:'primeiro / primeiramente',tag:'adjective',phonetic:'/fɜːrst/',example:'This is my first time here.'},
+    {id:'t84',en:'water',pt:'água',tag:'noun',phonetic:'/ˈwɔːtər/',example:'Can I have a glass of water?'},
+    {id:'t85',en:'been',pt:'sido / estado (particípio)',tag:'verb',phonetic:'/bɪn/',example:'I have been here before.'},
+    {id:'t86',en:'call',pt:'chamar / ligar / chamada',tag:'verb',phonetic:'/kɔːl/',example:'I\'ll call you tonight.'},
+    {id:'t87',en:'who',pt:'quem',tag:'question',phonetic:'/huː/',example:'Who is your teacher?'},
+    {id:'t88',en:'oil',pt:'óleo / petróleo',tag:'noun',phonetic:'/ɔɪl/',example:'Add some oil to the pan.'},
+    {id:'t89',en:'its',pt:'seu / sua (neutro/possessivo)',tag:'pronoun',phonetic:'/ɪts/',example:'The dog wagged its tail.'},
+    {id:'t90',en:'now',pt:'agora / já',tag:'adverb',phonetic:'/naʊ/',example:'I need to leave now.'},
+    {id:'t91',en:'find',pt:'encontrar / achar',tag:'verb',phonetic:'/faɪnd/',example:'I can\'t find my keys.'},
+    {id:'t92',en:'long',pt:'longo / comprido / muito tempo',tag:'adjective',phonetic:'/lɒŋ/',example:'It\'s been a long day.'},
+    {id:'t93',en:'down',pt:'para baixo / abaixo',tag:'adverb',phonetic:'/daʊn/',example:'Please sit down.'},
+    {id:'t94',en:'day',pt:'dia',tag:'noun',phonetic:'/deɪ/',example:'Have a great day!'},
+    {id:'t95',en:'did',pt:'fez / fiz (passado)',tag:'verb',phonetic:'/dɪd/',example:'Did you finish your homework?'},
+    {id:'t96',en:'get',pt:'conseguir / pegar / ficar',tag:'verb',phonetic:'/ɡet/',example:'I need to get some sleep.'},
+    {id:'t97',en:'come',pt:'vir / chegar',tag:'verb',phonetic:'/kʌm/',example:'Come here, please.'},
+    {id:'t98',en:'made',pt:'fez / feito (passado)',tag:'verb',phonetic:'/meɪd/',example:'She made a delicious cake.'},
+    {id:'t99',en:'may',pt:'pode / talvez (permissão)',tag:'modal',phonetic:'/meɪ/',example:'May I ask a question?'},
+    {id:'t100',en:'part',pt:'parte / pedaço',tag:'noun',phonetic:'/pɑːrt/',example:'This is the best part of the movie.'},
+  ],
+
+  verbs: [
+    {id:'v1',en:'have',pt:'ter / possuir',tag:'verb',phonetic:'/hæv/',example:'I have a meeting at 3pm.'},
+    {id:'v2',en:'know',pt:'saber / conhecer',tag:'verb',phonetic:'/noʊ/',example:'Do you know the answer?'},
+    {id:'v3',en:'think',pt:'pensar / achar / acreditar',tag:'verb',phonetic:'/θɪŋk/',example:'I think you are right.'},
+    {id:'v4',en:'take',pt:'pegar / levar / tomar',tag:'verb',phonetic:'/teɪk/',example:'Take your time.'},
+    {id:'v5',en:'give',pt:'dar / entregar',tag:'verb',phonetic:'/ɡɪv/',example:'Can you give me a hand?'},
+    {id:'v6',en:'want',pt:'querer / desejar',tag:'verb',phonetic:'/wɒnt/',example:'What do you want to eat?'},
+    {id:'v7',en:'need',pt:'precisar / necessitar',tag:'verb',phonetic:'/niːd/',example:'I need more information.'},
+    {id:'v8',en:'feel',pt:'sentir / se sentir',tag:'verb',phonetic:'/fiːl/',example:'How do you feel today?'},
+    {id:'v9',en:'become',pt:'tornar-se / virar',tag:'verb',phonetic:'/bɪˈkʌm/',example:'She wants to become a doctor.'},
+    {id:'v10',en:'leave',pt:'sair / partir / deixar',tag:'verb',phonetic:'/liːv/',example:'I have to leave at 5pm.'},
+    {id:'v11',en:'put',pt:'colocar / pôr',tag:'verb',phonetic:'/pʊt/',example:'Put the book on the shelf.'},
+    {id:'v12',en:'mean',pt:'significar / querer dizer',tag:'verb',phonetic:'/miːn/',example:'What does this word mean?'},
+    {id:'v13',en:'keep',pt:'manter / guardar / continuar',tag:'verb',phonetic:'/kiːp/',example:'Keep up the good work!'},
+    {id:'v14',en:'let',pt:'deixar / permitir',tag:'verb',phonetic:'/let/',example:'Let me explain.'},
+    {id:'v15',en:'begin',pt:'começar / iniciar',tag:'verb',phonetic:'/bɪˈɡɪn/',example:'Let\'s begin the lesson.'},
+    {id:'v16',en:'show',pt:'mostrar / exibir',tag:'verb',phonetic:'/ʃoʊ/',example:'Can you show me how?'},
+    {id:'v17',en:'hear',pt:'ouvir / escutar',tag:'verb',phonetic:'/hɪr/',example:'I can\'t hear you clearly.'},
+    {id:'v18',en:'play',pt:'jogar / brincar / tocar',tag:'verb',phonetic:'/pleɪ/',example:'Do you play any instrument?'},
+    {id:'v19',en:'run',pt:'correr / funcionar',tag:'verb',phonetic:'/rʌn/',example:'I run every morning.'},
+    {id:'v20',en:'move',pt:'mover / se mudar',tag:'verb',phonetic:'/muːv/',example:'We are going to move next month.'},
+    {id:'v21',en:'live',pt:'viver / morar',tag:'verb',phonetic:'/lɪv/',example:'Where do you live?'},
+    {id:'v22',en:'believe',pt:'acreditar / crer',tag:'verb',phonetic:'/bɪˈliːv/',example:'I believe in you.'},
+    {id:'v23',en:'hold',pt:'segurar / manter / esperar',tag:'verb',phonetic:'/hoʊld/',example:'Hold on a second.'},
+    {id:'v24',en:'bring',pt:'trazer',tag:'verb',phonetic:'/brɪŋ/',example:'Bring your ID tomorrow.'},
+    {id:'v25',en:'happen',pt:'acontecer / ocorrer',tag:'verb',phonetic:'/ˈhæpən/',example:'What happened to you?'},
+    {id:'v26',en:'must',pt:'dever / ter que (obrigação)',tag:'modal',phonetic:'/mʌst/',example:'You must wear a seatbelt.'},
+    {id:'v27',en:'should',pt:'deveria / devia',tag:'modal',phonetic:'/ʃʊd/',example:'You should see a doctor.'},
+    {id:'v28',en:'try',pt:'tentar / experimentar',tag:'verb',phonetic:'/traɪ/',example:'Try to be more patient.'},
+    {id:'v29',en:'ask',pt:'perguntar / pedir',tag:'verb',phonetic:'/æsk/',example:'Don\'t be afraid to ask.'},
+    {id:'v30',en:'need',pt:'precisar / necessitar',tag:'verb',phonetic:'/niːd/',example:'I need your help.'},
+    {id:'v31',en:'seem',pt:'parecer / aparentar',tag:'verb',phonetic:'/siːm/',example:'You seem tired today.'},
+    {id:'v32',en:'tell',pt:'contar / dizer / falar',tag:'verb',phonetic:'/tel/',example:'Tell me the truth.'},
+    {id:'v33',en:'work',pt:'trabalhar / funcionar',tag:'verb',phonetic:'/wɜːrk/',example:'Does this plan work?'},
+    {id:'v34',en:'turn',pt:'virar / girar / tornar-se',tag:'verb',phonetic:'/tɜːrn/',example:'Turn left at the corner.'},
+    {id:'v35',en:'start',pt:'começar / iniciar',tag:'verb',phonetic:'/stɑːrt/',example:'When does the movie start?'},
+    {id:'v36',en:'might',pt:'poderia / talvez (possibilidade)',tag:'modal',phonetic:'/maɪt/',example:'It might rain tomorrow.'},
+    {id:'v37',en:'open',pt:'abrir / aberto',tag:'verb',phonetic:'/ˈoʊpən/',example:'Can you open the window?'},
+    {id:'v38',en:'close',pt:'fechar / perto',tag:'verb',phonetic:'/kloʊz/',example:'Please close the door.'},
+    {id:'v39',en:'wait',pt:'esperar',tag:'verb',phonetic:'/weɪt/',example:'Wait for me, please!'},
+    {id:'v40',en:'help',pt:'ajudar / socorro',tag:'verb',phonetic:'/help/',example:'Can you help me?'},
+    {id:'v41',en:'talk',pt:'falar / conversar',tag:'verb',phonetic:'/tɔːk/',example:'We need to talk.'},
+    {id:'v42',en:'stand',pt:'ficar de pé / suportar',tag:'verb',phonetic:'/stænd/',example:'I can\'t stand the noise.'},
+    {id:'v43',en:'lose',pt:'perder',tag:'verb',phonetic:'/luːz/',example:'Don\'t lose your keys.'},
+    {id:'v44',en:'pay',pt:'pagar',tag:'verb',phonetic:'/peɪ/',example:'I\'ll pay for dinner.'},
+    {id:'v45',en:'meet',pt:'encontrar / conhecer',tag:'verb',phonetic:'/miːt/',example:'Nice to meet you!'},
+    {id:'v46',en:'include',pt:'incluir',tag:'verb',phonetic:'/ɪnˈkluːd/',example:'Does the price include tax?'},
+    {id:'v47',en:'continue',pt:'continuar',tag:'verb',phonetic:'/kənˈtɪnjuː/',example:'Please continue your story.'},
+    {id:'v48',en:'set',pt:'definir / colocar / conjunto',tag:'verb',phonetic:'/set/',example:'Set a goal for yourself.'},
+    {id:'v49',en:'learn',pt:'aprender',tag:'verb',phonetic:'/lɜːrn/',example:'I want to learn Spanish.'},
+    {id:'v50',en:'change',pt:'mudar / trocar / mudança',tag:'verb',phonetic:'/tʃeɪndʒ/',example:'Things change over time.'},
+    {id:'v51',en:'lead',pt:'liderar / levar / conduzir',tag:'verb',phonetic:'/liːd/',example:'She leads the team well.'},
+    {id:'v52',en:'understand',pt:'entender / compreender',tag:'verb',phonetic:'/ˌʌndərˈstænd/',example:'Do you understand?'},
+    {id:'v53',en:'watch',pt:'assistir / observar / relógio',tag:'verb',phonetic:'/wɒtʃ/',example:'I love to watch movies.'},
+    {id:'v54',en:'follow',pt:'seguir / acompanhar',tag:'verb',phonetic:'/ˈfɒloʊ/',example:'Follow the instructions.'},
+    {id:'v55',en:'stop',pt:'parar / cessar',tag:'verb',phonetic:'/stɒp/',example:'Stop talking and listen.'},
+    {id:'v56',en:'create',pt:'criar / desenvolver',tag:'verb',phonetic:'/kriˈeɪt/',example:'Let\'s create something new.'},
+    {id:'v57',en:'speak',pt:'falar (idioma/formal)',tag:'verb',phonetic:'/spiːk/',example:'Do you speak Portuguese?'},
+    {id:'v58',en:'read',pt:'ler',tag:'verb',phonetic:'/riːd/',example:'I read every night.'},
+    {id:'v59',en:'spend',pt:'gastar / passar (tempo)',tag:'verb',phonetic:'/spend/',example:'I spend too much money.'},
+    {id:'v60',en:'grow',pt:'crescer / cultivar',tag:'verb',phonetic:'/ɡroʊ/',example:'Children grow so fast.'},
+  ],
+
+  adjectives: [
+    {id:'a1',en:'good',pt:'bom / boa',tag:'adjective',phonetic:'/ɡʊd/',example:'That\'s a good idea!'},
+    {id:'a2',en:'new',pt:'novo / nova',tag:'adjective',phonetic:'/njuː/',example:'I have a new phone.'},
+    {id:'a3',en:'first',pt:'primeiro / primeira',tag:'adjective',phonetic:'/fɜːrst/',example:'This is my first visit.'},
+    {id:'a4',en:'last',pt:'último / passado',tag:'adjective',phonetic:'/lɑːst/',example:'I saw her last week.'},
+    {id:'a5',en:'long',pt:'longo / comprido',tag:'adjective',phonetic:'/lɒŋ/',example:'It was a long journey.'},
+    {id:'a6',en:'great',pt:'ótimo / grande / excelente',tag:'adjective',phonetic:'/ɡreɪt/',example:'You did a great job!'},
+    {id:'a7',en:'little',pt:'pequeno / pouco',tag:'adjective',phonetic:'/ˈlɪtəl/',example:'I have a little time.'},
+    {id:'a8',en:'own',pt:'próprio / de si mesmo',tag:'adjective',phonetic:'/oʊn/',example:'She has her own business.'},
+    {id:'a9',en:'right',pt:'certo / correto / direito',tag:'adjective',phonetic:'/raɪt/',example:'You are absolutely right.'},
+    {id:'a10',en:'big',pt:'grande / enorme',tag:'adjective',phonetic:'/bɪɡ/',example:'That\'s a big decision.'},
+    {id:'a11',en:'high',pt:'alto / elevado',tag:'adjective',phonetic:'/haɪ/',example:'The prices are too high.'},
+    {id:'a12',en:'small',pt:'pequeno / menor',tag:'adjective',phonetic:'/smɔːl/',example:'It\'s a small world.'},
+    {id:'a13',en:'large',pt:'grande / amplo',tag:'adjective',phonetic:'/lɑːrdʒ/',example:'We need a larger room.'},
+    {id:'a14',en:'next',pt:'próximo / seguinte',tag:'adjective',phonetic:'/nekst/',example:'See you next Monday.'},
+    {id:'a15',en:'early',pt:'cedo / antecipado',tag:'adjective',phonetic:'/ˈɜːrli/',example:'I wake up early every day.'},
+    {id:'a16',en:'young',pt:'jovem / novo',tag:'adjective',phonetic:'/jʌŋ/',example:'She looks very young.'},
+    {id:'a17',en:'important',pt:'importante',tag:'adjective',phonetic:'/ɪmˈpɔːrtənt/',example:'This is very important.'},
+    {id:'a18',en:'public',pt:'público',tag:'adjective',phonetic:'/ˈpʌblɪk/',example:'It\'s a public holiday.'},
+    {id:'a19',en:'private',pt:'privado / particular',tag:'adjective',phonetic:'/ˈpraɪvɪt/',example:'This is a private matter.'},
+    {id:'a20',en:'real',pt:'real / verdadeiro',tag:'adjective',phonetic:'/riːl/',example:'Is this a real diamond?'},
+    {id:'a21',en:'best',pt:'melhor / o melhor',tag:'adjective',phonetic:'/best/',example:'She is my best friend.'},
+    {id:'a22',en:'free',pt:'livre / grátis',tag:'adjective',phonetic:'/friː/',example:'Is this service free?'},
+    {id:'a23',en:'sure',pt:'certo / com certeza',tag:'adjective',phonetic:'/ʃʊr/',example:'Are you sure about that?'},
+    {id:'a24',en:'hard',pt:'difícil / duro / muito',tag:'adjective',phonetic:'/hɑːrd/',example:'This exam is very hard.'},
+    {id:'a25',en:'easy',pt:'fácil / simples',tag:'adjective',phonetic:'/ˈiːzi/',example:'It\'s easier than I thought.'},
+    {id:'a26',en:'different',pt:'diferente',tag:'adjective',phonetic:'/ˈdɪfrənt/',example:'We have different opinions.'},
+    {id:'a27',en:'possible',pt:'possível',tag:'adjective',phonetic:'/ˈpɒsɪbəl/',example:'Is it possible to change?'},
+    {id:'a28',en:'happy',pt:'feliz / contente',tag:'adjective',phonetic:'/ˈhæpi/',example:'I am so happy for you!'},
+    {id:'a29',en:'sad',pt:'triste',tag:'adjective',phonetic:'/sæd/',example:'Why do you look so sad?'},
+    {id:'a30',en:'tired',pt:'cansado',tag:'adjective',phonetic:'/ˈtaɪərd/',example:'I\'m really tired today.'},
+    {id:'a31',en:'busy',pt:'ocupado / movimentado',tag:'adjective',phonetic:'/ˈbɪzi/',example:'I\'m too busy right now.'},
+    {id:'a32',en:'ready',pt:'pronto / preparado',tag:'adjective',phonetic:'/ˈredi/',example:'Are you ready to go?'},
+    {id:'a33',en:'wrong',pt:'errado / incorreto',tag:'adjective',phonetic:'/rɒŋ/',example:'Something is wrong here.'},
+    {id:'a34',en:'late',pt:'tarde / atrasado',tag:'adjective',phonetic:'/leɪt/',example:'Sorry, I\'m late!'},
+    {id:'a35',en:'old',pt:'velho / antigo / idoso',tag:'adjective',phonetic:'/oʊld/',example:'This is an old tradition.'},
+    {id:'a36',en:'full',pt:'cheio / completo',tag:'adjective',phonetic:'/fʊl/',example:'The room is full.'},
+    {id:'a37',en:'open',pt:'aberto',tag:'adjective',phonetic:'/ˈoʊpən/',example:'The store is open now.'},
+    {id:'a38',en:'clear',pt:'claro / evidente',tag:'adjective',phonetic:'/klɪr/',example:'Is that clear to everyone?'},
+    {id:'a39',en:'strong',pt:'forte',tag:'adjective',phonetic:'/strɒŋ/',example:'You need to be strong.'},
+    {id:'a40',en:'beautiful',pt:'bonito / lindo',tag:'adjective',phonetic:'/ˈbjuːtɪfəl/',example:'What a beautiful day!'},
+    {id:'a41',en:'interesting',pt:'interessante',tag:'adjective',phonetic:'/ˈɪntrəstɪŋ/',example:'That\'s very interesting.'},
+    {id:'a42',en:'difficult',pt:'difícil',tag:'adjective',phonetic:'/ˈdɪfɪkəlt/',example:'This is a difficult problem.'},
+    {id:'a43',en:'necessary',pt:'necessário',tag:'adjective',phonetic:'/ˈnesəseri/',example:'Is it necessary to go?'},
+    {id:'a44',en:'special',pt:'especial',tag:'adjective',phonetic:'/ˈspeʃəl/',example:'Today is a special day.'},
+    {id:'a45',en:'common',pt:'comum / frequente',tag:'adjective',phonetic:'/ˈkɒmən/',example:'This is a common mistake.'},
+    {id:'a46',en:'available',pt:'disponível',tag:'adjective',phonetic:'/əˈveɪləbəl/',example:'Is the room available?'},
+    {id:'a47',en:'enough',pt:'suficiente / bastante',tag:'adjective',phonetic:'/ɪˈnʌf/',example:'I have enough money.'},
+    {id:'a48',en:'alone',pt:'sozinho / só',tag:'adjective',phonetic:'/əˈloʊn/',example:'I prefer to work alone.'},
+    {id:'a49',en:'afraid',pt:'com medo / assustado',tag:'adjective',phonetic:'/əˈfreɪd/',example:'Don\'t be afraid to try.'},
+    {id:'a50',en:'able',pt:'capaz / hábil',tag:'adjective',phonetic:'/ˈeɪbəl/',example:'Are you able to help me?'},
+  ],
+
+  phrasalVerbs: [
+    {id:'pv1',en:'give up',pt:'desistir / abandonar',tag:'phrasal verb',phonetic:'/ɡɪv ʌp/',example:'Don\'t give up on your dreams!'},
+    {id:'pv2',en:'look up',pt:'pesquisar / procurar',tag:'phrasal verb',phonetic:'/lʊk ʌp/',example:'Look up the word in the dictionary.'},
+    {id:'pv3',en:'find out',pt:'descobrir / saber',tag:'phrasal verb',phonetic:'/faɪnd aʊt/',example:'I need to find out the truth.'},
+    {id:'pv4',en:'come back',pt:'voltar / retornar',tag:'phrasal verb',phonetic:'/kʌm bæk/',example:'When will you come back?'},
+    {id:'pv5',en:'go on',pt:'continuar / acontecer',tag:'phrasal verb',phonetic:'/ɡoʊ ɒn/',example:'Please go on with your story.'},
+    {id:'pv6',en:'take off',pt:'decolar / tirar (roupa)',tag:'phrasal verb',phonetic:'/teɪk ɒf/',example:'The plane will take off soon.'},
+    {id:'pv7',en:'put on',pt:'colocar / vestir',tag:'phrasal verb',phonetic:'/pʊt ɒn/',example:'Put on your jacket, it\'s cold.'},
+    {id:'pv8',en:'turn on',pt:'ligar / acender',tag:'phrasal verb',phonetic:'/tɜːrn ɒn/',example:'Turn on the lights, please.'},
+    {id:'pv9',en:'turn off',pt:'desligar / apagar',tag:'phrasal verb',phonetic:'/tɜːrn ɒf/',example:'Turn off your phone in class.'},
+    {id:'pv10',en:'pick up',pt:'pegar / buscar / aprender',tag:'phrasal verb',phonetic:'/pɪk ʌp/',example:'Can you pick me up at 8?'},
+    {id:'pv11',en:'set up',pt:'configurar / montar / criar',tag:'phrasal verb',phonetic:'/set ʌp/',example:'Let\'s set up a meeting.'},
+    {id:'pv12',en:'show up',pt:'aparecer / chegar',tag:'phrasal verb',phonetic:'/ʃoʊ ʌp/',example:'He didn\'t show up to the party.'},
+    {id:'pv13',en:'break up',pt:'terminar (relacionamento)',tag:'phrasal verb',phonetic:'/breɪk ʌp/',example:'They broke up last month.'},
+    {id:'pv14',en:'break down',pt:'quebrar / ter colapso',tag:'phrasal verb',phonetic:'/breɪk daʊn/',example:'My car broke down on the way.'},
+    {id:'pv15',en:'get up',pt:'levantar / acordar',tag:'phrasal verb',phonetic:'/ɡet ʌp/',example:'I get up at 6am every day.'},
+    {id:'pv16',en:'get along',pt:'se dar bem / conviver',tag:'phrasal verb',phonetic:'/ɡet əˈlɒŋ/',example:'Do you get along with your boss?'},
+    {id:'pv17',en:'get over',pt:'superar / se recuperar',tag:'phrasal verb',phonetic:'/ɡet ˈoʊvər/',example:'It takes time to get over a loss.'},
+    {id:'pv18',en:'get rid of',pt:'se livrar de',tag:'phrasal verb',phonetic:'/ɡet rɪd ɒv/',example:'I need to get rid of old clothes.'},
+    {id:'pv19',en:'look forward to',pt:'estar ansioso por',tag:'phrasal verb',phonetic:'/lʊk ˈfɔːrwərd tuː/',example:'I look forward to seeing you.'},
+    {id:'pv20',en:'look after',pt:'cuidar de',tag:'phrasal verb',phonetic:'/lʊk ˈɑːftər/',example:'Can you look after my dog?'},
+    {id:'pv21',en:'look out',pt:'tomar cuidado / prestar atenção',tag:'phrasal verb',phonetic:'/lʊk aʊt/',example:'Look out! There\'s a car coming!'},
+    {id:'pv22',en:'run out of',pt:'ficar sem / acabar',tag:'phrasal verb',phonetic:'/rʌn aʊt ɒv/',example:'We ran out of coffee.'},
+    {id:'pv23',en:'run into',pt:'encontrar por acaso',tag:'phrasal verb',phonetic:'/rʌn ˈɪntuː/',example:'I ran into an old friend today.'},
+    {id:'pv24',en:'carry on',pt:'continuar / prosseguir',tag:'phrasal verb',phonetic:'/ˈkæri ɒn/',example:'Carry on with your work.'},
+    {id:'pv25',en:'carry out',pt:'realizar / executar',tag:'phrasal verb',phonetic:'/ˈkæri aʊt/',example:'We need to carry out the plan.'},
+    {id:'pv26',en:'bring up',pt:'criar (filho) / mencionar',tag:'phrasal verb',phonetic:'/brɪŋ ʌp/',example:'Don\'t bring up that topic again.'},
+    {id:'pv27',en:'come up with',pt:'pensar em / criar',tag:'phrasal verb',phonetic:'/kʌm ʌp wɪð/',example:'She came up with a great idea.'},
+    {id:'pv28',en:'deal with',pt:'lidar com / tratar de',tag:'phrasal verb',phonetic:'/diːl wɪð/',example:'How do you deal with stress?'},
+    {id:'pv29',en:'end up',pt:'acabar / terminar em',tag:'phrasal verb',phonetic:'/end ʌp/',example:'We ended up staying home.'},
+    {id:'pv30',en:'figure out',pt:'descobrir / entender',tag:'phrasal verb',phonetic:'/ˈfɪɡjər aʊt/',example:'I can\'t figure out this problem.'},
+    {id:'pv31',en:'fill in',pt:'preencher / substituir',tag:'phrasal verb',phonetic:'/fɪl ɪn/',example:'Fill in the blanks.'},
+    {id:'pv32',en:'fill out',pt:'preencher (formulário)',tag:'phrasal verb',phonetic:'/fɪl aʊt/',example:'Please fill out this form.'},
+    {id:'pv33',en:'go ahead',pt:'prosseguir / pode ir',tag:'phrasal verb',phonetic:'/ɡoʊ əˈhed/',example:'Go ahead, I\'m listening.'},
+    {id:'pv34',en:'go through',pt:'passar por / revisar',tag:'phrasal verb',phonetic:'/ɡoʊ θruː/',example:'Let\'s go through the plan again.'},
+    {id:'pv35',en:'hang on',pt:'esperar / aguentar',tag:'phrasal verb',phonetic:'/hæŋ ɒn/',example:'Hang on, I\'ll be right back.'},
+    {id:'pv36',en:'hold on',pt:'esperar / segurar',tag:'phrasal verb',phonetic:'/hoʊld ɒn/',example:'Hold on, let me check.'},
+    {id:'pv37',en:'keep up',pt:'manter o ritmo / acompanhar',tag:'phrasal verb',phonetic:'/kiːp ʌp/',example:'Keep up the great work!'},
+    {id:'pv38',en:'make up',pt:'inventar / se maquiar / compensar',tag:'phrasal verb',phonetic:'/meɪk ʌp/',example:'Don\'t make up excuses.'},
+    {id:'pv39',en:'make out',pt:'entender / distinguir',tag:'phrasal verb',phonetic:'/meɪk aʊt/',example:'I can\'t make out what he said.'},
+    {id:'pv40',en:'move on',pt:'seguir em frente',tag:'phrasal verb',phonetic:'/muːv ɒn/',example:'It\'s time to move on.'},
+    {id:'pv41',en:'point out',pt:'apontar / indicar',tag:'phrasal verb',phonetic:'/pɔɪnt aʊt/',example:'She pointed out my mistake.'},
+    {id:'pv42',en:'put off',pt:'adiar / procrastinar',tag:'phrasal verb',phonetic:'/pʊt ɒf/',example:'Don\'t put off what you can do today.'},
+    {id:'pv43',en:'put up with',pt:'aguentar / tolerar',tag:'phrasal verb',phonetic:'/pʊt ʌp wɪð/',example:'I can\'t put up with this noise.'},
+    {id:'pv44',en:'take over',pt:'assumir / tomar conta',tag:'phrasal verb',phonetic:'/teɪk ˈoʊvər/',example:'She will take over the project.'},
+    {id:'pv45',en:'take part in',pt:'participar de',tag:'phrasal verb',phonetic:'/teɪk pɑːrt ɪn/',example:'I want to take part in the event.'},
+    {id:'pv46',en:'think about',pt:'pensar sobre / considerar',tag:'phrasal verb',phonetic:'/θɪŋk əˈbaʊt/',example:'Think about what I said.'},
+    {id:'pv47',en:'throw away',pt:'jogar fora / descartar',tag:'phrasal verb',phonetic:'/θroʊ əˈweɪ/',example:'Don\'t throw away that receipt.'},
+    {id:'pv48',en:'turn up',pt:'aparecer / aumentar (volume)',tag:'phrasal verb',phonetic:'/tɜːrn ʌp/',example:'Turn up the music!'},
+    {id:'pv49',en:'work out',pt:'resolver / malhar / dar certo',tag:'phrasal verb',phonetic:'/wɜːrk aʊt/',example:'I hope it works out for you.'},
+    {id:'pv50',en:'write down',pt:'anotar / escrever',tag:'phrasal verb',phonetic:'/raɪt daʊn/',example:'Write down the key points.'},
+    {id:'pv51',en:'call off',pt:'cancelar',tag:'phrasal verb',phonetic:'/kɔːl ɒf/',example:'They called off the meeting.'},
+    {id:'pv52',en:'check in',pt:'fazer check-in / registrar',tag:'phrasal verb',phonetic:'/tʃek ɪn/',example:'Check in at the hotel by 3pm.'},
+    {id:'pv53',en:'check out',pt:'fazer check-out / conferir',tag:'phrasal verb',phonetic:'/tʃek aʊt/',example:'Check out this amazing video!'},
+    {id:'pv54',en:'come across',pt:'encontrar por acaso / parecer',tag:'phrasal verb',phonetic:'/kʌm əˈkrɒs/',example:'I came across an old photo.'},
+    {id:'pv55',en:'count on',pt:'contar com / depender de',tag:'phrasal verb',phonetic:'/kaʊnt ɒn/',example:'You can count on me.'},
+    {id:'pv56',en:'cut down on',pt:'reduzir / diminuir',tag:'phrasal verb',phonetic:'/kʌt daʊn ɒn/',example:'I need to cut down on sugar.'},
+    {id:'pv57',en:'drop off',pt:'deixar / entregar / adormecer',tag:'phrasal verb',phonetic:'/drɒp ɒf/',example:'Can you drop me off here?'},
+    {id:'pv58',en:'fall apart',pt:'desmoronar / se desfazer',tag:'phrasal verb',phonetic:'/fɔːl əˈpɑːrt/',example:'Everything is falling apart.'},
+    {id:'pv59',en:'give in',pt:'ceder / desistir',tag:'phrasal verb',phonetic:'/ɡɪv ɪn/',example:'Don\'t give in to pressure.'},
+    {id:'pv60',en:'go back',pt:'voltar / retornar',tag:'phrasal verb',phonetic:'/ɡoʊ bæk/',example:'I want to go back home.'},
+  ],
+
+  prepositions: [
+    {id:'prep1',en:'in',pt:'em / dentro de / em (mês/ano)',tag:'preposition',phonetic:'/ɪn/',example:'I was born in 1990.'},
+    {id:'prep2',en:'on',pt:'em / sobre / em (dia)',tag:'preposition',phonetic:'/ɒn/',example:'The meeting is on Monday.'},
+    {id:'prep3',en:'at',pt:'em / às (hora/lugar específico)',tag:'preposition',phonetic:'/æt/',example:'I\'ll see you at noon.'},
+    {id:'prep4',en:'for',pt:'para / por / durante',tag:'preposition',phonetic:'/fɔːr/',example:'I\'ve been waiting for an hour.'},
+    {id:'prep5',en:'with',pt:'com',tag:'preposition',phonetic:'/wɪð/',example:'I went with my family.'},
+    {id:'prep6',en:'about',pt:'sobre / acerca de',tag:'preposition',phonetic:'/əˈbaʊt/',example:'We talked about the project.'},
+    {id:'prep7',en:'from',pt:'de / desde / vindo de',tag:'preposition',phonetic:'/frɒm/',example:'She is from Argentina.'},
+    {id:'prep8',en:'to',pt:'para / a / até',tag:'preposition',phonetic:'/tuː/',example:'I\'m going to the store.'},
+    {id:'prep9',en:'of',pt:'de / do / da',tag:'preposition',phonetic:'/ɒv/',example:'A piece of cake, please.'},
+    {id:'prep10',en:'by',pt:'por / perto de / até (prazo)',tag:'preposition',phonetic:'/baɪ/',example:'Finish it by Friday.'},
+    {id:'prep11',en:'into',pt:'para dentro de',tag:'preposition',phonetic:'/ˈɪntuː/',example:'She walked into the room.'},
+    {id:'prep12',en:'through',pt:'através de / por',tag:'preposition',phonetic:'/θruː/',example:'We drove through the tunnel.'},
+    {id:'prep13',en:'during',pt:'durante',tag:'preposition',phonetic:'/ˈdjʊərɪŋ/',example:'Don\'t talk during the movie.'},
+    {id:'prep14',en:'before',pt:'antes de / antes',tag:'preposition',phonetic:'/bɪˈfɔːr/',example:'Wash your hands before eating.'},
+    {id:'prep15',en:'after',pt:'depois de / após',tag:'preposition',phonetic:'/ˈɑːftər/',example:'Let\'s talk after the meeting.'},
+    {id:'prep16',en:'between',pt:'entre (dois)',tag:'preposition',phonetic:'/bɪˈtwiːn/',example:'Choose between these two options.'},
+    {id:'prep17',en:'among',pt:'entre (vários)',tag:'preposition',phonetic:'/əˈmʌŋ/',example:'She is popular among students.'},
+    {id:'prep18',en:'without',pt:'sem',tag:'preposition',phonetic:'/wɪˈðaʊt/',example:'I can\'t live without music.'},
+    {id:'prep19',en:'against',pt:'contra / em oposição a',tag:'preposition',phonetic:'/əˈɡenst/',example:'Are you for or against it?'},
+    {id:'prep20',en:'around',pt:'ao redor de / por volta de',tag:'preposition',phonetic:'/əˈraʊnd/',example:'I\'ll be there around 7pm.'},
+    {id:'prep21',en:'behind',pt:'atrás de',tag:'preposition',phonetic:'/bɪˈhaɪnd/',example:'The keys are behind the door.'},
+    {id:'prep22',en:'beside',pt:'ao lado de',tag:'preposition',phonetic:'/bɪˈsaɪd/',example:'Sit beside me.'},
+    {id:'prep23',en:'beyond',pt:'além de',tag:'preposition',phonetic:'/biˈɒnd/',example:'This is beyond my expectations.'},
+    {id:'prep24',en:'despite',pt:'apesar de',tag:'preposition',phonetic:'/dɪˈspaɪt/',example:'Despite the rain, we went out.'},
+    {id:'prep25',en:'except',pt:'exceto / menos',tag:'preposition',phonetic:'/ɪkˈsept/',example:'Everyone came except John.'},
+    {id:'prep26',en:'inside',pt:'dentro de / no interior',tag:'preposition',phonetic:'/ɪnˈsaɪd/',example:'Wait inside the building.'},
+    {id:'prep27',en:'outside',pt:'fora de / do lado de fora',tag:'preposition',phonetic:'/ˌaʊtˈsaɪd/',example:'Let\'s eat outside today.'},
+    {id:'prep28',en:'since',pt:'desde / já que',tag:'preposition',phonetic:'/sɪns/',example:'I\'ve been here since Monday.'},
+    {id:'prep29',en:'until',pt:'até (tempo)',tag:'preposition',phonetic:'/ənˈtɪl/',example:'Wait until I get back.'},
+    {id:'prep30',en:'toward',pt:'em direção a / para',tag:'preposition',phonetic:'/tɔːrd/',example:'She walked toward the exit.'},
+  ],
+
+  expressions: [
+    {id:'e1',en:'How are you?',pt:'Como você está?',tag:'expression',phonetic:'',example:'— How are you? — I\'m fine, thanks!'},
+    {id:'e2',en:'Nice to meet you',pt:'Prazer em conhecê-lo(a)',tag:'expression',phonetic:'',example:'Nice to meet you, I\'m Ana.'},
+    {id:'e3',en:'What do you mean?',pt:'O que você quer dizer?',tag:'expression',phonetic:'',example:'What do you mean by that?'},
+    {id:'e4',en:'I agree',pt:'Eu concordo',tag:'expression',phonetic:'',example:'I totally agree with you.'},
+    {id:'e5',en:'I disagree',pt:'Eu discordo',tag:'expression',phonetic:'',example:'I\'m sorry, but I disagree.'},
+    {id:'e6',en:'That makes sense',pt:'Isso faz sentido',tag:'expression',phonetic:'',example:'Yes, that makes sense now.'},
+    {id:'e7',en:'I\'m not sure',pt:'Não tenho certeza',tag:'expression',phonetic:'',example:'I\'m not sure about that.'},
+    {id:'e8',en:'Could you repeat that?',pt:'Você poderia repetir?',tag:'expression',phonetic:'',example:'Sorry, could you repeat that?'},
+    {id:'e9',en:'I don\'t understand',pt:'Eu não entendo',tag:'expression',phonetic:'',example:'I don\'t understand this part.'},
+    {id:'e10',en:'Can you explain?',pt:'Você pode explicar?',tag:'expression',phonetic:'',example:'Can you explain what you mean?'},
+    {id:'e11',en:'In my opinion',pt:'Na minha opinião',tag:'expression',phonetic:'',example:'In my opinion, this is wrong.'},
+    {id:'e12',en:'As far as I know',pt:'Até onde eu sei',tag:'expression',phonetic:'',example:'As far as I know, he left.'},
+    {id:'e13',en:'By the way',pt:'A propósito / Por sinal',tag:'expression',phonetic:'',example:'By the way, did you call her?'},
+    {id:'e14',en:'On the other hand',pt:'Por outro lado',tag:'expression',phonetic:'',example:'On the other hand, it could work.'},
+    {id:'e15',en:'In fact',pt:'Na verdade / De fato',tag:'expression',phonetic:'',example:'In fact, I already knew that.'},
+    {id:'e16',en:'For example',pt:'Por exemplo',tag:'expression',phonetic:'',example:'For example, you could say...'},
+    {id:'e17',en:'Such as',pt:'Como / Tal como',tag:'expression',phonetic:'',example:'I like sports such as tennis.'},
+    {id:'e18',en:'As a result',pt:'Como resultado / Portanto',tag:'expression',phonetic:'',example:'As a result, we lost the deal.'},
+    {id:'e19',en:'In addition',pt:'Além disso / Adicionalmente',tag:'expression',phonetic:'',example:'In addition, we need more time.'},
+    {id:'e20',en:'On the contrary',pt:'Pelo contrário',tag:'expression',phonetic:'',example:'On the contrary, I loved it.'},
+    {id:'e21',en:'What\'s up?',pt:'E aí? / O que há?',tag:'expression',phonetic:'',example:'Hey! What\'s up?'},
+    {id:'e22',en:'Take it easy',pt:'Relaxa / Vai com calma',tag:'expression',phonetic:'',example:'Take it easy, it\'s not a big deal.'},
+    {id:'e23',en:'Never mind',pt:'Deixa pra lá / Não importa',tag:'expression',phonetic:'',example:'Never mind, I\'ll do it myself.'},
+    {id:'e24',en:'It depends',pt:'Depende',tag:'expression',phonetic:'',example:'It depends on the situation.'},
+    {id:'e25',en:'That\'s right',pt:'Isso mesmo / Exatamente',tag:'expression',phonetic:'',example:'Yes, that\'s right!'},
+    {id:'e26',en:'Not at all',pt:'De jeito nenhum / Imagina',tag:'expression',phonetic:'',example:'— Thank you! — Not at all!'},
+    {id:'e27',en:'Of course',pt:'Claro / Com certeza',tag:'expression',phonetic:'',example:'Of course I\'ll help you!'},
+    {id:'e28',en:'No wonder',pt:'Não é de se admirar',tag:'expression',phonetic:'',example:'No wonder she was upset.'},
+    {id:'e29',en:'So far so good',pt:'Até agora tudo bem',tag:'expression',phonetic:'',example:'How\'s the project? So far so good.'},
+    {id:'e30',en:'Keep in mind',pt:'Tenha em mente / Lembre-se',tag:'expression',phonetic:'',example:'Keep in mind the deadline.'},
+    {id:'e31',en:'At least',pt:'Pelo menos',tag:'expression',phonetic:'',example:'At least try to understand.'},
+    {id:'e32',en:'After all',pt:'Afinal / No final das contas',tag:'expression',phonetic:'',example:'After all, it wasn\'t that bad.'},
+    {id:'e33',en:'As soon as possible',pt:'O mais rápido possível',tag:'expression',phonetic:'',example:'Please reply as soon as possible.'},
+    {id:'e34',en:'Once in a while',pt:'De vez em quando',tag:'expression',phonetic:'',example:'I eat junk food once in a while.'},
+    {id:'e35',en:'All of a sudden',pt:'De repente / De súbito',tag:'expression',phonetic:'',example:'All of a sudden, it started raining.'},
+    {id:'e36',en:'On time',pt:'No horário / Pontualmente',tag:'expression',phonetic:'',example:'Please arrive on time.'},
+    {id:'e37',en:'In time',pt:'A tempo / Com antecedência',tag:'expression',phonetic:'',example:'We arrived in time for the show.'},
+    {id:'e38',en:'At the moment',pt:'No momento / Agora',tag:'expression',phonetic:'',example:'I\'m busy at the moment.'},
+    {id:'e39',en:'In the end',pt:'No final / Por fim',tag:'expression',phonetic:'',example:'In the end, everything worked out.'},
+    {id:'e40',en:'To be honest',pt:'Para ser honesto',tag:'expression',phonetic:'',example:'To be honest, I don\'t like it.'},
+    {id:'e41',en:'I\'m looking forward to',pt:'Estou ansioso(a) para',tag:'expression',phonetic:'',example:'I\'m looking forward to the trip.'},
+    {id:'e42',en:'It\'s worth it',pt:'Vale a pena',tag:'expression',phonetic:'',example:'Learning English is worth it.'},
+    {id:'e43',en:'Make up your mind',pt:'Tome uma decisão',tag:'expression',phonetic:'',example:'Make up your mind already!'},
+    {id:'e44',en:'Change your mind',pt:'Mudar de ideia',tag:'expression',phonetic:'',example:'Did you change your mind?'},
+    {id:'e45',en:'Keep an eye on',pt:'Ficar de olho em',tag:'expression',phonetic:'',example:'Keep an eye on the kids.'},
+    {id:'e46',en:'Break a leg',pt:'Boa sorte! (expressão)',tag:'expression',phonetic:'',example:'Break a leg at your presentation!'},
+    {id:'e47',en:'Hit the road',pt:'Pôr-se a caminho / Ir embora',tag:'expression',phonetic:'',example:'It\'s late, let\'s hit the road.'},
+    {id:'e48',en:'Under the weather',pt:'Indisposto / Mal de saúde',tag:'expression',phonetic:'',example:'I\'m feeling under the weather.'},
+    {id:'e49',en:'Once and for all',pt:'De uma vez por todas',tag:'expression',phonetic:'',example:'Let\'s solve this once and for all.'},
+    {id:'e50',en:'The sooner the better',pt:'Quanto antes, melhor',tag:'expression',phonetic:'',example:'Start studying — the sooner the better.'},
+  ],
+
+  connectors: [
+    {id:'c1',en:'however',pt:'no entanto / porém',tag:'connector',phonetic:'/haʊˈevər/',example:'I like it. However, it\'s expensive.'},
+    {id:'c2',en:'therefore',pt:'portanto / por isso',tag:'connector',phonetic:'/ˈðerfɔːr/',example:'She studied hard; therefore, she passed.'},
+    {id:'c3',en:'although',pt:'embora / apesar de',tag:'connector',phonetic:'/ɔːlˈðoʊ/',example:'Although it was late, we stayed.'},
+    {id:'c4',en:'because',pt:'porque / pois',tag:'connector',phonetic:'/bɪˈkɒz/',example:'I left because I was tired.'},
+    {id:'c5',en:'since',pt:'já que / uma vez que',tag:'connector',phonetic:'/sɪns/',example:'Since you\'re here, let\'s talk.'},
+    {id:'c6',en:'while',pt:'enquanto / ao passo que',tag:'connector',phonetic:'/waɪl/',example:'I listen to music while I work.'},
+    {id:'c7',en:'unless',pt:'a menos que / se não',tag:'connector',phonetic:'/ənˈles/',example:'I won\'t go unless you come too.'},
+    {id:'c8',en:'whereas',pt:'enquanto que / ao passo que',tag:'connector',phonetic:'/werˈæz/',example:'He is tall, whereas she is short.'},
+    {id:'c9',en:'furthermore',pt:'além disso / ademais',tag:'connector',phonetic:'/ˈfɜːrðərmɔːr/',example:'Furthermore, we need more data.'},
+    {id:'c10',en:'moreover',pt:'além disso / mais ainda',tag:'connector',phonetic:'/mɔːrˈoʊvər/',example:'Moreover, the cost is too high.'},
+    {id:'c11',en:'nevertheless',pt:'mesmo assim / contudo',tag:'connector',phonetic:'/ˌnevərðəˈles/',example:'It was hard; nevertheless, I did it.'},
+    {id:'c12',en:'consequently',pt:'consequentemente',tag:'connector',phonetic:'/ˈkɒnsɪkwəntli/',example:'Consequently, we had to cancel.'},
+    {id:'c13',en:'otherwise',pt:'caso contrário / senão',tag:'connector',phonetic:'/ˈʌðərwaɪz/',example:'Hurry up, otherwise we\'ll be late.'},
+    {id:'c14',en:'meanwhile',pt:'enquanto isso / nesse meio tempo',tag:'connector',phonetic:'/ˈmiːnwaɪl/',example:'Meanwhile, I\'ll prepare the report.'},
+    {id:'c15',en:'instead',pt:'em vez disso / ao invés',tag:'connector',phonetic:'/ɪnˈsted/',example:'Instead of coffee, I had tea.'},
+    {id:'c16',en:'besides',pt:'além disso / além de',tag:'connector',phonetic:'/bɪˈsaɪdz/',example:'Besides, I don\'t have time.'},
+    {id:'c17',en:'thus',pt:'assim / portanto / desse modo',tag:'connector',phonetic:'/ðʌs/',example:'Thus, we reached a conclusion.'},
+    {id:'c18',en:'yet',pt:'ainda / mas / porém',tag:'connector',phonetic:'/jet/',example:'It\'s simple, yet effective.'},
+    {id:'c19',en:'still',pt:'ainda / mesmo assim',tag:'connector',phonetic:'/stɪl/',example:'I still don\'t understand.'},
+    {id:'c20',en:'even though',pt:'mesmo que / embora',tag:'connector',phonetic:'/ˈiːvən ðoʊ/',example:'Even though it\'s hard, keep going.'},
+    {id:'c21',en:'as long as',pt:'desde que / contanto que',tag:'connector',phonetic:'/æz lɒŋ æz/',example:'As long as you try, it\'s fine.'},
+    {id:'c22',en:'in order to',pt:'a fim de / para',tag:'connector',phonetic:'/ɪn ˈɔːrdər tuː/',example:'Study in order to improve.'},
+    {id:'c23',en:'so that',pt:'para que / de modo que',tag:'connector',phonetic:'/soʊ ðæt/',example:'Speak slowly so that I understand.'},
+    {id:'c24',en:'as well as',pt:'assim como / bem como',tag:'connector',phonetic:'/æz wel æz/',example:'She speaks English as well as French.'},
+    {id:'c25',en:'not only... but also',pt:'não só... mas também',tag:'connector',phonetic:'',example:'Not only smart, but also kind.'},
+    {id:'c26',en:'on the one hand',pt:'por um lado',tag:'connector',phonetic:'',example:'On the one hand, it saves time.'},
+    {id:'c27',en:'in contrast',pt:'em contraste / por outro lado',tag:'connector',phonetic:'/ɪn ˈkɒntrɑːst/',example:'In contrast, the other option is cheaper.'},
+    {id:'c28',en:'in conclusion',pt:'em conclusão / concluindo',tag:'connector',phonetic:'/ɪn kənˈkluːʒən/',example:'In conclusion, we need to act now.'},
+    {id:'c29',en:'to sum up',pt:'em resumo / para resumir',tag:'connector',phonetic:'/tuː sʌm ʌp/',example:'To sum up, the plan is solid.'},
+    {id:'c30',en:'in other words',pt:'em outras palavras',tag:'connector',phonetic:'/ɪn ˈʌðər wɜːrdz/',example:'In other words, we failed.'},
+  ],
+
+  questions: [
+    {id:'q1',en:'What',pt:'O que / Qual',tag:'question word',phonetic:'/wɒt/',example:'What is your name?'},
+    {id:'q2',en:'Who',pt:'Quem',tag:'question word',phonetic:'/huː/',example:'Who called you?'},
+    {id:'q3',en:'Where',pt:'Onde / Aonde',tag:'question word',phonetic:'/wer/',example:'Where do you live?'},
+    {id:'q4',en:'When',pt:'Quando',tag:'question word',phonetic:'/wen/',example:'When is your birthday?'},
+    {id:'q5',en:'Why',pt:'Por que',tag:'question word',phonetic:'/waɪ/',example:'Why are you late?'},
+    {id:'q6',en:'How',pt:'Como / De que forma',tag:'question word',phonetic:'/haʊ/',example:'How do you do that?'},
+    {id:'q7',en:'Which',pt:'Qual / Quais (escolha)',tag:'question word',phonetic:'/wɪtʃ/',example:'Which color do you prefer?'},
+    {id:'q8',en:'Whose',pt:'De quem',tag:'question word',phonetic:'/huːz/',example:'Whose bag is this?'},
+    {id:'q9',en:'Whom',pt:'Quem (objeto)',tag:'question word',phonetic:'/huːm/',example:'Whom did you call?'},
+    {id:'q10',en:'How much',pt:'Quanto (incontável)',tag:'question word',phonetic:'/haʊ mʌtʃ/',example:'How much does it cost?'},
+    {id:'q11',en:'How many',pt:'Quantos / Quantas',tag:'question word',phonetic:'/haʊ ˈmeni/',example:'How many people are coming?'},
+    {id:'q12',en:'How long',pt:'Quanto tempo / Qual o comprimento',tag:'question word',phonetic:'/haʊ lɒŋ/',example:'How long have you been here?'},
+    {id:'q13',en:'How often',pt:'Com que frequência',tag:'question word',phonetic:'/haʊ ˈɒfən/',example:'How often do you exercise?'},
+    {id:'q14',en:'How far',pt:'Qual a distância / Quão longe',tag:'question word',phonetic:'/haʊ fɑːr/',example:'How far is the airport?'},
+    {id:'q15',en:'How old',pt:'Qual a idade / Quantos anos',tag:'question word',phonetic:'/haʊ oʊld/',example:'How old are you?'},
+    {id:'q16',en:'What time',pt:'Que horas / A que horas',tag:'question word',phonetic:'/wɒt taɪm/',example:'What time does it start?'},
+    {id:'q17',en:'What kind of',pt:'Que tipo de',tag:'question word',phonetic:'/wɒt kaɪnd ɒv/',example:'What kind of music do you like?'},
+    {id:'q18',en:'What about',pt:'E quanto a / Que tal',tag:'question word',phonetic:'/wɒt əˈbaʊt/',example:'What about tomorrow?'},
+    {id:'q19',en:'How come',pt:'Como assim / Por que (informal)',tag:'question word',phonetic:'/haʊ kʌm/',example:'How come you didn\'t tell me?'},
+    {id:'q20',en:'What for',pt:'Para quê / Com que finalidade',tag:'question word',phonetic:'/wɒt fɔːr/',example:'What is this tool for?'},
+    {id:'q21',en:'Do you...?',pt:'Você...? (pergunta simples)',tag:'question word',phonetic:'/duː juː/',example:'Do you speak English?'},
+    {id:'q22',en:'Did you...?',pt:'Você...? (passado)',tag:'question word',phonetic:'/dɪd juː/',example:'Did you finish your homework?'},
+    {id:'q23',en:'Have you ever...?',pt:'Você já...? (experiência)',tag:'question word',phonetic:'/hæv juː ˈevər/',example:'Have you ever been to Japan?'},
+    {id:'q24',en:'Would you like...?',pt:'Você gostaria de...?',tag:'question word',phonetic:'/wʊd juː laɪk/',example:'Would you like some coffee?'},
+    {id:'q25',en:'Could you please...?',pt:'Você poderia, por favor...?',tag:'question word',phonetic:'/kʊd juː pliːz/',example:'Could you please help me?'},
+  ],
+};
+
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+var state = {
+  player: localStorage.getItem('evq_name') || 'Student',
+  score: parseInt(localStorage.getItem('evq_score') || '0'),
+  games: parseInt(localStorage.getItem('evq_games') || '0'),
+  wordsLearned: parseInt(localStorage.getItem('evq_words') || '0'),
+  streak: parseInt(localStorage.getItem('evq_streak') || '0'),
+  lastPlay: localStorage.getItem('evq_lastplay') || '',
+  category: 'top100',
+  game: '',
+  fcIndex: 0, fcWords: [],
+  qWords: [], qIndex: 0, qScore: 0, qTimer: null, qTimeLeft: 15, qAnswered: false,
+  memCards: [], memFlipped: [], memMatched: 0, memMoves: 0, memLocked: false,
+  trWords: [], trIndex: 0, trScore: 0, trAnswered: false,
+};
+
+function saveState() {
+  localStorage.setItem('evq_name', state.player);
+  localStorage.setItem('evq_score', state.score);
+  localStorage.setItem('evq_games', state.games);
+  localStorage.setItem('evq_words', state.wordsLearned);
+  localStorage.setItem('evq_streak', state.streak);
+  localStorage.setItem('evq_lastplay', state.lastPlay);
+}
+
+// ════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function pick(arr, n) { return shuffle(arr).slice(0, n); }
+function speak(word) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(word);
+  u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1.0;
+  window.speechSynthesis.speak(u);
+}
+function playSound(type) {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if (type === 'correct') { osc.frequency.value = 523; osc.frequency.setTargetAtTime(784, ctx.currentTime, 0.1); }
+    else if (type === 'wrong') { osc.frequency.value = 220; osc.frequency.setTargetAtTime(165, ctx.currentTime, 0.1); }
+    else if (type === 'win') { osc.frequency.value = 523; osc.frequency.setTargetAtTime(1046, ctx.currentTime, 0.15); }
+    else { osc.frequency.value = 440; }
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+  } catch(e) {}
+}
+function confetti() {
+  var colors = ['#6366f1','#8b5cf6','#06b6d4','#10b981','#fbbf24','#ec4899','#f43f5e'];
+  for (var i = 0; i < 60; i++) {
+    (function(i) {
+      setTimeout(function() {
+        var el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
+        el.style.animationDuration = (2 + Math.random()) + 's';
+        document.body.appendChild(el);
+        setTimeout(function() { el.remove(); }, 4000);
+      }, i * 30);
+    })(i);
+  }
+}
+function tagColor(tag) {
+  var map = {
+    'verb':'#6366f1','modal':'#8b5cf6','adjective':'#06b6d4','noun':'#10b981',
+    'preposition':'#f59e0b','conjunction':'#ec4899','pronoun':'#ef4444',
+    'phrasal verb':'#0ea5e9','expression':'#a855f7','connector':'#14b8a6',
+    'question word':'#f97316','article':'#84cc16','adverb':'#e879f9',
+    'determiner':'#fb923c','number':'#22d3ee'
+  };
+  return map[tag] || '#6366f1';
+}
+
+// ════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  if (id === 'home') updateHomeStats();
+}
+function showCategories() { showScreen('categories'); }
+function saveName() {
+  var v = document.getElementById('playerName').value.trim();
+  if (v) { state.player = v; saveState(); }
+}
+function selectCategory(cat) {
+  state.category = cat;
+  var names = {
+    top100:'⭐ Top 100 Words', verbs:'⚡ Essential Verbs',
+    adjectives:'🎨 Key Adjectives', phrasalVerbs:'🔗 Phrasal Verbs',
+    prepositions:'📍 Prepositions', expressions:'💬 Expressions',
+    connectors:'🔀 Connectors', questions:'❓ Question Words'
+  };
+  document.getElementById('catTitle').textContent = names[cat] || cat;
+  var words = vocab[cat] || [];
+  document.getElementById('catProgress').textContent = words.length + ' words';
+  document.getElementById('catProgressBar').style.width = '0%';
+  showScreen('gameSelect');
+}
+function startGame(game) {
+  state.game = game;
+  if (game === 'flashcards') initFlashcards();
+  else if (game === 'quiz') initQuiz();
+  else if (game === 'memory') initMemory();
+  else if (game === 'translate') initTranslate();
+}
+
+// ════════════════════════════════════════
+// HOME STATS
+// ════════════════════════════════════════
+function updateHomeStats() {
+  document.getElementById('totalScore').textContent = state.score;
+  document.getElementById('gamesPlayed').textContent = state.games;
+  document.getElementById('wordsLearned').textContent = state.wordsLearned;
+  document.getElementById('streak').textContent = state.streak;
+  var n = document.getElementById('playerName');
+  if (n) n.value = state.player !== 'Student' ? state.player : '';
+}
+
+// ════════════════════════════════════════
+// FLASHCARDS
+// ════════════════════════════════════════
+function initFlashcards() {
+  state.fcWords = vocab[state.category];
+  state.fcIndex = 0;
+  renderFlashcard();
+  showScreen('flashcards');
+}
+function renderFlashcard() {
+  var w = state.fcWords[state.fcIndex];
+  var total = state.fcWords.length;
+  document.getElementById('fcBar').style.width = ((state.fcIndex+1)/total*100) + '%';
+  document.getElementById('fcProgress').textContent = (state.fcIndex+1) + ' / ' + total;
+  var color = tagColor(w.tag);
+  document.getElementById('fcTag').textContent = w.tag;
+  document.getElementById('fcTag').style.background = color + '33';
+  document.getElementById('fcTag').style.color = color;
+  document.getElementById('fcTagBack').textContent = w.tag;
+  document.getElementById('fcTagBack').style.background = 'rgba(255,255,255,.2)';
+  document.getElementById('fcTagBack').style.color = '#fff';
+  document.getElementById('fcWord').textContent = w.en;
+  document.getElementById('fcPhonetic').textContent = w.phonetic || '';
+  document.getElementById('fcWordBack').textContent = w.en;
+  document.getElementById('fcPt').textContent = w.pt;
+  document.getElementById('fcExample').textContent = w.example || '';
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('fcPrev').disabled = state.fcIndex === 0;
+  document.getElementById('fcNext').disabled = state.fcIndex === total - 1;
+}
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+  speak(state.fcWords[state.fcIndex].en);
+  playSound('click');
+}
+function fcNav(dir) {
+  var next = state.fcIndex + dir;
+  if (next >= 0 && next < state.fcWords.length) {
+    state.fcIndex = next;
+    renderFlashcard();
+    playSound('click');
+    if (next === state.fcWords.length - 1) {
+      addScore(50, state.fcWords.length);
+      setTimeout(function() { showResult('🎉','All Done!','You studied all ' + state.fcWords.length + ' words!', 50, 3); }, 800);
+    }
+  }
+}
+function speakCurrent() { speak(state.fcWords[state.fcIndex].en); }
+
+// ════════════════════════════════════════
+// QUIZ
+// ════════════════════════════════════════
+function initQuiz() {
+  clearInterval(state.qTimer);
+  var words = vocab[state.category];
+  state.qWords = pick(words, Math.min(10, words.length));
+  state.qIndex = 0;
+  state.qScore = 0;
+  renderQuiz();
+  showScreen('quiz');
+}
+function renderQuiz() {
+  var words = vocab[state.category];
+  var q = state.qWords[state.qIndex];
+  var total = state.qWords.length;
+  document.getElementById('quizBar').style.width = ((state.qIndex+1)/total*100)+'%';
+  document.getElementById('quizScore').textContent = 'Score: ' + state.qScore;
+  var color = tagColor(q.tag);
+  document.getElementById('qTag').textContent = q.tag;
+  document.getElementById('qTag').style.background = color + '33';
+  document.getElementById('qTag').style.color = color;
+  document.getElementById('qWord').textContent = q.en;
+  document.getElementById('qText').textContent = 'What does this mean in Portuguese?';
+  state.qAnswered = false;
+  var wrong = pick(words.filter(function(w){ return w.id !== q.id; }), 3);
+  var opts = shuffle([q].concat(wrong));
+  var html = '';
+  opts.forEach(function(o) {
+    var pt = o.pt.length > 30 ? o.pt.substring(0,28)+'…' : o.pt;
+    html += '<button class="opt-btn" onclick="answerQuiz(\''+o.id+'\',this)" data-id="'+o.id+'">'+pt+'</button>';
+  });
+  document.getElementById('quizOptions').innerHTML = html;
+  startTimer();
+}
+function startTimer() {
+  clearInterval(state.qTimer);
+  state.qTimeLeft = 15;
+  document.getElementById('quizTimer').textContent = '15s';
+  document.getElementById('quizTimer').classList.remove('warning');
+  state.qTimer = setInterval(function() {
+    state.qTimeLeft--;
+    document.getElementById('quizTimer').textContent = state.qTimeLeft + 's';
+    if (state.qTimeLeft <= 5) document.getElementById('quizTimer').classList.add('warning');
+    if (state.qTimeLeft <= 0) { clearInterval(state.qTimer); answerQuiz(null, null); }
+  }, 1000);
+}
+function answerQuiz(answerId, btn) {
+  if (state.qAnswered) return;
+  state.qAnswered = true;
+  clearInterval(state.qTimer);
+  var correctId = state.qWords[state.qIndex].id;
+  var isRight = answerId === correctId;
+  document.querySelectorAll('.opt-btn').forEach(function(b) {
+    b.disabled = true;
+    if (b.getAttribute('data-id') === correctId) b.classList.add('correct');
+    else if (b === btn) b.classList.add('wrong');
+  });
+  if (isRight) { state.qScore += 10; playSound('correct'); speak(state.qWords[state.qIndex].en); }
+  else playSound('wrong');
+  setTimeout(function() {
+    if (state.qIndex < state.qWords.length - 1) {
+      state.qIndex++;
+      renderQuiz();
+    } else {
+      var pts = Math.round((state.qScore / (state.qWords.length * 10)) * 100);
+      var stars = pts >= 80 ? 3 : pts >= 50 ? 2 : 1;
+      addScore(pts, state.qWords.length);
+      showResult(
+        pts >= 80 ? '🏆' : pts >= 50 ? '🌟' : '👍',
+        pts >= 80 ? 'Excellent!' : pts >= 50 ? 'Good Job!' : 'Keep Practicing!',
+        'You scored ' + state.qScore + ' out of ' + (state.qWords.length * 10) + ' points!',
+        pts, stars
+      );
+    }
+  }, 1500);
+}
+
+// ════════════════════════════════════════
+// MEMORY
+// ════════════════════════════════════════
+function initMemory() {
+  var words = pick(vocab[state.category], 6);
+  state.memCards = [];
+  state.memFlipped = [];
+  state.memMatched = 0;
+  state.memMoves = 0;
+  state.memLocked = false;
+  words.forEach(function(w) {
+    state.memCards.push({id: w.id+'-en', content: w.en, word: w.id, type:'en'});
+    state.memCards.push({id: w.id+'-pt', content: w.pt.split('/')[0].trim(), word: w.id, type:'pt'});
+  });
+  state.memCards = shuffle(state.memCards);
+  renderMemory();
+  showScreen('memory');
+}
+function renderMemory() {
+  document.getElementById('memMoves').textContent = 'Moves: ' + state.memMoves;
+  document.getElementById('memPairs').textContent = state.memMatched + ' / 6';
+  var grid = document.getElementById('memoryGrid');
+  grid.innerHTML = '';
+  state.memCards.forEach(function(card, idx) {
+    var btn = document.createElement('button');
+    var isFlipped = state.memFlipped.indexOf(idx) >= 0;
+    btn.className = 'mem-card' + (card.matched ? ' matched' : '') + (isFlipped ? ' revealed' : '');
+    var show = card.matched || isFlipped;
+    var color = card.type === 'en' ? '#6366f1' : '#10b981';
+    btn.innerHTML = '<div class="mem-card-inner" style="' + (show && !card.matched ? 'color:'+color+';font-weight:800' : '') + '">' + (show ? card.content : '') + '</div>';
+    btn.onclick = (function(i){ return function(){ flipMemory(i); }; })(idx);
+    grid.appendChild(btn);
+  });
+}
+function flipMemory(idx) {
+  if (state.memLocked) return;
+  if (state.memCards[idx].matched) return;
+  if (state.memFlipped.indexOf(idx) >= 0) return;
+  if (state.memFlipped.length >= 2) return;
+  playSound('click');
+  state.memFlipped.push(idx);
+  renderMemory();
+  if (state.memFlipped.length === 2) {
+    state.memMoves++;
+    state.memLocked = true;
+    var a = state.memCards[state.memFlipped[0]];
+    var b = state.memCards[state.memFlipped[1]];
+    if (a.word === b.word && a.type !== b.type) {
+      playSound('correct'); speak(a.type === 'en' ? a.content : b.content);
+      state.memCards[state.memFlipped[0]].matched = true;
+      state.memCards[state.memFlipped[1]].matched = true;
+      state.memMatched++;
+      state.memFlipped = [];
+      state.memLocked = false;
+      renderMemory();
+      if (state.memMatched === 6) {
+        var pts = Math.max(10, 100 - state.memMoves * 4);
+        addScore(pts, 6);
+        confetti();
+        setTimeout(function() {
+          showResult('🧠','Memory Master!','All pairs matched in '+state.memMoves+' moves!', pts, state.memMoves <= 8 ? 3 : state.memMoves <= 12 ? 2 : 1);
+        }, 600);
+      }
+    } else {
+      playSound('wrong');
+      setTimeout(function() {
+        state.memFlipped = [];
+        state.memLocked = false;
+        renderMemory();
+      }, 1000);
+    }
+  }
+}
+
+// ════════════════════════════════════════
+// TRANSLATE (Type the answer)
+// ════════════════════════════════════════
+function initTranslate() {
+  var words = vocab[state.category];
+  state.trWords = pick(words, Math.min(10, words.length));
+  state.trIndex = 0;
+  state.trScore = 0;
+  state.trAnswered = false;
+  renderTranslate();
+  showScreen('translate');
+}
+function renderTranslate() {
+  var w = state.trWords[state.trIndex];
+  var total = state.trWords.length;
+  document.getElementById('trBar').style.width = ((state.trIndex+1)/total*100)+'%';
+  document.getElementById('trProgress').textContent = (state.trIndex+1)+'/'+total;
+  document.getElementById('trScore').textContent = 'Score: '+state.trScore;
+  var color = tagColor(w.tag);
+  document.getElementById('trTag').textContent = w.tag;
+  document.getElementById('trTag').style.background = color+'33';
+  document.getElementById('trTag').style.color = color;
+  document.getElementById('trWord').textContent = w.en;
+  document.getElementById('trExample').textContent = w.example || '';
+  document.getElementById('trInput').value = '';
+  document.getElementById('trInput').disabled = false;
+  document.getElementById('trFeedback').textContent = '';
+  document.getElementById('trFeedback').style.color = '#fff';
+  document.getElementById('trHintArea').innerHTML = '<button class="btn" onclick="showHint()" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);font-size:.8rem;padding:8px 16px;border:1px solid rgba(255,255,255,.15)">💡 Hint</button>';
+  state.trAnswered = false;
+  setTimeout(function(){ document.getElementById('trInput').focus(); }, 100);
+}
+function normalize(str) {
+  return str.toLowerCase()
+    .replace(/[áàãâä]/g,'a').replace(/[éèêë]/g,'e').replace(/[íìîï]/g,'i')
+    .replace(/[óòõôö]/g,'o').replace(/[úùûü]/g,'u').replace(/[ç]/g,'c')
+    .replace(/[^a-z0-9\s\/]/g,'').trim();
+}
+function checkTranslate() {
+  if (state.trAnswered) { nextTranslate(); return; }
+  var w = state.trWords[state.trIndex];
+  var input = document.getElementById('trInput').value.trim();
+  if (!input) return;
+  var answers = w.pt.split('/').map(function(s){ return normalize(s.trim()); });
+  var userNorm = normalize(input);
+  var isRight = answers.some(function(a){ return userNorm === a || a.indexOf(userNorm) >= 0 || userNorm.indexOf(a) >= 0; });
+  state.trAnswered = true;
+  document.getElementById('trInput').disabled = true;
+  if (isRight) {
+    state.trScore += 10;
+    playSound('correct');
+    speak(w.en);
+    document.getElementById('trFeedback').textContent = '✅ Correct! ' + w.pt;
+    document.getElementById('trFeedback').style.color = '#10b981';
+  } else {
+    playSound('wrong');
+    document.getElementById('trFeedback').textContent = '❌ The answer is: ' + w.pt;
+    document.getElementById('trFeedback').style.color = '#ef4444';
+  }
+  document.getElementById('trHintArea').innerHTML = '<button class="btn btn-primary" onclick="nextTranslate()" style="padding:10px 24px;font-size:.9rem">Next ▶</button>';
+}
+function nextTranslate() {
+  if (state.trIndex < state.trWords.length - 1) {
+    state.trIndex++;
+    renderTranslate();
+  } else {
+    var pts = Math.round((state.trScore / (state.trWords.length * 10)) * 100);
+    var stars = pts >= 80 ? 3 : pts >= 50 ? 2 : 1;
+    addScore(pts, state.trWords.length);
+    showResult(
+      pts >= 80 ? '✍️' : pts >= 50 ? '📝' : '💪',
+      pts >= 80 ? 'Perfect Writer!' : pts >= 50 ? 'Good Effort!' : 'Keep Writing!',
+      'You got ' + state.trScore + ' out of ' + (state.trWords.length * 10) + ' points!',
+      pts, stars
+    );
+  }
+}
+function showHint() {
+  var w = state.trWords[state.trIndex];
+  var hint = w.pt.split('/')[0].trim();
+  var masked = hint.charAt(0) + hint.slice(1).replace(/[a-zA-ZÀ-ú]/g, '_');
+  document.getElementById('trHintArea').innerHTML = '<span style="color:#fbbf24;font-size:.9rem;font-weight:700">💡 ' + masked + '</span>';
+}
+
+// ════════════════════════════════════════
+// RESULTS & SCORE
+// ════════════════════════════════════════
+function addScore(pts, wordsCount) {
+  state.score += pts;
+  state.games++;
+  state.wordsLearned += (wordsCount || 0);
+  var today = new Date().toDateString();
+  if (state.lastPlay !== today) {
+    var yesterday = new Date(Date.now() - 86400000).toDateString();
+    state.streak = state.lastPlay === yesterday ? state.streak + 1 : 1;
+    state.lastPlay = today;
+  }
+  saveState();
+}
+function showResult(emoji, title, msg, pts, stars) {
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('resultScore').textContent = '+' + pts + ' pts';
+  var s = '';
+  for (var i = 0; i < stars; i++) s += '⭐';
+  document.getElementById('resultStars').textContent = s;
+  if (stars === 3) confetti();
+  else if (stars >= 2) playSound('win');
+  updateHomeStats();
+  showScreen('result');
+}
+function replayGame() { startGame(state.game); }
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+updateHomeStats();
+</script>
+</body>
+</html>
