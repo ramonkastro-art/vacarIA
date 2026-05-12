@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎮 Gamificação — VacarIA</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#f1f5f9;font-family:Arial,sans-serif;min-height:100vh}
+    .header{background:linear-gradient(135deg,#b45309,#d97706);padding:28px 24px 22px;text-align:center;box-shadow:0 4px 18px rgba(180,83,9,.25)}
+    .header-back{display:inline-flex;align-items:center;gap:6px;color:#fde68a;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:12px;opacity:.85;transition:opacity .2s}
+    .header-back:hover{opacity:1}
+    .header-title{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-1px}
+    .header-title span{color:#fde68a}
+    .header-sub{color:#fef3c7;font-size:14px;margin-top:6px;opacity:.9}
+    .container{max-width:900px;margin:0 auto;padding:36px 20px 60px}
+    .section-title{font-size:1.1rem;font-weight:700;color:#b45309;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+    .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:16px}
+    .game-card{background:#fff;border-radius:16px;padding:22px 18px;text-decoration:none;color:#1e293b;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1.5px solid #e2e8f0;transition:transform .18s,box-shadow .18s,border-color .18s;display:flex;flex-direction:column;gap:6px}
+    .game-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(180,83,9,.18);border-color:#b45309}
+    .game-card-icon{font-size:2.2rem}
+    .game-card-name{font-size:1rem;font-weight:700;color:#1e293b}
+    .game-card-desc{font-size:13px;color:#64748b;line-height:1.5;flex:1}
+    .game-card-tag{display:inline-block;margin-top:8px;font-size:11px;font-weight:600;color:#b45309;background:#fef3c7;border-radius:20px;padding:3px 10px}
+    .game-card-wide{background:#fff;border-radius:16px;padding:22px 24px;text-decoration:none;color:#1e293b;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1.5px solid #e2e8f0;transition:transform .18s,box-shadow .18s,border-color .18s;display:flex;flex-direction:row;align-items:center;gap:20px}
+    .game-card-wide:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(180,83,9,.18);border-color:#b45309}
+    .footer{text-align:center;margin-top:48px;font-size:12px;color:#a8a29e}
+    .footer em{font-style:italic;color:#c4b5a0}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a class="header-back" href="/">← Voltar para VacarIA</a>
+    <div class="header-title">Vacar<span>IA</span> · Jogos</div>
+    <div class="header-sub">Gamificação para o ensino de Língua Inglesa 🎮</div>
+  </div>
+  <div class="container">
+    <div class="section-title">🕹️ Escolha um jogo</div>
+    <div class="games-grid">
+      <a class="game-card" href="/game-tobe-racer.html" target="_blank" rel="noopener noreferrer">
+        <div class="game-card-icon">🏎️</div>
+        <div class="game-card-name">To BE Racer</div>
+        <div class="game-card-desc">Corrida de carros com conjugações do Verb To Be. Escolha o pronome e acelere!</div>
+        <span class="game-card-tag">⚡ Solo · Ranking</span>
+      </a>
+      <a class="game-card" href="/game-whos-door.html" target="_blank" rel="noopener noreferrer">
+        <div class="game-card-icon">🚪</div>
+        <div class="game-card-name">Who's at the Door?</div>
+        <div class="game-card-desc">Adivinhe a profissão em inglês antes que o tempo acabe. Multijogador em tempo real!</div>
+        <span class="game-card-tag">🌐 Multiplayer</span>
+      </a>
+      <a class="game-card" href="/game-english-quest.html" target="_blank" rel="noopener noreferrer">
+        <div class="game-card-icon">🦊</div>
+        <div class="game-card-name">English Quest Kids</div>
+        <div class="game-card-desc">Flashcards, Quiz, Memória e Ordem. Cores, dias, animais e meses em inglês!</div>
+        <span class="game-card-tag">🎮 4 jogos · Para Adultos e crianças</span>
+      </a>
+      <a class="game-card" href="/game-verb-shooter.html" target="_blank" rel="noopener noreferrer">
+        <div class="game-card-icon">🔫</div>
+        <div class="game-card-name">Verb Shooter Game</div>
+        <div class="game-card-desc">Acerte o maior número de Verbos e não cometa erros nessa aventura!</div>
+        <span class="game-card-tag">🎯 · Para Acertar no Alvo</span>
+      </a>
+    </div>
+    <a class="game-card-wide" href="/game-english-vocab.html" target="_blank" rel="noopener noreferrer">
+      <div class="game-card-icon" style="font-size:2.8rem">🦉</div>
+      <div>
+        <div class="game-card-name" style="font-size:1.05rem">English Vocabulary Quest Pro</div>
+        <div class="game-card-desc">Domine o vocabulário essencial, Phrasal Verbs e expressões para conversação real!</div>
+        <span class="game-card-tag">🎯 · As 500 palavras mais usadas e vocabulário avançado</span>
+      </div>
+    </a>
+    <div class="footer">
+      VacarIA · Assistente Pedagógico para Professores de Inglês<br/>
+      Desenvolvido por Ramon Castro<br/>
+      <em>Execute com autenticidade. Protagonize em sala de aula.</em>
+    </div>
+  </div>
+</body>
+</html>
