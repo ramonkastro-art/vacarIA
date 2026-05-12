@@ -374,50 +374,61 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
   ].join("\n");
 
   const footer =
-    "<div class='pdf-footer'>" +
-    "<div><div>VacarIA · Assistente Pedagógico para Professores de Inglês</div>" +
-    "<div style='font-size:7.5pt;color:#c4b5a0'>Desenvolvido por Ramon Castro · " + new Date().toLocaleDateString("pt-BR") + "</div></div>" +
+    "<​div class='pdf-footer'>" +
+    "<​div>" +
+    "<div>VacarIA · Assistente Pedagógico para Professores de Inglês</div>" +
+    "<div style='font-size:7.5pt;color:#c4b5a0'>Desenvolvido por Ramon Castro · " + new Date().toLocaleDateString("pt-BR") + "<​/div>" +
+    "<div style='font-size:7.5pt;color:#c4b5a0;font-style:italic;margin-top:2px'>Execute com autenticidade. Protagonize em sala de aula.</div>" +
+    "<​/div>" +
     "<img class='pdf-footer-logo' src='" + LOGO_B64 + "' alt='VacarIA'/></div>";
 
   const filename = (title + ".pdf").replace(/ /g,"_").replace(/[—–]/g,"-");
 
   return "<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'/>" +
-    "<title>" + title + "</title>" +
+    "<​title>" + title + "<​/title>" +
     "<script src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'><" + "/script>" +
     "<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'><" + "/script>" +
-    "<style>" + css + "</style></head><body>" +
-    "<div id='pdf-wrap'>" +
-    "<div class='pdf-header'><div class='pdf-title'>Vacar<span>IA</span>" + (subtitle ? " — " + subtitle : "") + "</div>" +
+    "<​style>" + css + "</style></head><body>" +
+    "<​div id='pdf-wrap'>" +
+    "<div class='pdf-header'><div class='pdf-title'>Vacar<span>IA</span>" + (subtitle ? " — " + subtitle : "") + "<​/div>" +
     "<div class='pdf-sub'>Rede de Ensino de Inglês<br/>" + title + "</div></div>" +
     printEl.innerHTML +
     footer +
-    "</div>" +
+    "<​/div>" +
     "<div id='msg'>Gerando PDF...</div>" +
     "<button id='btn-baixar' disabled>⏳ Gerando...</button>" +
-    "<script>" +
+    "<​script>" +
     "async function gerarPdf(){" +
     "  var btn=document.getElementById('btn-baixar');" +
     "  var msg=document.getElementById('msg');" +
     "  try{" +
     "    await document.fonts.ready;" +
     "    var el=document.getElementById('pdf-wrap');" +
-    "    var canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,width:794,windowWidth:794});" +
+    "    var scale=2;" +
+    "    var canvas=await html2canvas(el,{scale:scale,useCORS:true,backgroundColor:'#ffffff',logging:false,width:794,windowWidth:794});" +
     "    var jsPDF=window.jspdf.jsPDF;" +
     "    var pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});" +
     "    var pw=pdf.internal.pageSize.getWidth();" +
     "    var ph=pdf.internal.pageSize.getHeight();" +
     "    var mg=10;" +
     "    var imgW=pw-2*mg;" +
-    "    var imgH=(canvas.height*imgW)/canvas.width;" +
     "    var pageH=ph-2*mg;" +
-    "    var numPages=Math.ceil(imgH/pageH);" +
-    "    var imgData=canvas.toDataURL('image/jpeg',0.95);" +
-    "    for(var p=0;p<numPages;p++){" +
+    "    var pageHeightPx=Math.floor((canvas.width/(pw-2*mg))*pageH);" +
+    "    var totalPages=Math.ceil(canvas.height/pageHeightPx);" +
+    "    for(var p=0;p<totalPages;p++){" +
     "      if(p>0)pdf.addPage();" +
-    "      pdf.addImage(imgData,'JPEG',mg,mg-(p*pageH),imgW,imgH);" +
-    "      pdf.setFillColor(255,255,255);" +
-    "      pdf.rect(0,0,pw,mg,'F');" +
-    "      pdf.rect(0,ph-mg,pw,mg+1,'F');" +
+    "      var srcY=p*pageHeightPx;" +
+    "      var srcH=Math.min(pageHeightPx,canvas.height-srcY);" +
+    "      var pageCanvas=document.createElement('canvas');" +
+    "      pageCanvas.width=canvas.width;" +
+    "      pageCanvas.height=pageHeightPx;" +
+    "      var ctx=pageCanvas.getContext('2d');" +
+    "      ctx.fillStyle='#ffffff';" +
+    "      ctx.fillRect(0,0,pageCanvas.width,pageCanvas.height);" +
+    "      ctx.drawImage(canvas,0,srcY,canvas.width,srcH,0,0,canvas.width,srcH);" +
+    "      var imgData=pageCanvas.toDataURL('image/jpeg',0.95);" +
+    "      var sliceH=(srcH/canvas.width)*imgW;" +
+    "      pdf.addImage(imgData,'JPEG',mg,mg,imgW,sliceH);" +
     "    }" +
     "    pdf.save('" + filename + "');" +
     "    btn.textContent='✓ PDF Salvo!';" +
