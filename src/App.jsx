@@ -403,8 +403,18 @@ function handlePrint(params) {
 function handlePrintAvaliacao(params) {
   const printEl = document.getElementById("avaliacao-para-pdf");
   if (!printEl) return;
+  // Clonar o elemento e remover o gabarito do PDF
+  const clone = printEl.cloneNode(true);
+  const allEls = clone.querySelectorAll("*");
+  let removing = false;
+  allEls.forEach(el => {
+    if (!removing && el.textContent.trim().toUpperCase().startsWith("GABARITO")) {
+      removing = true;
+    }
+    if (removing) el.remove();
+  });
   const filename = "Avaliacao_de_Lingua_Inglesa";
-  const htmlContent = buildPdfHtml(printEl, "Avaliacao de Lingua Inglesa", "Avaliacao", "#6d28d9", "#e9d5ff");
+  const htmlContent = buildPdfHtml(clone, "Avaliacao de Lingua Inglesa", "Avaliacao", "#6d28d9", "#e9d5ff");
   sessionStorage.setItem("vacaria_pdf", JSON.stringify({ html: htmlContent, title: "Avaliacao" }));
   sessionStorage.setItem("vacaria_pdf_filename", filename);
   sessionStorage.setItem("vacaria_pdf_color", "#6d28d9");
