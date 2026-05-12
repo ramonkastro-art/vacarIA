@@ -367,7 +367,7 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
     ".md-li strong{color:#92400e}",
     ".md-hr{border:none;border-top:1px solid #e2e8f0;margin:10px 0}",
     ".pdf-footer{margin-top:28px;padding-top:8px;border-top:1px solid " + footerBorderColor + ";font-size:8pt;color:#a8a29e;display:flex;align-items:center;justify-content:space-between}",
-    ".pdf-footer-logo{width:32px;height:32px;object-fit:contain;opacity:0.6;border-radius:6px}",
+    ".pdf-footer-logo{width:24px;height:24px;max-width:24px;max-height:24px;object-fit:contain;opacity:0.6;border-radius:4px;flex-shrink:0}",
     "#btn-baixar{position:fixed;bottom:24px;right:24px;padding:14px 28px;background:" + headerColor + ";color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.3)}",
     "#btn-baixar:disabled{opacity:.6;cursor:not-allowed}",
     "#msg{position:fixed;bottom:76px;right:24px;font-size:13px;color:#374151;background:#fff;padding:8px 14px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)}"
@@ -451,7 +451,7 @@ function handlePrint(params) {
   const printEl = document.getElementById("plano-para-pdf");
   if (!printEl) return;
   const html = buildPdfHtml(printEl, "Plano de Aula — Lingua Inglesa", null, "#b45309", "#fde68a");
-  const blob = new Blob([html], {type: "text/html"});
+  const blob = new Blob([html], {type: "text/html;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const win = window.open(url, "_blank");
   if (win) setTimeout(() => URL.revokeObjectURL(url), 10000);
@@ -461,7 +461,7 @@ function handlePrintAvaliacao(params) {
   const printEl = document.getElementById("avaliacao-para-pdf");
   if (!printEl) return;
   const html = buildPdfHtml(printEl, "Avaliacao de Lingua Inglesa", "Avaliacao", "#6d28d9", "#e9d5ff");
-  const blob = new Blob([html], {type: "text/html"});
+  const blob = new Blob([html], {type: "text/html;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const win = window.open(url, "_blank");
   if (win) setTimeout(() => URL.revokeObjectURL(url), 10000);
