@@ -76,5 +76,42 @@
       <em>Execute com autenticidade. Protagonize em sala de aula.</em>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://nqtjcpkgbdwqkjzqzqzq.supabase.co";
+    // Lê as variáveis do meta tag injetado pelo Vite ou usa fallback
+    const _url = document.querySelector("meta[name=supabase-url]")?.content || "";
+    const _key = document.querySelector("meta[name=supabase-key]")?.content || "";
+
+    async function trackGame(feature) {
+      try {
+        const ipRes = await fetch("https://api.ipify.org?format=json");
+        const { ip } = await ipRes.json();
+        const { createClient } = supabase;
+        // Pega as credenciais do sessionStorage (injetadas pelo App.jsx)
+        const url = sessionStorage.getItem("sb_url") || "";
+        const key = sessionStorage.getItem("sb_key") || "";
+        if (!url || !key) return;
+        const db = createClient(url, key);
+        await db.from("interaction_logs").insert([{
+          ip_address: ip,
+          interaction_type: "jogo",
+          feature_used: feature,
+          prompt_text: feature,
+          success: true,
+          timestamp: new Date().toISOString()
+        }]);
+      } catch(e) { console.warn("Track error:", e); }
+    }
+
+    document.querySelectorAll(".game-card, .game-card-wide").forEach(card => {
+      card.addEventListener("click", function() {
+        const name = this.querySelector(".game-card-name")?.textContent || "Jogo";
+        trackGame(name);
+      });
+    });
+  </script>
+
 </body>
 </html>

@@ -11,6 +11,7 @@ export default function AdminPanel({ onClose }) {
   const [interactionLogs, setInteractionLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [aba, setAba] = useState("acessos");
+  const [expandedPrompt, setExpandedPrompt] = useState(null);
 
   function handleLogin() {
     if (senha === ADMIN_PASSWORD) {
@@ -157,7 +158,22 @@ export default function AdminPanel({ onClose }) {
                     <td style={styles.td}>{log.ip_address}</td>
                     <td style={styles.td}>{log.interaction_type}</td>
                     <td style={styles.td}>{log.feature_used}</td>
-                    <td style={{...styles.td, maxWidth:"200px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{log.prompt_text}</td>
+                    <td
+                      style={{...styles.td, maxWidth:"260px", cursor:"pointer", userSelect:"none"}}
+                      onClick={() => setExpandedPrompt(expandedPrompt === log.id ? null : log.id)}
+                      title="Clique para expandir"
+                    >
+                      {expandedPrompt === log.id ? (
+                        <span style={{whiteSpace:"pre-wrap", color:"#e2e8f0"}}>{log.prompt_text}</span>
+                      ) : (
+                        <span style={{display:"flex", alignItems:"center", gap:6}}>
+                          <span style={{overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:220}}>{log.prompt_text}</span>
+                          {log.prompt_text && log.prompt_text.length > 40 && (
+                            <span style={{color:"#6c63ff", fontSize:11, flexShrink:0}}>▼ ver</span>
+                          )}
+                        </span>
+                      )}
+                    </td>
                     <td style={styles.td}>{log.success ? "✅" : "❌"}</td>
                   </tr>
                 ))}
