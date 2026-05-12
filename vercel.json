@@ -5,5 +5,9 @@
   "functions": {
     "api/grok.js": { "maxDuration": 30 },
     "api/avaliacao.js": { "maxDuration": 45 }
-  }
+  },
+  "rewrites": [
+    { "source": "/games", "destination": "/games.html" },
+    { "source": "/((?!api|games\\.html|game-.*\\.html|pdf-generator\\.html|docx-generator\\.html).*)", "destination": "/index.html" }
+  ]
 }
