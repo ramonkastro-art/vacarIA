@@ -367,108 +367,49 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
     ".md-li strong{color:#92400e}",
     ".md-hr{border:none;border-top:1px solid #e2e8f0;margin:10px 0}",
     ".pdf-footer{margin-top:28px;padding-top:8px;border-top:1px solid " + footerBorderColor + ";font-size:8pt;color:#a8a29e;display:flex;align-items:center;justify-content:space-between}",
-    ".pdf-footer-logo{width:24px;height:24px;max-width:24px;max-height:24px;object-fit:contain;opacity:0.6;border-radius:4px;flex-shrink:0}",
-    "#btn-baixar{position:fixed;bottom:24px;right:24px;padding:14px 28px;background:" + headerColor + ";color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.3)}",
-    "#btn-baixar:disabled{opacity:.6;cursor:not-allowed}",
-    "#msg{position:fixed;bottom:76px;right:24px;font-size:13px;color:#374151;background:#fff;padding:8px 14px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)}"
+    ".pdf-footer-logo{width:24px;height:24px;max-width:24px;max-height:24px;object-fit:contain;opacity:0.6;border-radius:4px;flex-shrink:0}"
   ].join("\n");
 
   const footer =
-    "<​div class='pdf-footer'>" +
-    "<​div>" +
+    "<div class='pdf-footer'>" +
+    "<div>" +
     "<div>VacarIA · Assistente Pedagógico para Professores de Inglês</div>" +
-    "<div style='font-size:7.5pt;color:#c4b5a0'>Desenvolvido por Ramon Castro · " + new Date().toLocaleDateString("pt-BR") + "<​/div>" +
+    "<div style='font-size:7.5pt;color:#c4b5a0'>Desenvolvido por Ramon Castro · " + new Date().toLocaleDateString("pt-BR") + "</div>" +
     "<div style='font-size:7.5pt;color:#c4b5a0;font-style:italic;margin-top:2px'>Execute com autenticidade. Protagonize em sala de aula.</div>" +
-    "<​/div>" +
+    "</div>" +
     "<img class='pdf-footer-logo' src='" + LOGO_B64 + "' alt='VacarIA'/></div>";
 
-  const filename = (title + ".pdf").replace(/ /g,"_").replace(/[—–]/g,"-");
-
-  return "<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'/>" +
-    "<​title>" + title + "<​/title>" +
-    "<script src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'><" + "/script>" +
-    "<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'><" + "/script>" +
-    "<​style>" + css + "</style></head><body>" +
-    "<​div id='pdf-wrap'>" +
-    "<div class='pdf-header'><div class='pdf-title'>Vacar<span>IA</span>" + (subtitle ? " — " + subtitle : "") + "<​/div>" +
+  return "<div id='pdf-wrap' style='width:794px;margin:0 auto;background:#fff;padding:44px 60px;font-family:Arial,sans-serif;font-size:10.5pt;color:#1e293b;line-height:1.6'>" +
+    "<style>" + css + "</style>" +
+    "<div class='pdf-header'><div class='pdf-title'>Vacar<span>IA</span>" + (subtitle ? " — " + subtitle : "") + "</div>" +
     "<div class='pdf-sub'>Rede de Ensino de Inglês<br/>" + title + "</div></div>" +
     printEl.innerHTML +
     footer +
-    "<​/div>" +
-    "<div id='msg'>Gerando PDF...</div>" +
-    "<button id='btn-baixar' disabled>⏳ Gerando...</button>" +
-    "<​script>" +
-    "async function gerarPdf(){" +
-    "  var btn=document.getElementById('btn-baixar');" +
-    "  var msg=document.getElementById('msg');" +
-    "  try{" +
-    "    await document.fonts.ready;" +
-    "    var el=document.getElementById('pdf-wrap');" +
-    "    var scale=2;" +
-    "    var canvas=await html2canvas(el,{scale:scale,useCORS:true,backgroundColor:'#ffffff',logging:false,width:794,windowWidth:794});" +
-    "    var jsPDF=window.jspdf.jsPDF;" +
-    "    var pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});" +
-    "    var pw=pdf.internal.pageSize.getWidth();" +
-    "    var ph=pdf.internal.pageSize.getHeight();" +
-    "    var mg=10;" +
-    "    var imgW=pw-2*mg;" +
-    "    var pageH=ph-2*mg;" +
-    "    var pageHeightPx=Math.floor((canvas.width/(pw-2*mg))*pageH);" +
-    "    var totalPages=Math.ceil(canvas.height/pageHeightPx);" +
-    "    for(var p=0;p<totalPages;p++){" +
-    "      if(p>0)pdf.addPage();" +
-    "      var srcY=p*pageHeightPx;" +
-    "      var srcH=Math.min(pageHeightPx,canvas.height-srcY);" +
-    "      var pageCanvas=document.createElement('canvas');" +
-    "      pageCanvas.width=canvas.width;" +
-    "      pageCanvas.height=pageHeightPx;" +
-    "      var ctx=pageCanvas.getContext('2d');" +
-    "      ctx.fillStyle='#ffffff';" +
-    "      ctx.fillRect(0,0,pageCanvas.width,pageCanvas.height);" +
-    "      ctx.drawImage(canvas,0,srcY,canvas.width,srcH,0,0,canvas.width,srcH);" +
-    "      var imgData=pageCanvas.toDataURL('image/jpeg',0.95);" +
-    "      var sliceH=(srcH/canvas.width)*imgW;" +
-    "      pdf.addImage(imgData,'JPEG',mg,mg,imgW,sliceH);" +
-    "    }" +
-    "    pdf.save('" + filename + "');" +
-    "    btn.textContent='✓ PDF Salvo!';" +
-    "    btn.disabled=false;" +
-    "    msg.textContent='Pronto! Clique no botão para baixar novamente.';" +
-    "    btn.onclick=function(){pdf.save('" + filename + "');};" +
-    "  }catch(e){" +
-    "    msg.textContent='Erro: '+e.message;" +
-    "    btn.textContent='⬇ Tentar novamente';" +
-    "    btn.disabled=false;" +
-    "    btn.onclick=function(){location.reload();};" +
-    "    console.error(e);" +
-    "  }" +
-    "}" +
-    "window.addEventListener('load',function(){setTimeout(gerarPdf,800);});" +
-    "<" + "/script></body></html>";
+    "</div>";
 }
 
 function handlePrint(params) {
   const printEl = document.getElementById("plano-para-pdf");
   if (!printEl) return;
-  const html = buildPdfHtml(printEl, "Plano de Aula — Lingua Inglesa", null, "#b45309", "#fde68a");
-  const win = window.open("", "_blank");
-  if (win) {
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-  }
+  const filename = "Plano_de_Aula_Lingua_Inglesa";
+  const htmlContent = buildPdfHtml(printEl, "Plano de Aula — Lingua Inglesa", null, "#b45309", "#fde68a");
+  sessionStorage.setItem("vacaria_pdf", JSON.stringify({ html: htmlContent, title: "Plano de Aula" }));
+  sessionStorage.setItem("vacaria_pdf_filename", filename);
+  sessionStorage.setItem("vacaria_pdf_color", "#b45309");
+  const win = window.open("/pdf-generator.html", "_blank");
+  if (!win) alert("Permita pop-ups para gerar o PDF.");
 }
 
 function handlePrintAvaliacao(params) {
   const printEl = document.getElementById("avaliacao-para-pdf");
   if (!printEl) return;
-  const html = buildPdfHtml(printEl, "Avaliacao de Lingua Inglesa", "Avaliacao", "#6d28d9", "#e9d5ff");
-  const win = window.open("", "_blank");
-  if (win) {
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-  }
+  const filename = "Avaliacao_de_Lingua_Inglesa";
+  const htmlContent = buildPdfHtml(printEl, "Avaliacao de Lingua Inglesa", "Avaliacao", "#6d28d9", "#e9d5ff");
+  sessionStorage.setItem("vacaria_pdf", JSON.stringify({ html: htmlContent, title: "Avaliacao" }));
+  sessionStorage.setItem("vacaria_pdf_filename", filename);
+  sessionStorage.setItem("vacaria_pdf_color", "#6d28d9");
+  const win = window.open("/pdf-generator.html", "_blank");
+  if (!win) alert("Permita pop-ups para gerar o PDF.");
 }
 
 function handleDocx(text, filename) {

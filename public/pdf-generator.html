@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Gerando PDF...</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { margin: 0; background: #f1f5f9; font-family: Arial, sans-serif; }
+    #status { position: fixed; bottom: 24px; right: 24px; background: #fff;
+      padding: 12px 20px; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.15);
+      font-size: 14px; color: #374151; z-index: 999; }
+    #btn-baixar { position: fixed; bottom: 24px; right: 24px; padding: 14px 28px;
+      background: #b45309; color: #fff; border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,.3); display: none; }
+  </style>
+</head>
+<body>
+  <div id="status">⏳ Gerando PDF...</div>
+  <button id="btn-baixar">⬇ Baixar PDF</button>
+  <script>
+    const data = JSON.parse(sessionStorage.getItem('vacaria_pdf') || 'null');
+    if (!data) { document.getElementById('status').textContent = 'Erro: nenhum dado encontrado.'; }
+    else {
+      document.title = data.title || 'PDF';
+      document.body.insertAdjacentHTML('beforeend', data.html);
+      window.addEventListener('load', function() { setTimeout(gerarPdf, 800); });
+    }
+
+    async function gerarPdf() {
+      const status = document.getElementById('status');
+      const btn = document.getElementById('btn-baixar');
+      const filename = (sessionStorage.getItem('vacaria_pdf_filename') || 'documento') + '.pdf';
+      try {
+        await document.fonts.ready;
+        const el = document.getElementById('pdf-wrap');
+        const scale = 2;
+        const canvas = await html2canvas(el, {
+          scale: scale, useCORS: true, backgroundColor: '#ffffff',
+          logging: false, width: 794, windowWidth: 794
+        });
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pw = pdf.internal.pageSize.getWidth();
+        const ph = pdf.internal.pageSize.getHeight();
+        const mg = 10;
+        const imgW = pw - 2 * mg;
+        const pageH = ph - 2 * mg;
+        const pageHeightPx = Math.floor((canvas.width / imgW) * pageH);
+        const totalPages = Math.ceil(canvas.height / pageHeightPx);
+        for (let p = 0; p < totalPages; p++) {
+          if (p > 0) pdf.addPage();
+          const srcY = p * pageHeightPx;
+          const srcH = Math.min(pageHeightPx, canvas.height - srcY);
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = pageHeightPx;
+          const ctx = pageCanvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+          ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+          const imgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+          const sliceH = (srcH / canvas.width) * imgW;
+          pdf.addImage(imgData, 'JPEG', mg, mg, imgW, sliceH);
+        }
+        pdf.save(filename);
+        status.style.display = 'none';
+        btn.style.display = 'block';
+        btn.style.background = sessionStorage.getItem('vacaria_pdf_color') || '#b45309';
+        btn.textContent = '✓ PDF Salvo! Baixar novamente';
+        btn.onclick = () => pdf.save(filename);
+      } catch(e) {
+        status.textContent = 'Erro: ' + e.message;
+        console.error(e);
+      }
+    }
+  </script>
+</body>
+</html>
