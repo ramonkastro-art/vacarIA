@@ -182,6 +182,7 @@
     justify-content: center;
     width: 100%;
     gap: 14px;
+    margin-top: 80px;
   }
 
   /* Side button columns */
@@ -198,12 +199,26 @@
     position: relative; display: flex; flex-direction: column; align-items: center;
     margin-bottom: 4px; flex-shrink: 0;
   }
+  @media (max-width:720px) {
+    .scene-wrapper { margin-top: 0; }
+  }
 
   /* Bubble above house */
   .bubble-above {
     position: absolute; top: -88px; left: 50%;
     transform: translateX(-50%);
     width: min(340px, 92vw); z-index: 20;
+  }
+  /* On mobile, bubble goes into normal flow above the house */
+  @media (max-width:720px) {
+    .bubble-above {
+      position: static;
+      transform: none;
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 10px;
+    }
+    .bubble::after, .bubble::before { display: none; }
   }
   .bubble {
     background: var(--bubble-bg);
@@ -457,13 +472,26 @@
     50%      { transform: translateY(-4px); }
   }
   @media (max-width:720px) {
-    .scene-row { flex-direction: column; gap: 6px; }
-    .side-buttons { flex-direction: row; flex-wrap: wrap; max-width: 100%; width: 100%; justify-content: center; }
-    .side-buttons .prof-btn { width: calc(50% - 6px); }
+    .scene-row {
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px !important;
+    }
+    /* On mobile: hide side columns, show bottom grid */
+    .side-buttons { display: none !important; }
+    .buttons-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 480px;
+      margin-top: 10px;
+    }
     .house-front { width: 260px; }
+    .roof-svg { width: 266px; }
   }
   @media (max-width:400px) {
-    .side-buttons .prof-btn { width: 100%; }
+    .buttons-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
@@ -511,7 +539,7 @@
 
 <!-- GAME AREA -->
 <div class="game-area" id="gameArea" style="display:none">
-  <div class="scene-row" style="margin-top:80px;">
+  <div class="scene-row" id="sceneRow">
     <!-- LEFT COLUMN -->
     <div class="side-buttons" id="leftButtons"></div>
 
@@ -888,34 +916,54 @@ function nextRound() {
   document.getElementById('progressBar').style.width = (round / sequence.length * 100) + '%';
   document.getElementById('roundDisplay').textContent = round + 1;
 
-  // Build buttons in side columns
+  // Build buttons — side columns (desktop) + bottom grid (mobile)
   const wrong = shuffle(ALL_NAMES.filter(n => n !== currentAnswer));
   const opts  = shuffle([currentAnswer, ...wrong.slice(0, 11)]);
   const leftCol  = document.getElementById('leftButtons');
   const rightCol = document.getElementById('rightButtons');
+  const grid     = document.getElementById('buttonsGrid');
   leftCol.innerHTML = '';
   rightCol.innerHTML = '';
+  grid.innerHTML = '';
   buttonsDisabled = false;
 
   opts.forEach((name, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'prof-btn';
-    btn.textContent = name;
-    btn.onclick = () => handleAnswer(btn, name);
-    if (i % 2 === 0) leftCol.appendChild(btn);
-    else rightCol.appendChild(btn);
+    // Desktop: side columns
+    const btnSide = document.createElement('button');
+    btnSide.className = 'prof-btn';
+    btnSide.textContent = name;
+    btnSide.onclick = () => handleAnswer(name);
+    if (i % 2 === 0) leftCol.appendChild(btnSide);
+    else rightCol.appendChild(btnSide);
+
+    // Mobile: bottom grid
+    const btnGrid = document.createElement('button');
+    btnGrid.className = 'prof-btn';
+    btnGrid.textContent = name;
+    btnGrid.onclick = () => handleAnswer(name);
+    grid.appendChild(btnGrid);
   });
 
   // Auto-speak clue after door closes
   setTimeout(() => speak(currentClue), 700);
 }
 
-function handleAnswer(btn, chosen) {
+function handleAnswer(chosen) {
   if (buttonsDisabled) return;
   buttonsDisabled = true;
   speechSynthesis.cancel();
 
-  document.querySelectorAll('#leftButtons .prof-btn, #rightButtons .prof-btn').forEach(b => b.disabled = true);
+  // Disable & highlight all matching buttons (side + grid)
+  document.querySelectorAll('.prof-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === chosen) {
+      b.classList.add(chosen === currentAnswer ? 'correct-ans' : 'wrong-ans');
+    }
+    if (b.textContent === currentAnswer && chosen !== currentAnswer) {
+      b.classList.add('correct-ans'); // reveal correct answer
+    }
+  });
+
   document.getElementById('knockHint').style.display = 'none';
 
   const feedback = document.getElementById('feedback');
@@ -924,16 +972,13 @@ function handleAnswer(btn, chosen) {
 
   if (chosen === currentAnswer) {
     /* ✅ CORRECT */
-    btn.classList.add('correct-ans');
     feedback.textContent = '✅ Correct! Come on in!';
     feedback.className = 'feedback correct';
     score++;
     document.getElementById('scoreDisplay').textContent = score;
 
     door.classList.add('open');
-    // Ensure emoji is loaded, wipe the inline style, then reveal via class
     charEl.textContent = currentEmoji;
-    // Must remove inline style in next frame so browser doesn't batch it with class change
     charEl.style.cssText = '';
     requestAnimationFrame(() => {
       charEl.classList.add('visible');
@@ -941,23 +986,21 @@ function handleAnswer(btn, chosen) {
 
     speak("Correct! Come on in!", () => {
       round++;
-      setTimeout(nextRound, 2500); // emoji stays visible ~2.5s after TTS ends
+      setTimeout(nextRound, 2500);
     });
 
   } else {
     /* ❌ WRONG */
-    btn.classList.add('wrong-ans');
     feedback.textContent = '👋 See you later!';
     feedback.className = 'feedback wrong';
 
-    // Peek then walk away
     charEl.style.transition = 'none';
     charEl.style.opacity = '1';
     setTimeout(() => { charEl.classList.add('walk-away'); }, 180);
 
     speak("See you later!", () => {
       round++;
-      setTimeout(nextRound, 400); // wrong moves on quickly
+      setTimeout(nextRound, 400);
     });
   }
 }
