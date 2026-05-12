@@ -451,20 +451,24 @@ function handlePrint(params) {
   const printEl = document.getElementById("plano-para-pdf");
   if (!printEl) return;
   const html = buildPdfHtml(printEl, "Plano de Aula — Lingua Inglesa", null, "#b45309", "#fde68a");
-  const blob = new Blob([html], {type: "text/html;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const win = window.open(url, "_blank");
-  if (win) setTimeout(() => URL.revokeObjectURL(url), 10000);
+  const win = window.open("", "_blank");
+  if (win) {
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+  }
 }
 
 function handlePrintAvaliacao(params) {
   const printEl = document.getElementById("avaliacao-para-pdf");
   if (!printEl) return;
   const html = buildPdfHtml(printEl, "Avaliacao de Lingua Inglesa", "Avaliacao", "#6d28d9", "#e9d5ff");
-  const blob = new Blob([html], {type: "text/html;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const win = window.open(url, "_blank");
-  if (win) setTimeout(() => URL.revokeObjectURL(url), 10000);
+  const win = window.open("", "_blank");
+  if (win) {
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+  }
 }
 
 function handleDocx(text, filename) {
