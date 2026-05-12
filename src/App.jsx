@@ -774,6 +774,12 @@ export default function App() {
       color:"#fff", boxShadow:"0 4px 18px rgba(180,83,9,.25)",
       transition:"transform .18s,box-shadow .18s"
     }}
+    onClick={() => {
+      try {
+        sessionStorage.setItem("sb_url", import.meta.env.VITE_SUPABASE_URL || "");
+        sessionStorage.setItem("sb_key", import.meta.env.VITE_SUPABASE_ANON_KEY || "");
+      } catch(e) {}
+    }}
     onMouseEnter={e => { e.currentTarget.style.transform="translateY(-3px)"; e.currentTarget.style.boxShadow="0 8px 28px rgba(180,83,9,.35)"; }}
     onMouseLeave={e => { e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow="0 4px 18px rgba(180,83,9,.25)"; }}
   >
