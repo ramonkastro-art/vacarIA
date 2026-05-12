@@ -321,10 +321,11 @@ function renderLines(text) {
     if (line.trim() === "") return <div key={i} style={{ height: 6 }} />;
     if (line.includes(" | ")) {
       const [left, right] = line.split(" | ");
+      const rightFormatted = right.replace(/\(\s*\)/g, "(      )");
       return (
-        <div key={i} style={{display:"flex",gap:0,margin:"1px 0",fontFamily:"inherit",fontSize:15}}>
+        <div key={i} style={{display:"flex",gap:0,margin:"3px 0",fontFamily:"inherit",fontSize:15}}>
           <span style={{width:"50%",paddingRight:16}}>{left}</span>
-          <span style={{width:"50%"}}>{right}</span>
+          <span style={{width:"50%"}}>{rightFormatted}</span>
         </div>
       );
     }
