@@ -40,6 +40,7 @@
       scale: scale, useCORS: true, backgroundColor: '#ffffff',
       logging: false, width: 794, windowWidth: 794
     });
+
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pw = pdf.internal.pageSize.getWidth();
@@ -48,23 +49,63 @@
     const imgW = pw - 2 * mg;
     const pageH = ph - 2 * mg;
     const pageHeightPx = Math.floor((canvas.width / imgW) * pageH);
-    const totalPages = Math.ceil(canvas.height / pageHeightPx);
+
+    // ── Helper: encontra linha branca mais próxima antes de maxY ──
+    function findSafeCut(imgData, canvasWidth, startY, maxY, searchRange) {
+      const pixels = imgData.data;
+      // Escaneia de maxY para cima procurando linha quase branca
+      for (let y = maxY; y >= maxY - searchRange; y--) {
+        let isWhite = true;
+        // Amostra 20 pontos da linha para performance
+        const step = Math.floor(canvasWidth / 20);
+        for (let x = 0; x < canvasWidth; x += step) {
+          const idx = (y * canvasWidth + x) * 4;
+          const r = pixels[idx], g = pixels[idx+1], b = pixels[idx+2];
+          // Considera "branco" se todos os canais > 240
+          if (r < 240 || g < 240 || b < 240) { isWhite = false; break; }
+        }
+        if (isWhite) return y;
+      }
+      return maxY; // fallback: corta onde seria
+    }
+
+    const ctx2d = canvas.getContext('2d');
+    const imgData = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
     const pxPerMm = canvas.width / imgW;
-    for (let p = 0; p < totalPages; p++) {
-      if (p > 0) pdf.addPage();
-      const srcY = p * pageHeightPx;
-      const srcH = Math.min(pageHeightPx, canvas.height - srcY);
+    // Quanto buscar para cima: ~15mm em pixels
+    const searchRange = Math.floor(15 * pxPerMm);
+
+    let currentY = 0;
+    let pageNum = 0;
+
+    while (currentY < canvas.height) {
+      if (pageNum > 0) pdf.addPage();
+
+      const targetEnd = currentY + pageHeightPx;
+      let cutY;
+      if (targetEnd >= canvas.height) {
+        cutY = canvas.height;
+      } else {
+        cutY = findSafeCut(imgData, canvas.width, currentY, targetEnd, searchRange);
+      }
+
+      const sliceH = cutY - currentY;
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
-      pageCanvas.height = srcH;
-      const ctx = pageCanvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-      ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
-      const imgData = pageCanvas.toDataURL('image/jpeg', 0.95);
-      const sliceH = srcH / pxPerMm;
-      pdf.addImage(imgData, 'JPEG', mg, mg, imgW, sliceH);
+      pageCanvas.height = sliceH;
+      const sliceCtx = pageCanvas.getContext('2d');
+      sliceCtx.fillStyle = '#ffffff';
+      sliceCtx.fillRect(0, 0, pageCanvas.width, sliceH);
+      sliceCtx.drawImage(canvas, 0, currentY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+
+      const imgDataUrl = pageCanvas.toDataURL('image/jpeg', 0.95);
+      const renderedH = sliceH / pxPerMm;
+      pdf.addImage(imgDataUrl, 'JPEG', mg, mg, imgW, renderedH);
+
+      currentY = cutY;
+      pageNum++;
     }
+
     pdf.save(filename);
     status.style.display = 'none';
     btn.style.display = 'block';
