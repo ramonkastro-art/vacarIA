@@ -90,10 +90,10 @@ h2{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;text-align:center;color:#fff
 
 /* MEMORY */
 .memory-grid{display:grid;gap:10px;width:100%;max-width:480px;margin:12px 0}
-.mem-card{aspect-ratio:1;border-radius:16px;border:none;cursor:pointer;font-size:2rem;font-weight:800;transition:all .3s;box-shadow:0 4px 12px rgba(0,0,0,.15);background:linear-gradient(135deg,#6366f1,#8b5cf6);color:transparent;position:relative;overflow:hidden}
+.mem-card{aspect-ratio:1;border-radius:16px;border:none;cursor:pointer;font-size:clamp(0.6rem,2.5vw,1.1rem);font-weight:800;transition:all .3s;box-shadow:0 4px 12px rgba(0,0,0,.15);background:linear-gradient(135deg,#6366f1,#8b5cf6);color:transparent;position:relative;overflow:hidden;padding:4px}
 .mem-card.revealed,.mem-card.matched{background:#fff;color:#1f2937}
 .mem-card.matched{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
-.mem-card-inner{display:flex;align-items:center;justify-content:center;height:100%;font-size:inherit}
+.mem-card-inner{display:flex;align-items:center;justify-content:center;height:100%;font-size:inherit;word-break:break-word;text-align:center;overflow:hidden;padding:4px;line-height:1.2}
 .mem-card:not(.revealed):not(.matched) .mem-card-inner::after{content:"❓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem}
 
 /* SORT */
@@ -287,9 +287,9 @@ h2{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;text-align:center;color:#fff
 </div>
 
 <script>
-// ══════════════════════════════════════
+// ════
 // DATA
-// ══════════════════════════════════════
+// ════
 var vocab = {
   colors:[
     {id:'red',en:'red',pt:'vermelho',emoji:'🔴',color:'#ef4444'},
@@ -362,9 +362,9 @@ var vocab = {
   ],
 };
 
-// ══════════════════════════════════════
+// ════
 // STATE
-// ══════════════════════════════════════
+// ════
 var state = {
   player: localStorage.getItem('eqk_name') || 'Player',
   score: parseInt(localStorage.getItem('eqk_score') || '0'),
@@ -391,9 +391,9 @@ function saveState() {
   localStorage.setItem('eqk_lastplay', state.lastPlay);
 }
 
-// ══════════════════════════════════════
+// ════
 // UTILS
-// ══════════════════════════════════════
+// ════
 function shuffle(arr) {
   var a = arr.slice();
   for (var i = a.length - 1; i > 0; i--) {
@@ -444,9 +444,9 @@ function confetti() {
   }
 }
 
-// ══════════════════════════════════════
+// ════
 // NAVIGATION
-// ══════════════════════════════════════
+// ════
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
@@ -470,9 +470,9 @@ function startGame(game) {
   else if (game === 'sort') initSort();
 }
 
-// ══════════════════════════════════════
+// ════
 // HOME STATS
-// ══════════════════════════════════════
+// ════
 function updateHomeStats() {
   document.getElementById('totalScore').textContent = state.score;
   document.getElementById('gamesPlayed').textContent = state.games;
@@ -480,9 +480,9 @@ function updateHomeStats() {
   document.getElementById('playerName').value = state.player !== 'Player' ? state.player : '';
 }
 
-// ══════════════════════════════════════
+// ════
 // FLASHCARDS
-// ══════════════════════════════════════
+// ════
 function initFlashcards() {
   state.fcWords = vocab[state.category];
   state.fcIndex = 0;
@@ -527,9 +527,9 @@ function fcNav(dir) {
 }
 function speakCurrent() { speak(state.fcWords[state.fcIndex].en); }
 
-// ══════════════════════════════════════
+// ════
 // QUIZ
-// ══════════════════════════════════════
+// ════
 function initQuiz() {
   clearInterval(state.qTimer);
   var words = vocab[state.category];
@@ -604,9 +604,9 @@ function answerQuiz(answer, btn) {
   }, 1500);
 }
 
-// ══════════════════════════════════════
+// ════
 // MEMORY
-// ══════════════════════════════════════
+// ════
 function initMemory() {
   var words = pick(vocab[state.category], 6);
   var isDaysOrMonths = state.category === 'calendar';
@@ -623,6 +623,9 @@ function initMemory() {
     state.memCards.push({id: w.id+'-t', type:'text', content: w.en, word: w.en, matched: false});
   });
   state.memCards = shuffle(state.memCards);
+  // Use 3 columns for calendar (long words), 4 for others
+  var cols = isDaysOrMonths ? 3 : 4;
+  document.getElementById('memoryGrid').style.gridTemplateColumns = 'repeat('+cols+',1fr)';
   renderMemory();
   showScreen('memory');
 }
@@ -679,9 +682,9 @@ function flipMemory(idx) {
   }
 }
 
-// ══════════════════════════════════════
+// ════
 // SORT & ORDER
-// ══════════════════════════════════════
+// ════
 function initSort() {
   var words = vocab[state.category];
   var isOrder = state.category === 'calendar';
@@ -761,16 +764,16 @@ function checkSort() {
   }
 }
 
-// ══════════════════════════════════════
+// ════
 // RESULTS & SCORE
-// ══════════════════════════════════════
+// ════
 function addScore(pts) {
   state.score += pts;
   state.games++;
   // Streak: check if played today
   var today = new Date().toDateString();
   if (state.lastPlay !== today) {
-    var yesterday = new Date(Date.now() - 86400000).toDateString();
+    var yesterday = new Date(Date.now() - 8640000).toDateString();
     state.streak = state.lastPlay === yesterday ? state.streak + 1 : 1;
     state.lastPlay = today;
   }
@@ -791,9 +794,9 @@ function showResult(emoji, title, msg, pts, stars) {
 }
 function replayGame() { startGame(state.game); }
 
-// ══════════════════════════════════════
+// ════
 // INIT
-// ══════════════════════════════════════
+// ════
 updateHomeStats();
 </script>
 </body>
