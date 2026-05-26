@@ -576,6 +576,13 @@ export default function App() {
   useEffect(() => {
     trackPageAccess()
   }, [])
+  
+  useEffect(() => {
+  if (resultAv) {
+    const el = document.getElementById("avaliacao-gerada");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  }, [resultAv]);
 
   // Captura o evento de instalação PWA
     useEffect(() => {
@@ -817,7 +824,9 @@ export default function App() {
   <p style={{margin:"0 0 6px 0", fontSize:"13px", fontWeight:700, color:"#92400e"}}>
     💡 Quer uma avaliação pronta para este tema?
   </p>
-  <p style={{margin:"0 0 10px 0", fontSize:"12px", color:"#78350f"}}>
+  {resultAv && !loadingAv && (
+  <div className="av-result-card" id="avaliacao-gerada">
+  <p style={{margin:"0 0 10px 0", fontSize:"12px", color:"#78350f"}}> 
     Crie uma atividade avaliativa sobre <strong>"{tema}"</strong> diretamente
     na aba <strong>Avaliação</strong>.
   </p>
