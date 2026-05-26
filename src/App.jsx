@@ -846,7 +846,7 @@ export default function App() {
     📝 Criar Avaliação sobre "{tema}"
   </button>
 </div>
-            </div>
+           </div>
           </div>
           )}
         {/* RESULTADO AVALIAÇÃO */}
@@ -862,7 +862,7 @@ export default function App() {
         )}
 
         {resultAv && !loadingAv && (
-          <div className="av-result-card">
+          <div className="av-result-card" id="avaliacao-gerada">
             <div className="av-result-header">
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <span className="av-result-tag">Avaliação Gerada</span>
@@ -878,7 +878,6 @@ export default function App() {
             </div>
           </div>
         )}
-        
 {/* GAMIFICAÇÃO */}
 <div className="games-section">
   <div className="games-section-title">🎮 Gamificação</div>
