@@ -57,19 +57,36 @@ function buildPrompt(ano, tema, duracao, nivel, recursos, estado) {
 - Referencial Curricular Estadual (BNCC + adaptações ${ufEstado})
 - Metodologias ativas, ensino híbrido, aprendizagem baseada em projetos, gamificação, estratégias lúdicas e dinâmicas para ensino de inglês
 
+REGRA ABSOLUTA: Gere SOMENTE o plano de aula finalizado. Nenhuma introdução, explicação, comentário ou texto fora do plano. O documento começa diretamente com "# Plano de Aula — Língua Inglesa".
+
+REGRA DE COERÊNCIA TOTAL: Todos os objetivos de aprendizagem, habilidades BNCC e atividades devem ser coerentes entre si. O que é declarado nos objetivos DEVE aparecer nas atividades. O que aparece nas atividades DEVE estar nos critérios de avaliação.
+
+REGRA DE VARIAÇÃO: Varie os tipos de atividade, dinâmicas e exemplos. Evite repetir estruturas idênticas entre seções. Cada seção da aula deve ter uma abordagem distinta.
+
+REGRA DE EXEMPLOS OBRIGATÓRIOS:
+Em TODAS as seções que envolvam vocabulário, frases ou estruturas linguísticas, inclua OBRIGATORIAMENTE exemplos reais entre aspas simples, prontos para o professor usar imediatamente no quadro ou oralmente.
+Mínimo de 3 exemplos por seção que envolva linguagem.
+Formato: 'frase ou palavra em inglês' — NUNCA deixe instrução genérica sem exemplo concreto.
+Exemplos devem ser adequados ao nível ${nivel} e à realidade do aluno.
+
+══════════════════════════════
+RESTRIÇÕES INTERNAS (não aparecem no plano)
+══════════════════════════════
+
 RESTRIÇÃO 1 — DISCIPLINA EXCLUSIVA:
 Este plano é ESTRITAMENTE de LÍNGUA INGLESA.
 Independente do tema "${tema}", estruture a aula como aula de Inglês.
 
 RESTRIÇÃO 2 — IDIOMA DO PLANO:
 ${nivel === "Avançado"
-  ? "Nível AVANÇADO: os enunciados e instruções do plano podem estar em INGLÊS, pois a turma tem capacidade de compreender. Escreva o plano em inglês, exceto BNCC, referências e observações pedagógicas ao professor que devem permanecer em português."
+  ? "Nível AVANÇADO: os enunciados e instruções do plano podem estar em INGLÊS, pois a turma tem capacidade de compreender. Escreva o plano em inglês, exceto BNCC, referências e observações pedagógicas ao professor, que devem permanecer em português."
   : "O plano deve estar 100% em PORTUGUÊS BRASILEIRO. Use inglês apenas para vocabulário-alvo, comandos e estruturas gramaticais ensinados."}
 
 RESTRIÇÃO 3 — BNCC (OBRIGATÓRIO, verbatim):
 Use SOMENTE códigos e descrições EXATOS da BNCC oficial para Língua Inglesa.
 NÃO parafraseie, NÃO invente códigos. Selecione 2 a 4 habilidades reais.
 Padrões: EF06LIxx (6º), EF07LIxx (7º), EF08LIxx (8º), EF09LIxx (9º).
+Antes de inserir cada código, verifique internamente se ele existe na BNCC. Se não tiver certeza, omita e use apenas os que tem certeza.
 
 RESTRIÇÃO 4 — REFERENCIAL CURRICULAR ESTADUAL:
 O professor é do estado de ${nomeEstado} (${ufEstado}).
@@ -88,7 +105,7 @@ O professor tem acesso a: ${recursosStr}.
 ${temNotebook
   ? `OBRIGATÓRIO: O plano DEVE incluir atividades digitais específicas aproveitando o notebook/computador.
 Sugira ferramentas gratuitas online (ex: Wordwall, Quizlet, Google Slides, YouTube, Kahoot, Duolingo for Schools, Padlet, Mentimeter) com links ou instruções de uso direto em sala.
-Descreva passo a passo como o professor conduz a atividade digital.`
+Descreva passo a passo como o professor conduz a atividade digital, incluindo URL de acesso quando possível.`
   : `Adapte todas as atividades para uso ${recursos.includes("Cards / Flashcards") ? "de cards e flashcards físicos" : "do quadro negro"}, sem dependência de tecnologia digital.`}
 ${temArLivre
   ? `RESTRIÇÃO 7B — AR LIVRE (OBRIGATÓRIO):
@@ -103,9 +120,22 @@ Priorize atividades que gerem movimento, interação e uso oral da língua ingle
 
 RESTRIÇÃO 7 — NÍVEL DA TURMA:
 Nível: ${nivel}.
-${nivel === "Básico" ? "Use vocabulário simples, muita repetição, suporte visual e instruções curtas." : ""}
-${nivel === "Intermediário" ? "Equilibre atividades de produção e reconhecimento. Permita respostas mais elaboradas." : ""}
-${nivel === "Avançado" ? "Proponha desafios de produção oral e escrita, discussões e autonomia na língua." : ""}
+${nivel === "Básico" ? "Use vocabulário simples, muita repetição, suporte visual e instruções curtas. Não exija produção oral espontânea — prefira repetição corida e respostas curtas." : ""}
+${nivel === "Intermediário" ? "Equilibre atividades de produção e reconhecimento. Permita respostas mais elaboradas. Inclua ao menos uma atividade de produção oral ou escrita semi-guiada." : ""}
+${nivel === "Avançado" ? "Proponha desafios de produção oral e escrita, discussões e autonomia na língua. Minimize o suporte visual e incentive respostas elaboradas em inglês." : ""}
+
+RESTRIÇÃO 8 — OBJETIVOS DE APRENDIZAGEM:
+Gere exatamente 3 objetivos de aprendizagem, no formato:
+"Ao final da aula, o aluno será capaz de [verbo de ação observable] + [conteúdo específico]."
+Os verbos devem ser mensuráveis (identificar, nomear, usar, produzir, distinguir, descrever, etc.).
+Cada objetivo deve corresponder a uma seção da aula (Apresentação, Prática, Produção).
+
+RESTRIÇÃO 9 — AVALIAÇÃO ALINHADA AOS OBJETIVOS:
+Os critérios de avaliação devem corresponder diretamente aos 3 objetivos de aprendizagem declarados.
+Use sempre avaliação formativa observacional, sem provas escritas.
+Exemplos de critérios: participação oral, acerto em jogo/dinâmica, uso correto da estrutura nas atividades, interação com colegas.
+
+══════════════════════════════
 
 Crie o plano exatamente neste formato:
 
@@ -114,78 +144,97 @@ Crie o plano exatamente neste formato:
 **Série:** ${ano} | **Duração:** ${duracaoMin} | **Nível:** ${nivel} | **Estado:** ${nomeEstado} | **Componente:** Língua Inglesa
 **Recursos:** ${recursosStr}
 
+---
+
 ${efI ? "## Habilidades Trabalhadas" : "## Habilidades BNCC Alinhadas"}
 ${efI
   ? `[Descreva 2–4 competências em português, SEM códigos, inspiradas na BNCC de Língua Inglesa para ${ano}]`
   : `[Liste 2–4 habilidades com código exato e descrição verbatim da BNCC — padrão EF0${ano.charAt(0)}LIxx]`}
 
-  ## Referencial Curricular Estadual — ${refEstadual}
+## Referencial Curricular Estadual — ${refEstadual}
 ${efI
   ? `[Descreva como as competências acima se alinham às orientações do ${refEstadual} para anos iniciais de ${nomeEstado}. Mencione adaptações locais se houver.]`
   : `[Liste 1–2 habilidades ou orientações específicas do ${refEstadual} complementares às habilidades BNCC acima. Quando existir código estadual, use o sufixo ${ufEstado} — ex: EF06LI01${ufEstado}.]`}
- 
+
+---
+
 ## Objetivos de Aprendizagem
-• [Objetivo 1]
-• [Objetivo 2]
-• [Objetivo 3 — opcional]
+Ao final da aula, o aluno será capaz de:
+• [Objetivo 1 — alinhado à seção Apresentação]
+• [Objetivo 2 — alinhado à seção Prática]
+• [Objetivo 3 — alinhado à seção Produção]
 
 ## Materiais Necessários
 • [Liste apenas os materiais condizentes com os recursos: ${recursosStr}${temArLivre ? ". Inclua: bola, placas/cartões plastificados, giz para chão, cones, bambolês ou fitas coloridas conforme necessário" : ""}]
+
+---
 
 ## Estrutura da Aula (${duracaoMin})
 ${duracao === "2 períodos (80 min)"
   ? `### PERÍODO 1 (40 min)
 
 ### 1. Aquecimento — Warm Up (8–10 min)
-[${temArLivre ? "Dinâmica de movimento no espaço externo para ativar o vocabulário — ex: corrida de nomes, bola com perguntas, aquecimento corporal em inglês" : "Descrição passo a passo"}]
+[${temArLivre ? "Dinâmica de movimento no espaço externo para ativar o vocabulário — ex: corrida de nomes, bola com perguntas, aquecimento corporal em inglês" : "Descrição passo a passo da atividade de engajamento inicial"}]
+> 💬 Exemplos de falas do professor: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 2. Apresentação — Presentation (15 min)
-[${temNotebook ? "Introdução do conteúdo com atividade digital" : temArLivre ? "Apresentação lúdica no espaço externo: placas/cartazes dispostos pela quadra/gramado, professor apresenta estrutura em inglês de forma oral e gestual" : "Introdução do conteúdo"}]
+[${temNotebook ? "Introdução do conteúdo com atividade digital — indique ferramenta, URL e passo a passo de uso" : temArLivre ? "Apresentação lúdica no espaço externo: placas/cartazes dispostos pela quadra/gramado, professor apresenta estrutura em inglês de forma oral e gestual" : "Introdução clara e passo a passo do conteúdo novo"}]
+> 💬 Vocabulário/estrutura apresentada: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 3. Prática Guiada — Guided Practice (15 min)
-[${temArLivre ? "JOGO/BRINCADEIRA 1: nome da dinâmica, como organizar o espaço, regras passo a passo, como o professor media em inglês/português" : temNotebook ? "Atividade digital (indique ferramenta e como usar)" : "Atividade de prática guiada"}]
+[${temArLivre ? "JOGO/BRINCADEIRA 1 — Nome: | Objetivo linguístico: | Materiais: | Organização do espaço: | Regras passo a passo: | Como o professor media em inglês/português:" : temNotebook ? "Atividade digital guiada — indique ferramenta, URL, passo a passo e como o professor monitora" : "Atividade de prática guiada com suporte do professor"}]
+> 💬 Estrutura praticada: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### PERÍODO 2 (40 min)
 
 ### 4. Prática Livre — Free Practice (20 min)
-[${temArLivre ? "JOGO/BRINCADEIRA 2 (mais desafiador): nome da dinâmica, organização, regras e como estimular produção oral em inglês durante a atividade" : temNotebook ? "Atividade com recurso digital (indique qual e como)" : "Atividade de produção"}]
+[${temArLivre ? "JOGO/BRINCADEIRA 2 (mais desafiador) — Nome: | Objetivo: | Organização: | Regras: | Como estimular produção oral em inglês durante a atividade:" : temNotebook ? "Atividade com recurso digital de produção — indique qual, URL e como o aluno interage" : "Atividade de produção semi-guiada com crescente autonomia"}]
+> 💬 Produção esperada dos alunos: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 5. Produção — Production (12 min)
-[${temArLivre ? "Desafio final em equipe no espaço externo — atividade que exige uso oral da estrutura aprendida para vencer" : "Atividade de produção final"}]
+[${temArLivre ? "Desafio final em equipe no espaço externo — atividade que exige uso oral da estrutura aprendida para vencer" : "Atividade de produção final com mínimo suporte — aluno aplica de forma autônoma"}]
+> 💬 Exemplos de produção autônoma esperada: '[exemplo 1]' / '[exemplo 2]'
 
 ### 6. Fechamento — Wrap Up (8 min)
-[${temArLivre ? "Roda final: alunos sentados no gramado/quadra, professor recapitula vocabulário com perguntas rápidas, alunos respondem em inglês" : "Encerramento, recapitulação e avaliação informal"}]`
+[${temArLivre ? "Roda final: alunos sentados no gramado/quadra, professor recapitula vocabulário com perguntas rápidas, alunos respondem em inglês" : "Recapitulação dialogada, exit ticket informal e encerramento"}]
+> 💬 Perguntas de fechamento: '[exemplo 1]' / '[exemplo 2]'`
   : `### 1. Aquecimento — Warm Up (5–8 min)
-[Descrição passo a passo${temArLivre ? " — dinâmica de movimento para engajar no espaço externo" : ""}]
+[Descrição passo a passo da atividade de engajamento inicial${temArLivre ? " — dinâmica de movimento para engajar no espaço externo" : ""}]
+> 💬 Exemplos de falas do professor: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 2. Apresentação — Presentation (10–12 min)
-[Introdução do conteúdo${temNotebook ? " com atividade digital (indique ferramenta e como usar)" : temArLivre ? " — apresentação lúdica no espaço externo usando placas/cartazes" : ""}]
+[Introdução clara e passo a passo do conteúdo novo${temNotebook ? " com atividade digital — indique ferramenta, URL e passo a passo de uso" : temArLivre ? " — apresentação lúdica no espaço externo usando placas/cartazes" : ""}]
+> 💬 Vocabulário/estrutura apresentada: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 3. Prática — Practice (12–15 min)
-[${temArLivre ? "JOGO/BRINCADEIRA PRINCIPAL: nome da dinâmica, organização do espaço, regras detalhadas passo a passo, como o professor conduz em inglês/português" : temNotebook ? "Atividade digital (indique ferramenta e como usar)" : "Atividade de prática guiada"}]
+[${temArLivre ? "JOGO/BRINCADEIRA PRINCIPAL — Nome: | Objetivo linguístico: | Materiais: | Organização do espaço: | Regras passo a passo: | Como o professor conduz em inglês/português:" : temNotebook ? "Atividade digital guiada — indique ferramenta, URL e passo a passo" : "Atividade de prática guiada com suporte gradual do professor"}]
+> 💬 Estrutura praticada: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 4. Produção — Production (5–8 min)
-[${temArLivre ? "Atividade de produção oral em movimento — desafio final no espaço externo" : "Atividade de produção"}]
+[${temArLivre ? "Atividade de produção oral em movimento — desafio final no espaço externo com uso autônomo da estrutura" : "Atividade de produção com mínimo suporte — aluno aplica de forma autônoma"}]
+> 💬 Produção esperada dos alunos: '[exemplo 1]' / '[exemplo 2]'
 
 ### 5. Fechamento — Wrap Up (3–5 min)
-[${temArLivre ? "Reunir os alunos em roda, recapitulação oral do vocabulário/estrutura trabalhada" : "Encerramento e recapitulação"}]`}
+[${temArLivre ? "Roda final: recapitulação oral do vocabulário/estrutura trabalhada — professor faz perguntas rápidas e alunos respondem em inglês" : "Recapitulação dialogada, exit ticket informal e encerramento"}]
+> 💬 Perguntas de fechamento: '[exemplo 1]' / '[exemplo 2]'`}
 
-## Avaliação
-[2–4 linhas com critérios observáveis adequados ao nível ${nivel}]
+---
+
+## Avaliação Formativa
+| Objetivo | Critério Observável | Como Verificar |
+|---|---|---|
+| [Objetivo 1] | [critério mensurável] | [observação / dinâmica / fala] |
+| [Objetivo 2] | [critério mensurável] | [observação / dinâmica / fala] |
+| [Objetivo 3] | [critério mensurável] | [observação / dinâmica / fala] |
 
 ## Adaptação para Inclusão / Diversidade
-[3–5 linhas com adaptações para NEE e realidade gaúcha]
+[3–5 linhas com adaptações concretas para NEE, alunos com dificuldades de aprendizagem, realidade sociocultural do ${nomeEstado} e estratégias de diferenciação pedagógica sem excluir ninguém da atividade principal]
 
 ## Referências e Recursos Complementares
-[links de ferramentas digitais usadas no plano" : " + sugestões de materiais físicos"}]
+${temNotebook ? "[Liste todas as ferramentas digitais usadas no plano com URL real de acesso + 1 sugestão extra de recurso digital relacionado ao tema]" : "[Sugestões de materiais físicos, livros didáticos ou recursos de baixo custo relacionados ao tema]"}
 
-Instruções finais: gere SOMENTE o plano, sem introduções extras.
-
-REGRA DE OURO — EXEMPLOS OBRIGATÓRIOS:
-Em TODAS as seções da aula (especialmente Apresentação, Prática e Produção), sempre que mencionar vocabulário, frases ou estruturas em inglês, inclua OBRIGATORIAMENTE exemplos reais e concretos entre aspas simples, que o professor possa falar ou escrever no quadro imediatamente.
-Exemplos devem ser simples, criativos, próximos da realidade do aluno e prontos para uso em sala.
-Formato: 'frase de exemplo em inglês' — nunca deixe apenas a instrução genérica "forneça exemplos" sem de fato fornecê-los.
-Quantidade mínima: ao menos 2 exemplos por seção que envolva vocabulário ou estrutura linguística.`;
+---
+*Plano gerado pelo VacarIA — Assistente Pedagógico para Professores de Inglês*`;
 }
 
 function buildPromptAvaliacao(ano, tema, nivel, qtd) {
