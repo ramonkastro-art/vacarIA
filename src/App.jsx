@@ -823,11 +823,12 @@ export default function App() {
   </p>
   <button
     onClick={() => {
-      setModo("avaliacao");
-      setTemaAv(tema);
-      setAnoAv(ano);
-      setNivelAv(nivel);
-    }}
+     setModo("avaliacao");
+     setTemaAv(tema);
+     setAnoAv(ano);
+     setNivelAv(nivel);
+     window.scrollTo({ top: 0, behavior: "smooth" });
+     }}
     style={{
       padding:"8px 16px", background:"#b45309", color:"#fff",
       border:"none", borderRadius:"6px", fontSize:"12px",
