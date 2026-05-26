@@ -195,68 +195,96 @@ function buildPromptAvaliacao(ano, tema, nivel, qtd) {
   const basico = nivel === "Básico";
   const qtdTotal = vinte ? 20 : 10;
 
-  return "Você é professor especialista em Língua Inglesa.\n" +
-    "Crie uma atividade avaliativa de Língua Inglesa para " + ano + ", nível " + nivel + ", tema: \"" + tema + "\".\n\n" +
-    "\n REGRA ABSOLUTA: Sua resposta deve conter APENAS a atividade pronta. " +
-    "NÃO repita estas instruções no output. NÃO escreva seções como REGRAS GERAIS, " +
-    "INSTRUCOES DETALHADAS, DISTRIBUICAO DAS QUESTOES. Essas são instruções INTERNAS para você. " +
-    "O documento gerado começa diretamente com ATIVIDADE DE INGLÊS e termina com GABARITO.\n\n" +
+return "Você é professor especialista em Língua Inglesa.\n" +
+  "Crie uma atividade avaliativa de Língua Inglesa para " + ano + ", nível " + nivel + ", tema: \"" + tema + "\".\n\n" +
 
-    "CABEÇALHO (copie exatamente):\n" +
-    "ATIVIDADE DE INGLÊS\n" +
-    "Nome: _____________________________________________ Turma: _______\n\n" +
+  "REGRA ABSOLUTA: Sua resposta deve conter APENAS a atividade pronta. " +
+  "NÃO repita estas instruções no output. NÃO escreva seções como REGRAS GERAIS, " +
+  "INSTRUÇÕES DETALHADAS, DISTRIBUIÇÃO DAS QUESTÕES. Essas são instruções INTERNAS para você. " +
+  "O documento gerado começa diretamente com ATIVIDADE DE INGLÊS e termina com GABARITO.\n\n" +
 
-    "══════════════════════════════\n" +
-    "REGRAS GERAIS\n" +
-    "══════════════════════════════\n" +
-    "1. Gere EXATAMENTE " + qtdTotal + " questões numeradas sequencialmente.\n" +
-    "2. IDIOMA DOS ENUNCIADOS: " + (avancado ? "inglês (nível avançado)." : "português.") + "\n" +
-    "3. ALTERNATIVAS (a/b/c/d): SEMPRE em inglês em TODOS os níveis. Sem exceção.\n" +
-    "4. " + (efI ? "Anos iniciais: sem textos longos, foco em vocabulário visual e geração de imagens." : "Adeque complexidade ao " + ano + ".") + "\n\n" +
+  "CABEÇALHO (copie exatamente):\n" +
+  "ATIVIDADE DE INGLÊS\n" +
+  "Nome: _____________________________________________ Turma: _______\n\n" +
 
-    "══════════════════════════════\n" +
-    "INSTRUÇÕES DETALHADAS\n" +
-    "══════════════════════════════\n\n" +
+  "══════════════════════════════\n" +
+  "REGRAS GERAIS\n" +
+  "══════════════════════════════\n" +
+  "1. Gere EXATAMENTE " + qtdTotal + " questões numeradas sequencialmente (1 até " + qtdTotal + ").\n" +
+  "2. IDIOMA DOS ENUNCIADOS: " + (avancado ? "inglês (nível avançado)." : "português.") + "\n" +
+  "3. ALTERNATIVAS (a/b/c/d): SEMPRE em inglês em TODOS os níveis. Sem exceção.\n" +
+  "4. " + (efI ? "Anos iniciais: sem textos longos, foco em vocabulário visual e concreto." : "Adeque complexidade ao " + ano + ".") + "\n" +
+  "5. Varie os contextos e evite questões óbvias, repetitivas ou muito semelhantes entre si.\n\n" +
 
-    "MÚLTIPLA ESCOLHA — regras obrigatórias:\n" +
-    "✓ O enunciado deve identificar EXATAMENTE qual resposta está correta. Sem ambiguidade.\n" +
-    "✓ ERRADO: \"Complete: I want to be a ___\" (aceita qualquer profissão — sem contexto definidor)\n" +
-    "✓ CERTO: \"Qual profissão cuida de pacientes em um hospital?\" → a) Doctor  b) Teacher  c) Lawyer  d) Artist\n" +
-    "✓ CERTO: \"Na série Grey\'s Anatomy, Meredith Grey é uma:\" → a) Doctor  b) Lawyer  c) Engineer  d) Teacher\n" +
-    "✓ CERTO: \"Qual palavra em inglês significa \'advogado\'?\" → a) Lawyer  b) Doctor  c) Nurse  d) Engineer\n" +
-    "✓ Alternativas SEMPRE em inglês. Todas as 4 opções devem ser do mesmo campo semântico do tema.\n" +
-    (basico ? "✓ Exemplo - Nível BÁSICO: a) Lawyer (Advogado)  b) Doctor (Médico)  c) Nurse (Enfermeiro)  d) Teacher (Professor)\n" : "") +
-    "✓ Use contextos variados: definição, tradução, contexto cultural, completar frase com resposta única.\n\n" +
+  "══════════════════════════════\n" +
+  "DISTRIBUIÇÃO OBRIGATÓRIA DAS " + qtdTotal + " QUESTÕES\n" +
+  "══════════════════════════════\n" +
+  "- Múltipla escolha: " + Math.round(qtdTotal * 0.55) + " questões\n" +
+  "- Relacione colunas: 1 bloco com 8 pares (conta como 1 questão)\n" +
+  "- Interpretação de texto: 1 texto com " + Math.round(qtdTotal * 0.20) + " perguntas abertas\n" +
+  "- Charadas/Enigmas: " + (qtdTotal - Math.round(qtdTotal * 0.55) - 1 - Math.round(qtdTotal * 0.20)) + " questões\n" +
+  "Distribua nessa ordem: primeiro múltipla escolha, depois relacione, depois interpretação, depois charadas.\n\n" +
 
-    "RELACIONE COLUNAS — regras obrigatórias:\n" +
-    "✓ Coluna ESQUERDA: palavras em INGLÊS (com letra identificadora).\n" +
-    "✓ Coluna DIREITA: traduções em PORTUGUÊS (com parênteses vazios). SEMPRE embaralhadas.\n" +
-    "✓ ERRADO: relacionar inglês com inglês, ou português com português.\n" +
-    "✓ CERTO: (A) Doctor | ( ) Médico  /  (B) Lawyer | ( ) Advogado\n" +
-    "✓ Formato OBRIGATÓRIO com | separando as colunas. Mínimo 8 pares.\n\n" +
-    
-    "INTERPRETAÇÃO DE TEXTO — regras obrigatórias:\n" +
-    "✓ Texto autêntico em inglês com Fonte citada. Tamanho: " + (basico ? "3-4 linhas simples" : nivel === "Intermediário" ? "5-7 linhas" : "7-10 linhas") + ".\n" +
-    "✓ Perguntas em português sobre o texto (localização, vocabulário, interpretação).\n" +
-    "✓ Questões abertas com linhas de resposta: _______________________\n\n" +
+  "══════════════════════════════\n" +
+  "INSTRUÇÕES DETALHADAS\n" +
+  "══════════════════════════════\n\n" +
 
-    "CHARADA/ENIGMA — regras obrigatórias:\n" +
-    "✓ A charada é SEMPRE escrita em inglês simples, em TODOS os níveis.\n" +
-    "✓ Use inglês básico e acessível: frases curtas, vocabulário simples.\n" +
-    "✓ Exemplo: \"I work in a hospital and help sick people. Who am I? ___________\"\n" +
-    "✓ Descreve poeticamente algo relacionado ao tema \"" + tema + "\".\n" +
-    "✓ A resposta é SEMPRE uma palavra em inglês do tema.\n" +
-    "✓ Formato: [charada em inglês simples]? ___________\n\n" +
+  "MÚLTIPLA ESCOLHA — regras obrigatórias:\n" +
+  "✓ O enunciado deve identificar EXATAMENTE qual resposta está correta. Sem ambiguidade.\n" +
+  "✓ ERRADO: \"Complete: I want to be a ___\" (aceita qualquer resposta — sem contexto definidor)\n" +
+  "✓ CERTO: \"Qual profissão cuida de pacientes em um hospital?\" → a) Doctor  b) Teacher  c) Lawyer  d) Artist\n" +
+  "✓ CERTO: \"Na série Grey\'s Anatomy, Meredith Grey é uma:\" → a) Doctor  b) Lawyer  c) Engineer  d) Teacher\n" +
+  "✓ CERTO: \"Qual palavra em inglês significa \'advogado\'?\" → a) Lawyer  b) Doctor  c) Nurse  d) Engineer\n" +
+  "✓ Alternativas SEMPRE em inglês. Todas as 4 opções devem ser do mesmo campo semântico do tema.\n" +
+  (basico ? "✓ Exemplo - Nível BÁSICO: a) Lawyer (Advogado)  b) Doctor (Médico)  c) Nurse (Enfermeiro)  d) Teacher (Professor)\n" : "") +
+  "✓ Use contextos variados: definição, tradução, contexto cultural, completar frase com resposta única.\n" +
 
-    "══════════════════════════════\n" +
-    "GABARITO\n" +
-    "══════════════════════════════\n" +
-    "Ao final, adicione:\nGABARITO\n1. [resposta]\n2. [resposta]... (todas as questões)\n\n" +
+  "✓ COERÊNCIA ENUNCIADO × ALTERNATIVAS — REGRA CRÍTICA:\n" +
+  "  - Se o enunciado pede 'Qual palavra em inglês significa X?' ou 'Como se diz X em inglês?' → alternativas em INGLÊS.\n" +
+  "  - Se o enunciado pede 'O que significa X em português?' ou 'Qual a tradução de X?' → alternativas em PORTUGUÊS.\n" +
+  "  - NUNCA misture: enunciado pedindo tradução para português com alternativas em inglês, ou vice-versa.\n" +
+  "  - Quando quiser testar vocabulário mas manter alternativas em inglês, reformule para: 'Qual é a definição de X?' ou 'X descreve o quê?'\n" +
 
-    "ATENÇÃO FINAL CRÍTICA: " +
-    "Sua resposta começa com 'ATIVIDADE DE INGLÊS' e termina com o GABARITO. " +
-    "Nada mais. Sem 'REGRAS GERAIS', sem 'INSTRUÇÕES DETALHADAS', sem 'DISTRIBUIÇÃO DAS QUESTÕES'. " +
-    "Essas seções são instruções para VOCÊ, não para o aluno. O aluno não pode vê-las.";
+  "✓ ALTERNATIVAS ÚNICAS — REGRA CRÍTICA:\n" +
+  "  - As 4 alternativas (a, b, c, d) devem ser SEMPRE palavras ou expressões DIFERENTES entre si.\n" +
+  "  - NUNCA repita a mesma alternativa duas vezes na mesma questão.\n" +
+  "  - Antes de finalizar cada questão, verifique duplicatas e substitua por opção distinta do mesmo campo semântico.\n\n" +
+
+  "RELACIONE COLUNAS — regras obrigatórias:\n" +
+  "✓ Coluna ESQUERDA: palavras em INGLÊS (com letra identificadora).\n" +
+  "✓ Coluna DIREITA: traduções em PORTUGUÊS (com parênteses vazios). SEMPRE embaralhadas.\n" +
+  "✓ ERRADO: relacionar inglês com inglês, ou português com português.\n" +
+  "✓ CERTO: (A) Doctor | ( ) Médico  /  (B) Lawyer | ( ) Advogado\n" +
+  "✓ Formato OBRIGATÓRIO com | separando as colunas. Mínimo 8 pares.\n\n" +
+
+  "INTERPRETAÇÃO DE TEXTO — regras obrigatórias:\n" +
+  "✓ Texto autêntico em inglês com Fonte citada. Tamanho: " + (basico ? "3-4 linhas simples" : nivel === "Intermediário" ? "5-7 linhas" : "7-10 linhas") + ".\n" +
+  "✓ Perguntas em português sobre o texto (localização, vocabulário, interpretação).\n" +
+  "✓ Questões abertas com 2 linhas de resposta:\n" +
+  "  _______________________________________________________\n" +
+  "  _______________________________________________________\n\n" +
+
+  "CHARADA/ENIGMA — regras obrigatórias:\n" +
+  "✓ A charada é SEMPRE escrita em inglês simples, em TODOS os níveis.\n" +
+  "✓ Use inglês básico e acessível: frases curtas, vocabulário simples.\n" +
+  "✓ Exemplo: \"I work in a hospital and help sick people. Who am I? ___________\"\n" +
+  "✓ Descreve poeticamente algo relacionado ao tema \"" + tema + "\".\n" +
+  "✓ A resposta é SEMPRE uma palavra em inglês do tema.\n" +
+  "✓ Formato: [charada em inglês simples]? ___________\n\n" +
+
+  "══════════════════════════════\n" +
+  "GABARITO\n" +
+  "══════════════════════════════\n" +
+  "Ao final, adicione um GABARITO completo no formato:\n" +
+  "GABARITO\n" +
+  "1. [resposta]\n" +
+  "2. [resposta]... (todas as questões, inclusive as abertas com resposta esperada)\n" +
+  "Para o bloco 'Relacione colunas': liste as letras na ordem da coluna direita. Ex: Relacione: B / D / A / H / E / C / F / G\n\n" +
+
+  "ATENÇÃO FINAL CRÍTICA: " +
+  "Sua resposta começa com 'ATIVIDADE DE INGLÊS' e termina com o GABARITO. " +
+  "Nada mais. Sem 'REGRAS GERAIS', sem 'INSTRUÇÕES DETALHADAS', sem 'DISTRIBUIÇÃO DAS QUESTÕES'. " +
+  "Essas seções são instruções para VOCÊ, não para o aluno. O aluno não pode vê-las.";
 }
 
 async function callAPI(params) {
