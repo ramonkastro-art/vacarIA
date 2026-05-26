@@ -221,11 +221,11 @@ ${duracao === "2 períodos (80 min)"
 ---
 
 ## Avaliação Formativa
-| Objetivo | Critério Observável | Como Verificar |
-|---|---|---|
-| [Objetivo 1] | [critério mensurável] | [observação / dinâmica / fala] |
-| [Objetivo 2] | [critério mensurável] | [observação / dinâmica / fala] |
-| [Objetivo 3] | [critério mensurável] | [observação / dinâmica / fala] |
+${[1,2,3].map(i => `
+🎯 **Objetivo ${i}:** [objetivo ${i}]
+📋 **Critério:** [critério observável]
+🔍 **Como verificar:** [observação / fala / dinâmica]
+`).join('---\n')}
 
 ## Adaptação para Inclusão / Diversidade
 [3–5 linhas com adaptações concretas para NEE, alunos com dificuldades de aprendizagem, realidade sociocultural do ${nomeEstado} e estratégias de diferenciação pedagógica sem excluir ninguém da atividade principal]
@@ -804,6 +804,38 @@ export default function App() {
             </div>
             <div className="result-body">
               <div id="plano-para-pdf">{renderLines(result)}</div>
+
+{/* CTA — aparece na tela, some no PDF */}
+<div className="no-print" style={{
+  marginTop: "24px",
+  padding: "16px 20px",
+  background: "linear-gradient(135deg, #fef3c7, #fde68a)",
+  borderLeft: "4px solid #b45309",
+  borderRadius: "8px",
+  fontFamily: "inherit"
+}}>
+  <p style={{margin:"0 0 6px 0", fontSize:"13px", fontWeight:700, color:"#92400e"}}>
+    💡 Quer uma avaliação pronta para este tema?
+  </p>
+  <p style={{margin:"0 0 10px 0", fontSize:"12px", color:"#78350f"}}>
+    Crie uma atividade avaliativa sobre <strong>"{tema}"</strong> diretamente
+    na aba <strong>Avaliação</strong>.
+  </p>
+  <button
+    onClick={() => {
+      setModo("avaliacao");
+      setTemaAv(tema);
+      setAnoAv(ano);
+      setNivelAv(nivel);
+    }}
+    style={{
+      padding:"8px 16px", background:"#b45309", color:"#fff",
+      border:"none", borderRadius:"6px", fontSize:"12px",
+      fontWeight:700, cursor:"pointer"
+    }}>
+    📝 Criar Avaliação sobre "{tema}"
+  </button>
+</div>
             </div>
           </div>
         )}
