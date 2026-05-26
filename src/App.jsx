@@ -826,20 +826,18 @@ export default function App() {
   <p style={{margin:"0 0 6px 0", fontSize:"13px", fontWeight:700, color:"#92400e"}}>
     💡 Quer uma avaliação pronta para este tema?
   </p>
-  {resultAv && !loadingAv && (
-  <div className="av-result-card" id="avaliacao-gerada">
-  <p style={{margin:"0 0 10px 0", fontSize:"12px", color:"#78350f"}}> 
+  <p style={{margin:"0 0 10px 0", fontSize:"12px", color:"#78350f"}}>
     Crie uma atividade avaliativa sobre <strong>"{tema}"</strong> diretamente
     na aba <strong>Avaliação</strong>.
   </p>
   <button
     onClick={() => {
-     setModo("avaliacao");
-     setTemaAv(tema);
-     setAnoAv(ano);
-     setNivelAv(nivel);
-     window.scrollTo({ top: 0, behavior: "smooth" });
-     }}
+      setModo("avaliacao");
+      setTemaAv(tema);
+      setAnoAv(ano);
+      setNivelAv(nivel);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }}
     style={{
       padding:"8px 16px", background:"#b45309", color:"#fff",
       border:"none", borderRadius:"6px", fontSize:"12px",
@@ -850,8 +848,7 @@ export default function App() {
 </div>
             </div>
           </div>
-        )}
-
+          )}
         {/* RESULTADO AVALIAÇÃO */}
         {loadingAv && (
           <div className="av-result-card">
