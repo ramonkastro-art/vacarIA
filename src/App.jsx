@@ -576,12 +576,14 @@ export default function App() {
   useEffect(() => {
     trackPageAccess()
   }, [])
-  
+
   useEffect(() => {
-  if (resultAv) {
-    const el = document.getElementById("avaliacao-gerada");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+   if (resultAv) {
+    setTimeout(() => {
+      const el = document.getElementById("avaliacao-gerada");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+   }
   }, [resultAv]);
 
   // Captura o evento de instalação PWA
