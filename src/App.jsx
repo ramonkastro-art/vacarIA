@@ -908,66 +908,16 @@ export default function App() {
   </a>
 </div>
 
-{/* INDICAÇÕES DO PROFESSOR */}
-<div style={{marginTop:32, marginBottom:8}}>
-  <div style={{
-    fontSize:"0.7rem", fontWeight:800, letterSpacing:"0.12em",
-    color:"#b45309", marginBottom:12, textTransform:"uppercase"
-  }}>
-    🛒 Indicações do Professor Ramon
-  </div>
-  <p style={{fontSize:"12px", color:"#78350f", marginBottom:16, opacity:0.85}}>
-    Produtos que uso e recomendo para professores — links do Mercado Livre
-  </p>
-  <div style={{
-    display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))",
-    gap:12
-  }}>
-    {[
-      { emoji:"📘", label:"Meu E-book", sub:"A Arte de Cativar Alunos", url:"https://www.amazon.com.br/Arte-Cativar-Alunos-Confian%C3%A7a-Desconhecido-ebook/dp/B0GWSBTRKX/", destaque: true },
-      { emoji:"📓", label:"Notebook", sub:"ASUS VivoBook i5", url:"https://meli.la/1rfrpns" },
-      { emoji:"📖", label:"Dicionário", sub:"Inglês recomendado", url:"https://meli.la/1bgNUVv" },
-      { emoji:"📱", label:"Celular", sub:"Indicação pessoal", url:"https://meli.la/2DxSGzh" },
-      { emoji:"🎧", label:"Fone de Ouvido", sub:"Para aulas online", url:"https://meli.la/15ZyCAH" },
-      { emoji:"🎤", label:"Microfone + Amp.", sub:"Salas até 30 alunos", url:"https://meli.la/1hZQMnn" },
-    ].map(item => (
-      <a
-        key={item.label}
-        href={item.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display:"flex", flexDirection:"column", alignItems:"center",
-          padding:"14px 10px",
-          background: item.destaque ? "linear-gradient(135deg,#fef3c7,#fde68a)" : "#fffbeb",
-          border: item.destaque ? "2px solid #b45309" : "1.5px solid #fde68a",
-          borderRadius:12,
-          textDecoration:"none", color:"#78350f",
-          transition:"transform .15s, box-shadow .15s",
-          textAlign:"center",
-          position:"relative"
-        }}
-        onMouseEnter={e => { e.currentTarget.style.transform="translateY(-3px)"; e.currentTarget.style.boxShadow="0 6px 18px rgba(180,83,9,.18)"; }}
-        onMouseLeave={e => { e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow=""; }}
-      >
-        {item.destaque && (
-          <span style={{
-            position:"absolute", top:-10, left:"50%", transform:"translateX(-50%)",
-            background:"#b45309", color:"#fff", fontSize:"9px",
-            fontWeight:800, borderRadius:6, padding:"2px 8px", letterSpacing:"0.08em"
-          }}>⭐ AUTOR</span>
-        )}
-        <span style={{fontSize:"1.6rem", marginBottom:6}}>{item.emoji}</span>
-        <span style={{fontSize:"12px", fontWeight:700, marginBottom:2}}>{item.label}</span>
-        <span style={{fontSize:"10px", opacity:0.7}}>{item.sub}</span>
-        <span style={{
-          marginTop:8, fontSize:"10px", fontWeight:700,
-          color:"#fff", background: item.destaque ? "#b45309" : "#b45309",
-          borderRadius:6, padding:"3px 10px"
-        }}>{item.destaque ? "Ver na Amazon →" : "Ver no ML →"}</span>
-      </a>
-    ))}
-  </div>
+{/* link para lojinha (substitui os cards grandes na home) */}
+<div style={{marginTop:24, marginBottom:8, textAlign:"center"}}>
+  <a href="/lojinha"
+     style={{
+       display:"inline-block", textDecoration:"none",
+       background:"linear-gradient(135deg,#fef3c7,#fde68a)",
+       color:"#78350f", padding:"12px 18px", borderRadius:12, fontWeight:800, boxShadow:"0 6px 18px rgba(180,83,9,.12)"
+     }}>
+    🛍️ Ver indicações e achadinhos do Professor Ramon — ir para a lojinha
+  </a>
 </div>
 
 <footer className="footer">
