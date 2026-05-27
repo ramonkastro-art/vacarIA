@@ -2,13 +2,14 @@ import AdminPanel from './AdminPanel';
 import Lojinha from "./pages/lojinha";
 import { useState, useEffect } from "react";
 import "./App.css";
+export default function App() {
+  // roteamento simples para /lojinha (sem usar React Router)
+  const path = window.location.pathname || "/";
+  if (path === "/lojinha" || path === "/lojinha/" || path.startsWith("/lojinha?")) {
+    return <Lojinha />;
+  }
 import { trackPageAccess, trackInteraction } from './tracker';
 
-// roteamento simples para /lojinha
-const path = window.location.pathname || "/";
-if (path === "/lojinha" || path === "/lojinha/" || path.startsWith("/lojinha?")) {
-  return <Lojinha />;
-}
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
 const NIVEIS = ["Básico","Intermediário","Avançado"];
@@ -939,4 +940,4 @@ export default function App() {
       {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
     </>
   );
-}
+}}
