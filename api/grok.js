@@ -1,3 +1,5 @@
+import { getBestGeminiModel } from './gemini-model-resolver.js'
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -5,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const groqKey = process.env.GROQ_API_KEY
+  const groqKey   = process.env.GROQ_API_KEY
   const geminiKey = process.env.GEMINI_API_KEY
 
   let body = req.body
@@ -13,7 +15,7 @@ export default async function handler(req, res) {
 
   const messages = body.messages || []
 
-  // ── 1. Tenta GROQ ──────────────────────────────────────────────
+  // ── 1. Groq (principal para planos de aula) ────────────────────
   if (groqKey) {
     try {
       const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -31,32 +33,29 @@ export default async function handler(req, res) {
       })
 
       const data = await groqRes.json()
+      if (groqRes.ok) return res.status(200).json({ ...data, _provider: 'groq' })
 
-      if (groqRes.ok) {
-        return res.status(200).json({ ...data, _provider: 'groq' })
-      }
-
-      // Rate limit ou quota → tenta fallback
       const status = groqRes.status
       if (status !== 429 && status !== 503 && status !== 402) {
         return res.status(status).json(data)
       }
-
-      console.warn('Groq indisponível, tentando Gemini...', status)
+      console.warn('[grok] Groq indisponível, tentando Gemini...', status)
     } catch (e) {
-      console.warn('Groq erro de rede:', e.message)
+      console.warn('[grok] Groq erro de rede:', e.message)
     }
   }
 
-  // ── 2. Fallback: Gemini ─────────────────────────────────────────
+  // ── 2. Fallback: Gemini (modelo resolvido automaticamente) ──────
   if (geminiKey) {
     try {
-      // Extrai o conteúdo do usuário para enviar ao Gemini
+      const model = await getBestGeminiModel(geminiKey)
+      console.log(`[grok] Usando Gemini fallback: ${model}`)
+
       const userMsg = messages.filter(m => m.role === 'user').map(m => m.content).join('\n')
-      const sysMsg = messages.filter(m => m.role === 'system').map(m => m.content).join('\n')
+      const sysMsg  = messages.filter(m => m.role === 'system').map(m => m.content).join('\n')
 
       const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -72,23 +71,21 @@ export default async function handler(req, res) {
       )
 
       const data = await geminiRes.json()
-
       if (!geminiRes.ok) {
-        console.error('Gemini erro:', JSON.stringify(data))
+        console.error('[grok] Gemini erro:', JSON.stringify(data))
         return res.status(geminiRes.status).json({ error: data?.error?.message || 'Erro no Gemini' })
       }
 
-      // Normaliza resposta no formato OpenAI para o frontend não precisar mudar
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
       return res.status(200).json({
-        _provider: 'gemini',
+        _provider: `gemini-${model}`,
         choices: [{ message: { role: 'assistant', content: text } }],
       })
     } catch (e) {
-      console.error('Gemini erro de rede:', e.message)
+      console.error('[grok] Gemini erro:', e.message)
       return res.status(500).json({ error: `Gemini falhou: ${e.message}` })
     }
   }
 
-  return res.status(500).json({ error: 'Nenhuma API disponível. Verifique as variáveis de ambiente.' })
+  return res.status(500).json({ error: 'Nenhuma API disponível.' })
 }
