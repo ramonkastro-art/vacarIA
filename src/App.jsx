@@ -337,8 +337,21 @@ return "Você é professor especialista em Língua Inglesa.\n" +
   "Essas seções são instruções para VOCÊ, não para o aluno. O aluno não pode vê-las.";
 }
 
+async function fetchWithTimeout(url, opts = {}, timeout = 90000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, { signal: controller.signal, ...opts });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
 async function callAPI(params) {
-  const response = await fetch("/api/grok", {
+  const response = await fetchWithTimeout("/api/grok", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -350,7 +363,7 @@ async function callAPI(params) {
         { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos, params.estado) },
       ],
       temperature: 0.65,
-      max_tokens: 4000,
+      max_tokens: 8000,
     }),
   });
   const data = await response.json();
@@ -361,7 +374,7 @@ async function callAPI(params) {
 }
 
 async function callAvaliacao(params) {
-  const response = await fetch("/api/avaliacao", {
+  const response = await fetchWithTimeout("/api/avaliacao", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -373,7 +386,7 @@ async function callAvaliacao(params) {
         { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.qtd) },
       ],
       temperature: 0.3,
-      max_tokens: 4000,
+      max_tokens: 8000,
     }),
   });
   const data = await response.json();
@@ -602,6 +615,28 @@ export default function App() {
    window.addEventListener('beforeinstallprompt', handler);
    return () => window.removeEventListener('beforeinstallprompt', handler);
    }, []);
+
+
+  // Limpa service workers antigos para evitar cache de POST e erros de runtime
+  useEffect(() => {
+    const cleanup = async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((reg) => reg.unregister()));
+          console.log('Service workers antigos removidos.');
+        }
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((key) => caches.delete(key)));
+          console.log('Caches antigos removidos.');
+        }
+      } catch (err) {
+        console.warn('Falha ao limpar service workers/caches:', err);
+      }
+    };
+    cleanup();
+  }, []);
 
   const handleInstall = async () => {
     if (!installPrompt) return;
