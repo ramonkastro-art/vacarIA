@@ -1,4 +1,4 @@
-import generateWithGemini from '../src/lib/gemini-generate-wrapper.js'
+import { getBestGeminiModel } from './gemini-model-resolver.js'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -7,18 +7,15 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const groqKey = process.env.GROQ_API_KEY
+  const groqKey   = process.env.GROQ_API_KEY
   const geminiKey = process.env.GEMINI_API_KEY
 
   let body = req.body
-  if (typeof body === 'string') {
-    try { body = JSON.parse(body) } catch { body = {} }
-  }
+  if (typeof body === 'string') { try { body = JSON.parse(body) } catch { body = {} } }
 
   const messages = body.messages || []
 
-  // helper: fetch with timeout
-  async function fetchWithTimeout(url, opts = {}, timeout = 5000) {
+  async function fetchWithTimeout(url, opts = {}, timeout = 25000) {
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), timeout)
     try {
@@ -31,16 +28,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // Build combined prompt text from messages
-  const systemText = messages.filter(m => m.role === 'system').map(m => m.content).join('
-')
-  const userText = messages.filter(m => m.role === 'user').map(m => m.content).join('
-')
-  const promptText = (systemText ? systemText + "
-
-" : "") + userText
-
-  // 1) Try Groq first (fast, preferred for lesson plans)
+  // ── 1. Groq (principal para planos de aula) ────────────────────
   if (groqKey) {
     try {
       const groqRes = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
@@ -53,51 +41,62 @@ export default async function handler(req, res) {
           model: 'llama-3.3-70b-versatile',
           messages,
           temperature: body.temperature ?? 0.65,
-          max_tokens: body.max_tokens ?? 8000,
+          max_tokens: body.max_tokens ?? 4000,
         }),
-      }, 5000)
+      }, 25000)
 
-      const data = await groqRes.json().catch(() => null)
-      if (groqRes.ok && data) {
-        return res.status(200).json({ ...data, _provider: 'groq' })
-      }
+      const data = await groqRes.json()
+      if (groqRes.ok) return res.status(200).json({ ...data, _provider: 'groq' })
 
       const status = groqRes.status
-      // non-transient errors -> return to client
-      if (status && status !== 429 && status !== 503 && status !== 402) {
-        return res.status(status || 500).json(data || { error: 'Groq erro desconhecido' })
+      if (status !== 429 && status !== 503 && status !== 402) {
+        return res.status(status).json(data)
       }
-
-      console.warn('[grok] Groq unavailable or transient error, falling back to Gemini', status)
+      console.warn('[grok] Groq indisponível, tentando Gemini...', status)
     } catch (e) {
-      console.warn('[grok] Groq network/error:', e && e.message)
-      // fallthrough to Gemini
+      console.warn('[grok] Groq erro:', e.message)
     }
   }
 
-  // 2) Gemini fallback
+  // ── 2. Fallback: Gemini (modelo resolvido automaticamente) ──────
   if (geminiKey) {
     try {
-      // Use the wrapper which resolves model, handles timeouts/retries and large tokens
-      const maxOutputTokens = body.max_tokens || 8192
-      const temp = body.temperature ?? 0.65
+      const model = await getBestGeminiModel(geminiKey)
+      console.log(`[grok] Gemini fallback: ${model}`)
 
-      const result = await generateWithGemini(geminiKey, promptText, { maxOutputTokens, temperature: temp })
-      if (result && (result.text || result.raw)) {
-        const text = result.text || (result.raw && JSON.stringify(result.raw)) || ''
-        return res.status(200).json({
-          _provider: 'gemini-fallback',
-          choices: [{ message: { role: 'assistant', content: text } }],
-          raw: result.raw || null,
-        })
+      const userMsg = messages.filter(m => m.role === 'user').map(m => m.content).join('\n')
+      const sysMsg  = messages.filter(m => m.role === 'system').map(m => m.content).join('\n')
+
+      const geminiRes = await fetchWithTimeout(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: sysMsg }] },
+            contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+            generationConfig: {
+              temperature: body.temperature ?? 0.65,
+              maxOutputTokens: body.max_tokens ?? 4000,
+            },
+          }),
+        }, 30000)
+
+      const data = await geminiRes.json()
+      if (!geminiRes.ok) {
+        return res.status(geminiRes.status).json({ error: data?.error?.message || 'Erro no Gemini' })
       }
 
-      return res.status(500).json({ error: 'Gemini returned no content', raw: result && result.raw })
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+      return res.status(200).json({
+        _provider: `gemini-${model}`,
+        choices: [{ message: { role: 'assistant', content: text } }],
+      })
     } catch (e) {
-      console.error('[grok] Gemini error:', e && e.message)
-      return res.status(500).json({ error: `Gemini failed: ${e && e.message}` })
+      console.error('[grok] Gemini erro:', e.message)
+      return res.status(500).json({ error: `Gemini falhou: ${e.message}` })
     }
   }
 
-  return res.status(500).json({ error: 'No API key available (Groq or Gemini).' })
+  return res.status(500).json({ error: 'Nenhuma API disponível.' })
 }

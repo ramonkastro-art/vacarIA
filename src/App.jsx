@@ -1,5 +1,5 @@
 import AdminPanel from './AdminPanel';
-import Lojinha from "./pages/lojinha";
+import Lojinha from "./lojinha";
 import { useState, useEffect } from "react";
 import "./App.css";
 import { trackPageAccess, trackInteraction } from './tracker';

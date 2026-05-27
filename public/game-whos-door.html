@@ -171,36 +171,13 @@
   /* ── GAME AREA ── */
   .game-area {
     display: flex; flex-direction: column; align-items: center;
-    width: 100%; max-width: 960px;
-  }
-
-  /* ── SCENE ROW: left buttons | house | right buttons ── */
-  .scene-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    gap: 14px;
-    margin-top: 80px;
-  }
-
-  /* Side button columns */
-  .side-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-    max-width: 210px;
+    width: 100%; max-width: 680px;
   }
 
   /* ── SCENE ── */
   .scene-wrapper {
     position: relative; display: flex; flex-direction: column; align-items: center;
-    margin-bottom: 4px; flex-shrink: 0;
-  }
-  @media (max-width:720px) {
-    .scene-wrapper { margin-top: 0; }
+    margin-top: 80px; margin-bottom: 4px; width: 100%;
   }
 
   /* Bubble above house */
@@ -208,17 +185,6 @@
     position: absolute; top: -88px; left: 50%;
     transform: translateX(-50%);
     width: min(340px, 92vw); z-index: 20;
-  }
-  /* On mobile, bubble goes into normal flow above the house */
-  @media (max-width:720px) {
-    .bubble-above {
-      position: static;
-      transform: none;
-      width: 100%;
-      max-width: 420px;
-      margin-bottom: 10px;
-    }
-    .bubble::after, .bubble::before { display: none; }
   }
   .bubble {
     background: var(--bubble-bg);
@@ -351,13 +317,16 @@
   @keyframes popIn { 0%{transform:scale(0.6);opacity:0} 70%{transform:scale(1.18)} 100%{transform:scale(1);opacity:1} }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-9px)} 75%{transform:translateX(9px)} }
 
-  /* Buttons — hidden, replaced by side columns */
-  .buttons-grid { display:none; }
+  /* Buttons */
+  .buttons-grid {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:8px; width:100%; max-width:680px; margin-top:10px;
+  }
   .prof-btn {
     background:#fff; border:2.5px solid #b0bec5; border-radius:50px;
-    padding:10px 8px; font-family:'Nunito',sans-serif; font-weight:800;
+    padding:10px 6px; font-family:'Nunito',sans-serif; font-weight:800;
     font-size:0.76rem; color:#37474f; cursor:pointer;
-    transition:all 0.17s; text-align:center; width:100%;
+    transition:all 0.17s; text-align:center;
     box-shadow:0 2px 8px rgba(0,0,0,0.07); outline:none;
   }
   .prof-btn:hover:not(:disabled) {
@@ -471,28 +440,8 @@
     0%,100% { transform: translateY(0); }
     50%      { transform: translateY(-4px); }
   }
-  @media (max-width:720px) {
-    .scene-row {
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 10px !important;
-    }
-    /* On mobile: hide side columns, show bottom grid */
-    .side-buttons { display: none !important; }
-    .buttons-grid {
-      display: grid !important;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      width: 100%;
-      max-width: 480px;
-      margin-top: 10px;
-    }
-    .house-front { width: 260px; }
-    .roof-svg { width: 266px; }
-  }
-  @media (max-width:400px) {
-    .buttons-grid { grid-template-columns: 1fr 1fr; }
-  }
+  @media (max-width:500px) { .buttons-grid{grid-template-columns:repeat(3,1fr)} .house-front{width:260px} }
+  @media (max-width:360px) { .buttons-grid{grid-template-columns:repeat(2,1fr)} }
 </style>
 </head>
 <body>
@@ -539,52 +488,46 @@
 
 <!-- GAME AREA -->
 <div class="game-area" id="gameArea" style="display:none">
-  <div class="scene-row" id="sceneRow">
-    <!-- LEFT COLUMN -->
-    <div class="side-buttons" id="leftButtons"></div>
-
-    <!-- HOUSE CENTER -->
-    <div style="display:flex;flex-direction:column;align-items:center;">
-      <div class="scene-wrapper">
-        <div class="bubble-above">
-          <div class="bubble" id="clueText">…</div>
-        </div>
-        <div class="char-behind" id="charBehind"></div>
-        <!-- SVG Roof — perfectly centred triangle -->
-        <svg class="roof-svg" viewBox="0 0 306 60" xmlns="http://www.w3.org/2000/svg"
-             onclick="eggRoof()" style="cursor:pointer">
-          <polygon points="153,4 306,60 0,60" fill="#c62828"/>
-          <polygon points="153,6 303,60 3,60" fill="#e53935"/>
-          <line x1="153" y1="6" x2="153" y2="18" stroke="#ef9a9a" stroke-width="2" stroke-linecap="round"/>
-          <rect x="210" y="18" width="22" height="32" fill="#bf360c" rx="2"/>
-          <rect x="207" y="14" width="28" height="7" fill="#d84315" rx="2"/>
-          <circle cx="221" cy="10" r="4" fill="#cfd8dc" opacity="0.7"/>
-          <circle cx="225" cy="5" r="3" fill="#cfd8dc" opacity="0.5"/>
-          <circle cx="218" cy="2" r="2.5" fill="#cfd8dc" opacity="0.4"/>
-        </svg>
-        <div class="house-front">
-          <div class="windows">
-            <div class="window-box" onclick="eggWindow(this, 0)"></div>
-            <div class="window-box" onclick="eggWindow(this, 1)"></div>
-          </div>
-          <div class="door-frame">
-            <div class="door" id="door" onclick="speakClue(event)">
-              <div class="door-panel top"></div>
-              <div class="door-panel bot"></div>
-              <div class="door-knocker"></div>
-            </div>
-          </div>
-          <div class="mailbox" onclick="eggMailbox()">📬</div>
-          <div class="cat" onclick="eggCat()">🐱</div>
+  <div class="scene-wrapper">
+    <div class="bubble-above">
+      <div class="bubble" id="clueText">…</div>
+    </div>
+    <div class="char-behind" id="charBehind"></div>
+    <!-- SVG Roof — perfectly centred triangle -->
+    <svg class="roof-svg" viewBox="0 0 306 60" xmlns="http://www.w3.org/2000/svg"
+         onclick="eggRoof()" style="cursor:pointer">
+      <!-- Shadow layer -->
+      <polygon points="153,4 306,60 0,60" fill="#c62828"/>
+      <!-- Main roof -->
+      <polygon points="153,6 303,60 3,60" fill="#e53935"/>
+      <!-- Ridge highlight -->
+      <line x1="153" y1="6" x2="153" y2="18" stroke="#ef9a9a" stroke-width="2" stroke-linecap="round"/>
+      <!-- Chimney -->
+      <rect x="210" y="18" width="22" height="32" fill="#bf360c" rx="2"/>
+      <rect x="207" y="14" width="28" height="7" fill="#d84315" rx="2"/>
+      <!-- Chimney smoke puffs -->
+      <circle cx="221" cy="10" r="4" fill="#cfd8dc" opacity="0.7"/>
+      <circle cx="225" cy="5" r="3" fill="#cfd8dc" opacity="0.5"/>
+      <circle cx="218" cy="2" r="2.5" fill="#cfd8dc" opacity="0.4"/>
+    </svg>
+    <div class="house-front">
+      <div class="windows">
+        <div class="window-box" onclick="eggWindow(this, 0)"></div>
+        <div class="window-box" onclick="eggWindow(this, 1)"></div>
+      </div>
+      <div class="door-frame">
+        <div class="door" id="door" onclick="speakClue(event)">
+          <div class="door-panel top"></div>
+          <div class="door-panel bot"></div>
+          <div class="door-knocker"></div>
         </div>
       </div>
-      <div class="steps-wrap" onclick="eggSteps()"><div class="steps"></div></div>
+      <!-- Mailbox & Cat -->
+      <div class="mailbox" onclick="eggMailbox()">📬</div>
+      <div class="cat" onclick="eggCat()">🐱</div>
     </div>
-
-    <!-- RIGHT COLUMN -->
-    <div class="side-buttons" id="rightButtons"></div>
   </div>
-
+  <div class="steps-wrap" onclick="eggSteps()"><div class="steps"></div></div>
   <div class="knock-hint" id="knockHint">🔊 Click the door to hear the clue again!</div>
   <div class="feedback" id="feedback"></div>
   <div class="buttons-grid" id="buttonsGrid"></div>
@@ -916,54 +859,31 @@ function nextRound() {
   document.getElementById('progressBar').style.width = (round / sequence.length * 100) + '%';
   document.getElementById('roundDisplay').textContent = round + 1;
 
-  // Build buttons — side columns (desktop) + bottom grid (mobile)
+  // Build buttons
   const wrong = shuffle(ALL_NAMES.filter(n => n !== currentAnswer));
   const opts  = shuffle([currentAnswer, ...wrong.slice(0, 11)]);
-  const leftCol  = document.getElementById('leftButtons');
-  const rightCol = document.getElementById('rightButtons');
-  const grid     = document.getElementById('buttonsGrid');
-  leftCol.innerHTML = '';
-  rightCol.innerHTML = '';
+  const grid  = document.getElementById('buttonsGrid');
   grid.innerHTML = '';
   buttonsDisabled = false;
 
-  opts.forEach((name, i) => {
-    // Desktop: side columns
-    const btnSide = document.createElement('button');
-    btnSide.className = 'prof-btn';
-    btnSide.textContent = name;
-    btnSide.onclick = () => handleAnswer(name);
-    if (i % 2 === 0) leftCol.appendChild(btnSide);
-    else rightCol.appendChild(btnSide);
-
-    // Mobile: bottom grid
-    const btnGrid = document.createElement('button');
-    btnGrid.className = 'prof-btn';
-    btnGrid.textContent = name;
-    btnGrid.onclick = () => handleAnswer(name);
-    grid.appendChild(btnGrid);
+  opts.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'prof-btn';
+    btn.textContent = name;
+    btn.onclick = () => handleAnswer(btn, name);
+    grid.appendChild(btn);
   });
 
   // Auto-speak clue after door closes
   setTimeout(() => speak(currentClue), 700);
 }
 
-function handleAnswer(chosen) {
+function handleAnswer(btn, chosen) {
   if (buttonsDisabled) return;
   buttonsDisabled = true;
   speechSynthesis.cancel();
 
-  // Disable & highlight all matching buttons (side + grid)
-  document.querySelectorAll('.prof-btn').forEach(b => {
-    b.disabled = true;
-    if (b.textContent === chosen) {
-      b.classList.add(chosen === currentAnswer ? 'correct-ans' : 'wrong-ans');
-    }
-    if (b.textContent === currentAnswer && chosen !== currentAnswer) {
-      b.classList.add('correct-ans'); // reveal correct answer
-    }
-  });
-
+  document.querySelectorAll('.prof-btn').forEach(b => b.disabled = true);
   document.getElementById('knockHint').style.display = 'none';
 
   const feedback = document.getElementById('feedback');
@@ -972,13 +892,16 @@ function handleAnswer(chosen) {
 
   if (chosen === currentAnswer) {
     /* ✅ CORRECT */
+    btn.classList.add('correct-ans');
     feedback.textContent = '✅ Correct! Come on in!';
     feedback.className = 'feedback correct';
     score++;
     document.getElementById('scoreDisplay').textContent = score;
 
     door.classList.add('open');
+    // Ensure emoji is loaded, wipe the inline style, then reveal via class
     charEl.textContent = currentEmoji;
+    // Must remove inline style in next frame so browser doesn't batch it with class change
     charEl.style.cssText = '';
     requestAnimationFrame(() => {
       charEl.classList.add('visible');
@@ -986,21 +909,23 @@ function handleAnswer(chosen) {
 
     speak("Correct! Come on in!", () => {
       round++;
-      setTimeout(nextRound, 2500);
+      setTimeout(nextRound, 2500); // emoji stays visible ~2.5s after TTS ends
     });
 
   } else {
     /* ❌ WRONG */
+    btn.classList.add('wrong-ans');
     feedback.textContent = '👋 See you later!';
     feedback.className = 'feedback wrong';
 
+    // Peek then walk away
     charEl.style.transition = 'none';
     charEl.style.opacity = '1';
     setTimeout(() => { charEl.classList.add('walk-away'); }, 180);
 
     speak("See you later!", () => {
       round++;
-      setTimeout(nextRound, 400);
+      setTimeout(nextRound, 400); // wrong moves on quickly
     });
   }
 }
