@@ -2,12 +2,6 @@ import AdminPanel from './AdminPanel';
 import Lojinha from "./pages/lojinha";
 import { useState, useEffect } from "react";
 import "./App.css";
-export default function App() {
-  // roteamento simples para /lojinha (sem usar React Router)
-  const path = window.location.pathname || "/";
-  if (path === "/lojinha" || path === "/lojinha/" || path.startsWith("/lojinha?")) {
-    return <Lojinha />;
-  }
 import { trackPageAccess, trackInteraction } from './tracker';
 
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
@@ -578,7 +572,16 @@ export default function App() {
 
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstall, setShowInstall] = useState(false);
+  // Simple client-side route to show /lojinha page (keeps hooks order).
+  const _path = typeof window !== 'undefined' ? window.location.pathname : '/';
+  if (_path === '/lojinha' || _path === '/lojinha/' || _path.startsWith('/lojinha?')) {
+    return <Lojinha />;
+  }
 
+  // ✅ NOVO: Registra acesso ao carregar o app
+  useEffect(() => {
+    trackPageAccess()
+  }, [])
   // ✅ NOVO: Registra acesso ao carregar o app
   useEffect(() => {
     trackPageAccess()
@@ -940,4 +943,4 @@ export default function App() {
       {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
     </>
   );
-}}
+}
