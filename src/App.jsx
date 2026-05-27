@@ -559,6 +559,49 @@ function RadioGroup({ label, options, value, onChange }) {
   );
 }
 
+function GamesPage() {
+  const jogos = [
+    { href: "/game-tobe-racer.html",   icon: "🏎️", name: "To BE Racer",        desc: "Corrida com Verb To Be. Escolha o pronome e acelere!",           tag: "⚡ Solo · Ranking" },
+    { href: "/game-whos-door.html",    icon: "🚪", name: "Who's at the Door?",  desc: "Adivinhe a profissão antes do tempo. Multijogador!",             tag: "🌐 Multiplayer" },
+    { href: "/game-english-quest.html",icon: "🦊", name: "English Quest Kids",  desc: "Flashcards, Quiz, Memória e Ordem em inglês.",                   tag: "🎮 4 jogos" },
+    { href: "/game-verb-shooter.html", icon: "🎯", name: "Verb Shooter",        desc: "Atire nas conjugações corretas antes que o tempo acabe!",        tag: "⚡ Solo" },
+  ];
+  return (
+    <div style={{minHeight:"100vh",background:"#fefce8",padding:"32px 16px",fontFamily:"'IBM Plex Sans',sans-serif"}}>
+      <div style={{maxWidth:640,margin:"0 auto"}}>
+        <a href="/" style={{display:"inline-block",marginBottom:24,color:"#92400e",fontWeight:700,textDecoration:"none",fontSize:14}}>
+          ⬅ Voltar ao VacarIA
+        </a>
+        <h1 style={{fontFamily:"'Space Mono',monospace",color:"#b45309",fontSize:"clamp(1.8rem,5vw,2.8rem)",marginBottom:8}}>
+          🎮 Gamificação
+        </h1>
+        <p style={{color:"#78716c",marginBottom:28,fontSize:15}}>
+          Jogos educativos de Língua Inglesa para usar em sala de aula
+        </p>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+          {jogos.map(j => (
+            <a key={j.name} href={j.href} target="_blank" rel="noopener noreferrer"
+              style={{background:"#fff",border:"1.5px solid #fde68a",borderRadius:16,padding:"20px 16px",
+                textDecoration:"none",display:"flex",flexDirection:"column",gap:8,
+                boxShadow:"0 4px 12px rgba(180,83,9,.08)",transition:"all .2s"}}
+              onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.borderColor="#d97706"}}
+              onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.borderColor="#fde68a"}}
+            >
+              <span style={{fontSize:28}}>{j.icon}</span>
+              <span style={{fontFamily:"'Space Mono',monospace",fontSize:12,fontWeight:700,color:"#b45309"}}>{j.name}</span>
+              <span style={{fontSize:12,color:"#78716c",lineHeight:1.5}}>{j.desc}</span>
+              <span style={{fontSize:10,background:"rgba(14,116,144,.08)",border:"1px solid rgba(14,116,144,.2)",
+                borderRadius:100,padding:"2px 10px",color:"#0e7490",fontFamily:"'Space Mono',monospace",alignSelf:"flex-start"}}>
+                {j.tag}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [ano, setAno] = useState("");
@@ -589,6 +632,9 @@ export default function App() {
   const _path = typeof window !== 'undefined' ? window.location.pathname : '/';
   if (_path === '/lojinha' || _path === '/lojinha/' || _path.startsWith('/lojinha?')) {
     return <Lojinha />;
+  }
+  if (_path === '/games' || _path === '/games/') {
+    return <GamesPage />;
   }
 
   // ✅ NOVO: Registra acesso ao carregar o app
