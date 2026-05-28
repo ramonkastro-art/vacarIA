@@ -90,10 +90,10 @@ h2{font-size:clamp(1.2rem,4vw,2rem);font-weight:800;text-align:center;color:#fff
 
 /* MEMORY */
 .memory-grid{display:grid;gap:10px;width:100%;max-width:480px;margin:12px 0}
-.mem-card{aspect-ratio:1;border-radius:16px;border:none;cursor:pointer;font-size:2rem;font-weight:800;transition:all .3s;box-shadow:0 4px 12px rgba(0,0,0,.15);background:linear-gradient(135deg,#6366f1,#8b5cf6);color:transparent;position:relative;overflow:hidden}
+.mem-card{aspect-ratio:1;border-radius:16px;border:none;cursor:pointer;font-size:2rem;font-weight:800;transition:all .3s;box-shadow:0 4px 12px rgba(0,0,0,.15);background:linear-gradient(135deg,#6366f1,#8b5cf6);color:transparent;position:relative;overflow:visible}
 .mem-card.revealed,.mem-card.matched{background:#fff;color:#1f2937}
 .mem-card.matched{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
-.mem-card-inner{display:flex;align-items:center;justify-content:center;height:100%;font-size:inherit}
+.mem-card-inner{display:flex;align-items:center;justify-content:center;height:100%;font-size:inherit;word-break:break-word;overflow-wrap:break-word;text-align:center;padding:4px;line-height:1.2}
 .mem-card:not(.revealed):not(.matched) .mem-card-inner::after{content:"❓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem}
 
 /* SORT */
@@ -634,7 +634,11 @@ function renderMemory() {
   state.memCards.forEach(function(card, idx) {
     var btn = document.createElement('button');
     btn.className = 'mem-card' + (card.matched ? ' matched' : '') + (state.memFlipped.indexOf(idx) >= 0 ? ' revealed' : '');
-    btn.innerHTML = '<div class="mem-card-inner">' + (card.matched || state.memFlipped.indexOf(idx) >= 0 ? card.content : '') + '</div>';
+    var isText = card.type === 'text';
+    var txtLen = (card.content || '').length;
+    var fs = txtLen > 9 ? '0.65rem' : txtLen > 6 ? '0.8rem' : txtLen > 4 ? '0.95rem' : 'inherit';
+    var innerStyle = isText && (card.matched || state.memFlipped.indexOf(idx) >= 0) ? ' style="font-size:'+fs+';padding:6px;word-break:break-word;hyphens:auto"' : '';
+    btn.innerHTML = '<div class="mem-card-inner"' + innerStyle + '>' + (card.matched || state.memFlipped.indexOf(idx) >= 0 ? card.content : '') + '</div>';
     btn.onclick = (function(i){ return function(){ flipMemory(i); }; })(idx);
     grid.appendChild(btn);
   });
