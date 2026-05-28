@@ -317,7 +317,45 @@
   @keyframes popIn { 0%{transform:scale(0.6);opacity:0} 70%{transform:scale(1.18)} 100%{transform:scale(1);opacity:1} }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-9px)} 75%{transform:translateX(9px)} }
 
-  /* Buttons */
+  /* Desktop 3-col layout */
+  .desktop-layout {
+    display:flex; align-items:flex-start; justify-content:center;
+    width:100%; gap:12px;
+  }
+  .center-col {
+    display:flex; flex-direction:column; align-items:center;
+    flex-shrink:0;
+  }
+  .side-col {
+    display:none; /* hidden on mobile */
+    flex-direction:column; gap:8px;
+    width:160px; flex-shrink:0; padding-top:80px;
+  }
+  .side-btn {
+    background:#fff; border:2.5px solid #b0bec5; border-radius:50px;
+    padding:10px 8px; font-family:'Nunito',sans-serif; font-weight:800;
+    font-size:0.8rem; color:#37474f; cursor:pointer;
+    transition:all 0.17s; text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.07); outline:none; width:100%;
+  }
+  .side-btn:hover:not(:disabled) {
+    background:#e3f2fd; border-color:#29b6f6; color:#0277bd;
+    transform:translateY(-2px) scale(1.04);
+  }
+  .side-btn.correct-ans { background:#e8f5e9; border-color:#43a047; color:#2e7d32; transform:scale(1.08); }
+  .side-btn.wrong-ans   { background:#ffebee; border-color:#e53935; color:#c62828; animation:shake 0.35s; }
+  .side-btn:disabled    { cursor:not-allowed; opacity:0.55; }
+
+  @media (min-width:700px) {
+    .side-col { display:flex; }
+    .buttons-mobile { display:none !important; }
+  }
+  @media (max-width:699px) {
+    .side-col { display:none !important; }
+    .buttons-mobile { display:grid !important; }
+  }
+
+  /* Buttons (mobile fallback) */
   .buttons-grid {
     display:grid; grid-template-columns:repeat(4,1fr);
     gap:8px; width:100%; max-width:680px; margin-top:10px;
@@ -440,7 +478,7 @@
     0%,100% { transform: translateY(0); }
     50%      { transform: translateY(-4px); }
   }
-  @media (max-width:500px) { .buttons-grid{grid-template-columns:repeat(3,1fr)} .house-front{width:260px} }
+  @media (max-width:500px) { .buttons-grid{grid-template-columns:repeat(3,1fr)} .house-front{width:260px} .desktop-layout{flex-direction:column;align-items:center} }
   @media (max-width:360px) { .buttons-grid{grid-template-columns:repeat(2,1fr)} }
 </style>
 </head>
@@ -488,6 +526,9 @@
 
 <!-- GAME AREA -->
 <div class="game-area" id="gameArea" style="display:none">
+  <div class="desktop-layout">
+  <div class="side-col" id="colLeft"></div>
+  <div class="center-col">
   <div class="scene-wrapper">
     <div class="bubble-above">
       <div class="bubble" id="clueText">…</div>
@@ -530,7 +571,10 @@
   <div class="steps-wrap" onclick="eggSteps()"><div class="steps"></div></div>
   <div class="knock-hint" id="knockHint">🔊 Click the door to hear the clue again!</div>
   <div class="feedback" id="feedback"></div>
-  <div class="buttons-grid" id="buttonsGrid"></div>
+  <div class="buttons-grid buttons-mobile" id="buttonsGridMobile"></div>
+  </div><!-- center-col -->
+  <div class="side-col" id="colRight"></div>
+  </div><!-- desktop-layout -->
 </div>
 
 <!-- END SCREEN -->
@@ -862,16 +906,29 @@ function nextRound() {
   // Build buttons
   const wrong = shuffle(ALL_NAMES.filter(n => n !== currentAnswer));
   const opts  = shuffle([currentAnswer, ...wrong.slice(0, 11)]);
-  const grid  = document.getElementById('buttonsGrid');
+  const grid  = document.getElementById('buttonsGridMobile');
+  const colL  = document.getElementById('colLeft');
+  const colR  = document.getElementById('colRight');
   grid.innerHTML = '';
+  colL.innerHTML = '';
+  colR.innerHTML = '';
   buttonsDisabled = false;
 
-  opts.forEach(name => {
+  const isDesktop = window.innerWidth >= 700;
+
+  opts.forEach((name, i) => {
     const btn = document.createElement('button');
-    btn.className = 'prof-btn';
     btn.textContent = name;
     btn.onclick = () => handleAnswer(btn, name);
-    grid.appendChild(btn);
+
+    if (isDesktop) {
+      btn.className = 'side-btn';
+      if (i < Math.ceil(opts.length / 2)) colL.appendChild(btn);
+      else colR.appendChild(btn);
+    } else {
+      btn.className = 'prof-btn';
+      grid.appendChild(btn);
+    }
   });
 
   // Auto-speak clue after door closes
@@ -883,7 +940,7 @@ function handleAnswer(btn, chosen) {
   buttonsDisabled = true;
   speechSynthesis.cancel();
 
-  document.querySelectorAll('.prof-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.prof-btn, .side-btn').forEach(b => b.disabled = true);
   document.getElementById('knockHint').style.display = 'none';
 
   const feedback = document.getElementById('feedback');
