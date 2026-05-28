@@ -294,11 +294,25 @@ canvas {
     <!-- START SCREEN -->
     <div class="overlay" id="startScreen">
       <h2 class="green">ADJECTIVE<br/>SNAKE</h2>
-      <p>Eat <span style="color:var(--yellow);font-weight:900">GOOD adjectives</span> to grow and score.<br/><br/>
+
+      <!-- Language selector -->
+      <div style="display:flex;gap:10px;margin-bottom:4px">
+        <button id="btnEN" onclick="setLang('en')"
+          style="font-family:'Press Start 2P',monospace;font-size:.55rem;padding:8px 14px;border-radius:6px;border:2px solid var(--green);background:var(--green);color:#000;cursor:pointer;transition:all .15s">
+          🇺🇸 ENGLISH
+        </button>
+        <button id="btnPT" onclick="setLang('pt')"
+          style="font-family:'Press Start 2P',monospace;font-size:.55rem;padding:8px 14px;border-radius:6px;border:2px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s">
+          🇧🇷 PORTUGUÊS
+        </button>
+      </div>
+
+      <p id="startDesc">Eat <span style="color:var(--yellow);font-weight:900">GOOD adjectives</span> to grow.<br/><br/>
          Avoid <span style="color:var(--yellow);font-weight:900">BAD adjectives</span> — they cost a life!<br/><br/>
-         All words look the same — you must <span style="color:var(--yellow);font-weight:900">READ</span> them!<br/><br/>
+         All words same color — you must <span style="color:var(--yellow);font-weight:900">READ</span> them!<br/><br/>
          Don't crash into yourself!</p>
-      <button class="pixel-btn" onclick="startGame()">▶ START</button>
+
+      <button class="pixel-btn" id="startBtn" onclick="startGame()">▶ START</button>
       <div class="controls-hint">
         <span class="key">↑</span><span class="key">↓</span><span class="key">←</span><span class="key">→</span>
         <span style="color:var(--text-dim);font-size:.75rem">or</span>
@@ -332,7 +346,7 @@ canvas {
       <div class="stat-value" id="bestVal">0</div>
     </div>
     <div class="legend-box">
-      <div class="legend-title">Good Adj.</div>
+      <div class="legend-title" id="goodAdjTitle">Good Adj.</div>
       <div style="font-size:.72rem;color:var(--green);line-height:1.8" id="goodHint">happy, kind...</div>
     </div>
   </div>
@@ -374,6 +388,42 @@ const BAD = [
 ];
 
 const BONUS_WORDS = ['wonderful','brilliant','outstanding','fantastic','excellent','superb','magnificent','incredible'];
+
+const GOOD_PT = [
+  {w:'feliz',      en:'happy'},    {w:'gentil',     en:'kind'},
+  {w:'corajoso',   en:'brave'},    {w:'inteligente',en:'smart'},
+  {w:'criativo',   en:'creative'}, {w:'calmo',      en:'calm'},
+  {w:'honesto',    en:'honest'},   {w:'generoso',   en:'generous'},
+  {w:'educado',    en:'polite'},   {w:'paciente',   en:'patient'},
+  {w:'amigável',   en:'friendly'}, {w:'alegre',     en:'cheerful'},
+  {w:'solidário',  en:'caring'},   {w:'leal',       en:'loyal'},
+  {w:'curioso',    en:'curious'},  {w:'ativo',      en:'active'},
+  {w:'positivo',   en:'positive'}, {w:'brincalhão', en:'playful'},
+  {w:'respeitoso', en:'respectful'},{w:'otimista',  en:'optimistic'},
+  {w:'empático',   en:'empathetic'},{w:'dedicado',  en:'dedicated'},
+  {w:'humilde',    en:'humble'},   {w:'amoroso',    en:'loving'},
+  {w:'forte',      en:'strong'},   {w:'bondoso',    en:'kind-hearted'},
+  {w:'sensível',   en:'sensitive'},{w:'justo',      en:'fair'},
+  {w:'companheiro',en:'companionable'},{w:'inspirador',en:'inspiring'},
+];
+
+const BAD_PT = [
+  {w:'rude',       en:'rude'},     {w:'preguiçoso', en:'lazy'},
+  {w:'malvado',    en:'mean'},     {w:'cruel',      en:'cruel'},
+  {w:'egoísta',    en:'selfish'},  {w:'mentiroso',  en:'liar'},
+  {w:'invejoso',   en:'jealous'},  {w:'agressivo',  en:'aggressive'},
+  {w:'arrogante',  en:'arrogant'}, {w:'covarde',    en:'coward'},
+  {w:'bagunceiro', en:'messy'},    {w:'impulsivo',  en:'impulsive'},
+  {w:'grosseiro',  en:'rude'},     {w:'mandão',     en:'bossy'},
+  {w:'rabugento',  en:'grumpy'},   {w:'barulhento', en:'noisy'},
+  {w:'teimoso',    en:'stubborn'}, {w:'desonesto',  en:'dishonest'},
+  {w:'violento',   en:'violent'},  {w:'irresponsável',en:'irresponsible'},
+];
+
+const BONUS_WORDS_PT = ['maravilhoso','extraordinário','fantástico','incrível','excepcional','magnífico','brilhante','espetacular'];
+
+// Current language state
+let lang = 'en'; // 'en' or 'pt'
 
 // ══════════════════════════════════════════
 // GAME CONFIG
@@ -470,17 +520,20 @@ function spawnFood(n) {
       }
     }
 
+    const goodList  = lang === 'pt' ? GOOD_PT : GOOD;
+    const badList   = lang === 'pt' ? BAD_PT  : BAD;
+    const bonusList = lang === 'pt' ? BONUS_WORDS_PT : BONUS_WORDS;
     if (type === 'bonus') {
-      word = BONUS_WORDS[Math.floor(Math.random() * BONUS_WORDS.length)];
-      meaning = 'maravilhoso'; 
+      word = bonusList[Math.floor(Math.random() * bonusList.length)];
+      meaning = lang === 'pt' ? 'incrível!' : 'wonderful!';
     } else if (type === 'apple') {
-      word = '🍎 +life'; meaning = 'vida extra!';
+      word = lang === 'pt' ? '🍎 +vida' : '🍎 +life'; meaning = 'vida extra!';
     } else if (type === 'good') {
-      const w = GOOD[Math.floor(Math.random() * GOOD.length)];
-      word = w.w; meaning = w.pt;
+      const w = goodList[Math.floor(Math.random() * goodList.length)];
+      word = w.w; meaning = lang === 'pt' ? w.en : w.pt;
     } else {
-      const w = BAD[Math.floor(Math.random() * BAD.length)];
-      word = w.w; meaning = w.pt;
+      const w = badList[Math.floor(Math.random() * badList.length)];
+      word = w.w; meaning = lang === 'pt' ? w.en : w.pt;
     }
 
     food.push({x, y, word, meaning, type});
@@ -791,7 +844,8 @@ function updateUI() {
 }
 
 function updateGoodHint() {
-  const sample = [...GOOD].sort(() => .5 - Math.random()).slice(0, 6).map(w => w.w);
+  const goodList = lang === 'pt' ? GOOD_PT : GOOD;
+  const sample = [...goodList].sort(() => .5 - Math.random()).slice(0, 6).map(w => w.w);
   document.getElementById('goodHint').textContent = sample.join(', ') + '...';
 }
 
@@ -833,6 +887,37 @@ canvas.addEventListener('touchend', e => {
   }
   if (nd.x !== -dir.x || nd.y !== -dir.y) nextDir = nd;
 }, {passive: true});
+
+// Language selector
+function setLang(l) {
+  lang = l;
+  const btnEN = document.getElementById('btnEN');
+  const btnPT = document.getElementById('btnPT');
+  if (l === 'en') {
+    btnEN.style.background = 'var(--green)'; btnEN.style.color = '#000'; btnEN.style.borderColor = 'var(--green)';
+    btnPT.style.background = 'transparent'; btnPT.style.color = 'var(--text-dim)'; btnPT.style.borderColor = 'var(--border)';
+    document.getElementById('startDesc').innerHTML =
+      'Eat <span style="color:var(--yellow);font-weight:900">GOOD adjectives</span> to grow.<br/><br/>' +
+      'Avoid <span style="color:var(--yellow);font-weight:900">BAD adjectives</span> — they cost a life!<br/><br/>' +
+      'All words same color — you must <span style="color:var(--yellow);font-weight:900">READ</span> them!<br/><br/>' +
+      "Don't crash into yourself!";
+    document.getElementById('startBtn').textContent = '▶ START';
+    document.querySelector('.subtitle').textContent = 'Eat GOOD adjectives · Avoid BAD ones · Don\'t hit yourself!';
+    document.getElementById('goodHint').previousElementSibling.textContent = 'GOOD ADJ.';
+  } else {
+    btnPT.style.background = 'var(--green)'; btnPT.style.color = '#000'; btnPT.style.borderColor = 'var(--green)';
+    btnEN.style.background = 'transparent'; btnEN.style.color = 'var(--text-dim)'; btnEN.style.borderColor = 'var(--border)';
+    document.getElementById('startDesc').innerHTML =
+      'Coma adjetivos <span style="color:var(--yellow);font-weight:900">POSITIVOS</span> para crescer.<br/><br/>' +
+      'Evite adjetivos <span style="color:var(--yellow);font-weight:900">NEGATIVOS</span> — custam uma vida!<br/><br/>' +
+      'Todas as palavras têm a mesma cor — você precisa <span style="color:var(--yellow);font-weight:900">LER</span>!<br/><br/>' +
+      'Não bata no próprio corpo!';
+    document.getElementById('startBtn').textContent = '▶ JOGAR';
+    document.querySelector('.subtitle').textContent = 'Coma adjetivos POSITIVOS · Evite os NEGATIVOS · Não bata em você!';
+    document.getElementById('goodHint').previousElementSibling.textContent = 'ADJ. POSITIVOS';
+  }
+  updateGoodHint();
+}
 
 // Initial draw
 draw();
