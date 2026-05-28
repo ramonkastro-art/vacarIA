@@ -1012,7 +1012,27 @@ export default function App() {
     🛍️ Ver indicações e achadinhos do Professor Ramon — ir para a lojinha
   </a>
 </div>
-
+<div style={{
+  textAlign: 'center', 
+  marginBottom: '8px', 
+  fontSize: '0.9rem',
+  color: '#666'
+}}>
+  <span>Siga o Prof. Ramon nas redes sociais: </span>
+  <a 
+    href="https://instagram.com/ramoncccastro" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    style={{
+      color: '#d46b08', // Cor laranja combinando com seu tema
+      fontWeight: 'bold',
+      textDecoration: 'none',
+      marginLeft: '5px'
+    }}
+  >
+    @ramoncccastro
+  </a>
+</div>
 <footer className="footer">
           VacarIA · Desenvolvido por Ramon Castro
           <button
