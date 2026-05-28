@@ -27,13 +27,13 @@ export default function AdminPanel({ onClose }) {
       .from("access_logs")
       .select("*")
       .order("timestamp", { ascending: false })
-      .limit(100);
+      .limit(100000);
 
     const { data: interacoes } = await supabase
       .from("interaction_logs")
       .select("*")
       .order("timestamp", { ascending: false })
-      .limit(100);
+      .limit(100000);
 
     setAccessLogs(acessos || []);
     setInteractionLogs(interacoes || []);
