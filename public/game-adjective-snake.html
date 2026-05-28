@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Adjective Snake 🐍</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0a0a1a;
+  --panel: #111128;
+  --border: #1e1e4a;
+  --green: #00ff88;
+  --green-dim: #00aa55;
+  --red: #ff3355;
+  --red-dim: #aa1133;
+  --yellow: #ffcc00;
+  --blue: #4488ff;
+  --text: #e0e0ff;
+  --text-dim: #8888aa;
+  --snake-head: #00ff88;
+  --snake-body: #00cc66;
+  --snake-tail: #008844;
+  --glow-green: 0 0 12px #00ff8888, 0 0 24px #00ff8844;
+  --glow-red: 0 0 12px #ff335588, 0 0 24px #ff335544;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  overflow: hidden;
+}
+
+/* Scanline effect */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.08) 2px, rgba(0,0,0,.08) 4px);
+  pointer-events: none;
+  z-index: 100;
+}
+
+h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.8rem, 2.5vw, 1.3rem);
+  color: var(--green);
+  text-shadow: var(--glow-green);
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-size: .85rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* MAIN LAYOUT */
+.game-wrap {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+}
+
+/* CANVAS */
+.canvas-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+canvas {
+  display: block;
+  border: 2px solid var(--green);
+  box-shadow: var(--glow-green);
+  border-radius: 4px;
+  image-rendering: pixelated;
+}
+
+/* SIDE PANELS */
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 150px;
+  max-width: 180px;
+}
+
+.stat-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.stat-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: .5rem;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.stat-value {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.1rem;
+  color: var(--yellow);
+}
+
+.lives-row { display: flex; gap: 4px; font-size: 1.2rem; }
+
+.legend-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.legend-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: .45rem;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .78rem;
+  margin-bottom: 5px;
+  color: var(--text);
+}
+.legend-dot {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.last-word-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  min-height: 60px;
+}
+.last-word {
+  font-size: .85rem;
+  font-weight: 900;
+  margin-top: 4px;
+  word-break: break-word;
+}
+.last-word.good { color: var(--green); }
+.last-word.bad  { color: var(--red); }
+
+/* OVERLAY SCREENS */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 26, .92);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+  padding: 20px;
+  text-align: center;
+}
+.overlay.hidden { display: none; }
+
+.overlay h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(.7rem, 2vw, 1.1rem);
+  line-height: 1.6;
+}
+.overlay h2.green { color: var(--green); text-shadow: var(--glow-green); }
+.overlay h2.red   { color: var(--red);   text-shadow: var(--glow-red); }
+
+.overlay p {
+  font-size: .85rem;
+  color: var(--text-dim);
+  max-width: 260px;
+  line-height: 1.6;
+}
+
+.pixel-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: .6rem;
+  background: var(--green);
+  color: #000;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all .15s;
+  box-shadow: 4px 4px 0 var(--green-dim);
+}
+.pixel-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--green-dim);
+}
+.pixel-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--green-dim);
+}
+
+/* Controls hint */
+.controls-hint {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 6px;
+}
+.key {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: .5rem;
+  color: var(--text-dim);
+}
+
+/* Flash overlay */
+#flashOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+  transition: opacity .05s;
+}
+
+@media (max-width: 640px) {
+  .game-wrap { flex-direction: column; align-items: center; }
+  .side-panel { flex-direction: row; flex-wrap: wrap; max-width: 100%; min-width: unset; }
+  .stat-box, .legend-box, .last-word-box { flex: 1; min-width: 120px; }
+}
+</style>
+</head>
+<body>
+
+<h1>🐍 ADJECTIVE SNAKE</h1>
+<p class="subtitle">Eat GOOD adjectives · Avoid BAD ones · Don't hit yourself!</p>
+
+<div class="game-wrap">
+  <!-- LEFT PANEL -->
+  <div class="side-panel">
+    <div class="stat-box">
+      <div class="stat-label">Score</div>
+      <div class="stat-value" id="scoreVal">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Level</div>
+      <div class="stat-value" id="levelVal">1</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Lives</div>
+      <div class="lives-row" id="livesRow">❤️❤️❤️</div>
+    </div>
+    <div class="legend-box">
+      <div class="legend-title">Legend</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffcc00"></div>Good adj. +10</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffcc00"></div>Bad adj. -1 ❤️</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffcc00"></div>Bonus +25</div>
+      <div style="font-size:.62rem;color:var(--text-dim);margin-top:4px;line-height:1.5">All words same color — read carefully! 👀</div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap">
+    <canvas id="gameCanvas"></canvas>
+    <div id="flashOverlay"></div>
+
+    <!-- START SCREEN -->
+    <div class="overlay" id="startScreen">
+      <h2 class="green">ADJECTIVE<br/>SNAKE</h2>
+      <p>Eat <span style="color:var(--yellow);font-weight:900">GOOD adjectives</span> to grow and score.<br/><br/>
+         Avoid <span style="color:var(--yellow);font-weight:900">BAD adjectives</span> — they cost a life!<br/><br/>
+         All words look the same — you must <span style="color:var(--yellow);font-weight:900">READ</span> them!<br/><br/>
+         Don't crash into yourself!</p>
+      <button class="pixel-btn" onclick="startGame()">▶ START</button>
+      <div class="controls-hint">
+        <span class="key">↑</span><span class="key">↓</span><span class="key">←</span><span class="key">→</span>
+        <span style="color:var(--text-dim);font-size:.75rem">or</span>
+        <span class="key">WASD</span>
+        <span style="color:var(--text-dim);font-size:.75rem">or swipe</span>
+      </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div class="overlay hidden" id="gameOverScreen">
+      <h2 class="red">GAME OVER</h2>
+      <div style="font-family:'Press Start 2P',monospace;font-size:.7rem;color:var(--yellow)" id="finalScore"></div>
+      <div style="font-size:.8rem;color:var(--text-dim)" id="finalMsg"></div>
+      <button class="pixel-btn" onclick="startGame()">▶ PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="side-panel">
+    <div class="last-word-box">
+      <div class="stat-label">Last word</div>
+      <div class="last-word" id="lastWord">—</div>
+      <div style="font-size:.75rem;color:var(--text-dim);margin-top:4px" id="lastWordMeaning"></div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Streak 🔥</div>
+      <div class="stat-value" id="streakVal">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Best</div>
+      <div class="stat-value" id="bestVal">0</div>
+    </div>
+    <div class="legend-box">
+      <div class="legend-title">Good Adj.</div>
+      <div style="font-size:.72rem;color:var(--green);line-height:1.8" id="goodHint">happy, kind...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// VOCABULARY DATA
+// ══════════════════════════════════════════
+const GOOD = [
+  {w:'happy',    pt:'feliz'},    {w:'kind',     pt:'gentil'},
+  {w:'brave',    pt:'corajoso'}, {w:'smart',    pt:'inteligente'},
+  {w:'funny',    pt:'engraçado'},{w:'calm',     pt:'calmo'},
+  {w:'bright',   pt:'brilhante'},{w:'clean',    pt:'limpo'},
+  {w:'helpful',  pt:'prestativo'},{w:'honest',  pt:'honesto'},
+  {w:'gentle',   pt:'gentil'},   {w:'strong',   pt:'forte'},
+  {w:'creative', pt:'criativo'}, {w:'polite',   pt:'educado'},
+  {w:'cheerful', pt:'alegre'},   {w:'caring',   pt:'cuidadoso'},
+  {w:'patient',  pt:'paciente'}, {w:'friendly', pt:'amigável'},
+  {w:'gifted',   pt:'talentoso'},{w:'warm',     pt:'afetuoso'},
+  {w:'positive', pt:'positivo'}, {w:'peaceful', pt:'pacífico'},
+  {w:'playful',  pt:'brincalhão'},{w:'generous', pt:'generoso'},
+  {w:'loyal',    pt:'leal'},     {w:'active',   pt:'ativo'},
+  {w:'joyful',   pt:'alegre'},   {w:'curious',  pt:'curioso'},
+  {w:'amazing',  pt:'incrível'}, {w:'noble',    pt:'nobre'},
+];
+
+const BAD = [
+  {w:'rude',    pt:'rude'},      {w:'lazy',    pt:'preguiçoso'},
+  {w:'mean',    pt:'mau'},       {w:'cruel',   pt:'cruel'},
+  {w:'selfish', pt:'egoísta'},   {w:'greedy',  pt:'ganancioso'},
+  {w:'jealous', pt:'ciumento'},  {w:'angry',   pt:'bravo'},
+  {w:'arrogant',pt:'arrogante'}, {w:'sneaky',  pt:'sorrateiro'},
+  {w:'messy',   pt:'bagunçeiro'},{w:'reckless',pt:'imprudente'},
+  {w:'hasty',   pt:'precipitado'},{w:'coward', pt:'covarde'},
+  {w:'grumpy',  pt:'rabugento'}, {w:'noisy',   pt:'barulhento'},
+  {w:'stubborn',pt:'teimoso'},   {w:'bossy',   pt:'mandão'},
+  {w:'dishonest',pt:'desonesto'},{w:'violent', pt:'violento'},
+];
+
+const BONUS_WORDS = ['wonderful','brilliant','outstanding','fantastic','excellent','superb','magnificent','incredible'];
+
+// ══════════════════════════════════════════
+// GAME CONFIG
+// ══════════════════════════════════════════
+const CELL = 20;
+const COLS = 24;
+const ROWS = 22;
+const W = COLS * CELL;
+const H = ROWS * CELL;
+const MAX_LIVES = 3;
+const BASE_SPEED = 150;
+const MIN_SPEED = 70;
+const FOOD_COUNT = 4; // words on screen at once
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = W;
+canvas.height = H;
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let snake, dir, nextDir, food, score, lives, level, streak, best, gameLoop, running, paused;
+let touchStartX, touchStartY;
+best = parseInt(localStorage.getItem('snakeBest') || '0');
+document.getElementById('bestVal').textContent = best;
+
+function startGame() {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('gameOverScreen').classList.add('hidden');
+  clearInterval(gameLoop);
+
+  // Init snake in center
+  snake = [
+    {x: Math.floor(COLS/2),     y: Math.floor(ROWS/2)},
+    {x: Math.floor(COLS/2) - 1, y: Math.floor(ROWS/2)},
+    {x: Math.floor(COLS/2) - 2, y: Math.floor(ROWS/2)},
+  ];
+  dir = {x:1, y:0};
+  nextDir = {x:1, y:0};
+  food = [];
+  score = 0;
+  lives = MAX_LIVES;
+  level = 1;
+  streak = 0;
+  running = true;
+  paused = false;
+
+  spawnFood(FOOD_COUNT);
+  updateUI();
+  updateGoodHint();
+
+  const speed = Math.max(MIN_SPEED, BASE_SPEED - (level - 1) * 15);
+  gameLoop = setInterval(tick, speed);
+}
+
+// ══════════════════════════════════════════
+// FOOD SPAWNING
+// ══════════════════════════════════════════
+function spawnFood(n) {
+  let attempts = 0;
+  while (food.length < n && attempts < 200) {
+    attempts++;
+    const x = Math.floor(Math.random() * COLS);
+    const y = Math.floor(Math.random() * ROWS);
+    if (isFree(x, y)) {
+      const isBonus = Math.random() < .06;
+      const isGood  = isBonus || Math.random() < .55;
+
+      let word, meaning, type;
+      if (isBonus) {
+        word = BONUS_WORDS[Math.floor(Math.random() * BONUS_WORDS.length)];
+        meaning = 'maravilhoso';
+        type = 'bonus';
+      } else if (isGood) {
+        const w = GOOD[Math.floor(Math.random() * GOOD.length)];
+        word = w.w; meaning = w.pt; type = 'good';
+      } else {
+        const w = BAD[Math.floor(Math.random() * BAD.length)];
+        word = w.w; meaning = w.pt; type = 'bad';
+      }
+      food.push({x, y, word, meaning, type});
+    }
+  }
+}
+
+function isFree(x, y) {
+  if (snake.some(s => s.x === x && s.y === y)) return false;
+  if (food.some(f => f.x === x && f.y === y)) return false;
+  return true;
+}
+
+// ══════════════════════════════════════════
+// GAME TICK
+// ══════════════════════════════════════════
+function tick() {
+  if (!running || paused) return;
+
+  dir = nextDir;
+  const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+
+  // Wall wrap
+  head.x = (head.x + COLS) % COLS;
+  head.y = (head.y + ROWS) % ROWS;
+
+  // Self collision
+  if (snake.some(s => s.x === head.x && s.y === head.y)) {
+    loseLife('💥 Hit yourself!');
+    return;
+  }
+
+  snake.unshift(head);
+
+  // Check food collision
+  const fi = food.findIndex(f => f.x === head.x && f.y === head.y);
+  if (fi >= 0) {
+    const eaten = food.splice(fi, 1)[0];
+    eatWord(eaten);
+    spawnFood(FOOD_COUNT - food.length + 1);
+  } else {
+    snake.pop(); // no growth, remove tail
+  }
+
+  // Level up every 50 points
+  const newLevel = Math.floor(score / 50) + 1;
+  if (newLevel > level) {
+    level = newLevel;
+    clearInterval(gameLoop);
+    const speed = Math.max(MIN_SPEED, BASE_SPEED - (level - 1) * 15);
+    gameLoop = setInterval(tick, speed);
+  }
+
+  updateUI();
+  draw();
+}
+
+function eatWord(item) {
+  const el = document.getElementById('lastWord');
+  const mel = document.getElementById('lastWordMeaning');
+
+  if (item.type === 'good') {
+    score += 10;
+    streak++;
+    if (streak % 5 === 0) score += 15; // streak bonus
+    el.className = 'last-word good';
+    el.textContent = '✅ ' + item.word;
+    mel.textContent = item.meaning;
+    flash('rgba(0,255,136,0.15)');
+  } else if (item.type === 'bonus') {
+    score += 25;
+    streak++;
+    el.className = 'last-word good';
+    el.textContent = '⭐ ' + item.word;
+    mel.textContent = '+ 25 pts!';
+    flash('rgba(255,204,0,0.25)');
+  } else {
+    streak = 0;
+    el.className = 'last-word bad';
+    el.textContent = '❌ ' + item.word;
+    mel.textContent = item.meaning;
+    loseLife('Ate a BAD adjective!');
+    return;
+  }
+
+  if (score > best) {
+    best = score;
+    localStorage.setItem('snakeBest', best);
+  }
+}
+
+function loseLife(reason) {
+  lives--;
+  streak = 0;
+  flash('rgba(255,51,85,0.35)');
+
+  if (lives <= 0) {
+    clearInterval(gameLoop);
+    running = false;
+    setTimeout(() => gameOver(reason), 300);
+  } else {
+    // Brief pause and respawn
+    paused = true;
+    setTimeout(() => { paused = false; }, 800);
+    // Reset snake position, keep score
+    snake = [
+      {x: Math.floor(COLS/2),     y: Math.floor(ROWS/2)},
+      {x: Math.floor(COLS/2) - 1, y: Math.floor(ROWS/2)},
+    ];
+    dir = {x:1, y:0};
+    nextDir = {x:1, y:0};
+  }
+  updateUI();
+}
+
+function gameOver(reason) {
+  document.getElementById('gameOverScreen').classList.remove('hidden');
+  document.getElementById('finalScore').textContent = 'SCORE: ' + score;
+  const msgs = score > 100 ? '🏆 Adjective Master!' : score > 50 ? '🌟 Great effort!' : '📚 Keep learning!';
+  document.getElementById('finalMsg').textContent = msgs;
+}
+
+// ══════════════════════════════════════════
+// DRAWING
+// ══════════════════════════════════════════
+function draw() {
+  // Background
+  ctx.fillStyle = '#0a0a1a';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid dots
+  ctx.fillStyle = 'rgba(255,255,255,.04)';
+  for (let x = 0; x < COLS; x++) {
+    for (let y = 0; y < ROWS; y++) {
+      ctx.beginPath();
+      ctx.arc(x * CELL + CELL/2, y * CELL + CELL/2, 1, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  // Food
+  food.forEach(f => drawFood(f));
+
+  // Snake
+  drawSnake();
+}
+
+function drawFood(f) {
+  const px = f.x * CELL;
+  const py = f.y * CELL;
+  const pad = 3;
+
+  // Background pill
+  // All words same color — student must READ the adjective, not guess by color!
+  const WORD_COLORS = [
+    {bg:'rgba(255,204,0,.18)',  border:'#ffcc00', text:'#ffdd44'},
+    {bg:'rgba(68,136,255,.18)', border:'#4488ff', text:'#88aaff'},
+    {bg:'rgba(200,100,255,.18)',border:'#cc66ff', text:'#dd99ff'},
+    {bg:'rgba(0,200,255,.18)',  border:'#00ccff', text:'#44ddff'},
+    {bg:'rgba(255,140,0,.18)',  border:'#ff8c00', text:'#ffaa33'},
+  ];
+  const colorIdx = (f.x * 3 + f.y * 7) % WORD_COLORS.length;
+  const { bg, border, textColor: text } = { ...WORD_COLORS[colorIdx], textColor: WORD_COLORS[colorIdx].text };
+  let textColor = text;
+  // Bonus gets a star but same random color treatment
+  if (f.type === 'bonus') textColor = '#fff';
+
+  // Measure text
+  const fontSize = f.word.length > 7 ? 8 : f.word.length > 5 ? 9 : 10;
+  ctx.font = `bold ${fontSize}px Nunito, sans-serif`;
+  const tw = ctx.measureText(f.word).width;
+  const bw = Math.max(tw + 10, CELL);
+  const bh = CELL - 4;
+
+  // Clamp to canvas
+  const bx = Math.min(px, W - bw - 2);
+  const by = py + 2;
+
+  // Glow
+  ctx.shadowColor = border;
+  ctx.shadowBlur = 8;
+
+  // Box
+  ctx.fillStyle = bg;
+  roundRect(ctx, bx, by, bw, bh, 4);
+  ctx.fill();
+  ctx.strokeStyle = border;
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, bx, by, bw, bh, 4);
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+
+  // Text
+  ctx.fillStyle = textColor;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(f.word, bx + bw/2, by + bh/2);
+
+  // No visual type hint on the word tile — student must know the adjective!
+}
+
+function drawSnake() {
+  snake.forEach((seg, i) => {
+    const px = seg.x * CELL;
+    const py = seg.y * CELL;
+    const pad = 2;
+    const ratio = 1 - (i / snake.length) * 0.5;
+    const alpha = 0.4 + ratio * 0.6;
+
+    if (i === 0) {
+      // HEAD
+      ctx.shadowColor = '#00ff88';
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = '#00ff88';
+      roundRect(ctx, px + pad, py + pad, CELL - pad*2, CELL - pad*2, 5);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Eyes
+      const ex1 = dir.x === 1 ? px + CELL - 7 : dir.x === -1 ? px + 5 : px + 5;
+      const ey1 = dir.y === 1 ? py + CELL - 7 : dir.y === -1 ? py + 5 : py + 5;
+      const ex2 = dir.x === 0 ? px + CELL - 7 : ex1;
+      const ey2 = dir.y === 0 ? ey1 : py + CELL - 7;
+
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(ex1, ey1, 2.5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ex2, ey2, 2.5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(ex1 - .5, ey1 - .5, 1, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ex2 - .5, ey2 - .5, 1, 0, Math.PI*2); ctx.fill();
+    } else {
+      // BODY
+      const g = i < snake.length / 2 ? '#00cc66' : '#008844';
+      ctx.fillStyle = g;
+      ctx.globalAlpha = alpha;
+      roundRect(ctx, px + pad, py + pad, CELL - pad*2, CELL - pad*2, 4);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function flash(color) {
+  const el = document.getElementById('flashOverlay');
+  el.style.background = color;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 150);
+}
+
+// ══════════════════════════════════════════
+// UI
+// ══════════════════════════════════════════
+function updateUI() {
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('levelVal').textContent = level;
+  document.getElementById('streakVal').textContent = streak;
+  document.getElementById('bestVal').textContent = best;
+  const hearts = '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives);
+  document.getElementById('livesRow').textContent = hearts;
+}
+
+function updateGoodHint() {
+  const sample = [...GOOD].sort(() => .5 - Math.random()).slice(0, 6).map(w => w.w);
+  document.getElementById('goodHint').textContent = sample.join(', ') + '...';
+}
+
+// ══════════════════════════════════════════
+// INPUT
+// ══════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  const map = {
+    ArrowUp:   {x:0,y:-1}, ArrowDown:  {x:0,y:1},
+    ArrowLeft: {x:-1,y:0}, ArrowRight: {x:1,y:0},
+    w: {x:0,y:-1}, s: {x:0,y:1}, a: {x:-1,y:0}, d: {x:1,y:0},
+    W: {x:0,y:-1}, S: {x:0,y:1}, A: {x:-1,y:0}, D: {x:1,y:0},
+  };
+  const nd = map[e.key];
+  if (nd) {
+    e.preventDefault();
+    // Prevent reversing
+    if (nd.x !== -dir.x || nd.y !== -dir.y) nextDir = nd;
+  }
+  if (e.key === 'p' || e.key === 'P') paused = !paused;
+});
+
+// Touch / swipe
+canvas.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive: true});
+
+canvas.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+
+  let nd;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    nd = dx > 0 ? {x:1,y:0} : {x:-1,y:0};
+  } else {
+    nd = dy > 0 ? {x:0,y:1} : {x:0,y:-1};
+  }
+  if (nd.x !== -dir.x || nd.y !== -dir.y) nextDir = nd;
+}, {passive: true});
+
+// Initial draw
+draw();
+</script>
+</body>
+</html>
