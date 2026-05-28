@@ -281,6 +281,7 @@ canvas {
       <div class="legend-item"><div class="legend-dot" style="background:#ffcc00"></div>Good adj. +10</div>
       <div class="legend-item"><div class="legend-dot" style="background:#ffcc00"></div>Bad adj. -1 ❤️</div>
       <div class="legend-item"><div class="legend-dot" style="background:#ffcc00"></div>Bonus +25</div>
+      <div class="legend-item">🍎 Extra life!</div>
       <div style="font-size:.62rem;color:var(--text-dim);margin-top:4px;line-height:1.5">All words same color — read carefully! 👀</div>
     </div>
   </div>
@@ -433,29 +434,56 @@ function startGame() {
 // FOOD SPAWNING
 // ══════════════════════════════════════════
 function spawnFood(n) {
+  const goodCount  = food.filter(f => f.type === 'good' || f.type === 'bonus').length;
+  const badCount   = food.filter(f => f.type === 'bad').length;
+  const appleCount = food.filter(f => f.type === 'apple').length;
   let attempts = 0;
-  while (food.length < n && attempts < 200) {
+
+  while (food.length < n && attempts < 300) {
     attempts++;
     const x = Math.floor(Math.random() * COLS);
     const y = Math.floor(Math.random() * ROWS);
-    if (isFree(x, y)) {
-      const isBonus = Math.random() < .06;
-      const isGood  = isBonus || Math.random() < .55;
+    if (!isFree(x, y)) continue;
 
-      let word, meaning, type;
-      if (isBonus) {
-        word = BONUS_WORDS[Math.floor(Math.random() * BONUS_WORDS.length)];
-        meaning = 'maravilhoso';
+    // Guarantee at least 2 good adjectives always on screen
+    const needsGood = (goodCount + food.filter(f => f.type==='good'||f.type==='bonus').length) < 2;
+    // Max 1 bad adjective at a time (increases with level)
+    const maxBad = Math.min(1 + Math.floor(level / 3), 3);
+    const canAddBad = (badCount + food.filter(f=>f.type==='bad').length) < maxBad;
+
+    let type, word, meaning;
+
+    if (needsGood) {
+      // Force a good adjective
+      type = Math.random() < .08 ? 'bonus' : 'good';
+    } else if (!canAddBad) {
+      type = Math.random() < .08 ? 'bonus' : 'good';
+    } else {
+      // Apple: 4% chance, max 1 on screen at a time
+      if (appleCount === 0 && Math.random() < .04) {
+        type = 'apple';
+      } else if (Math.random() < .08) {
         type = 'bonus';
-      } else if (isGood) {
-        const w = GOOD[Math.floor(Math.random() * GOOD.length)];
-        word = w.w; meaning = w.pt; type = 'good';
       } else {
-        const w = BAD[Math.floor(Math.random() * BAD.length)];
-        word = w.w; meaning = w.pt; type = 'bad';
+        // 60% good, 40% bad — but bad capped by maxBad
+        type = Math.random() < .60 ? 'good' : (canAddBad ? 'bad' : 'good');
       }
-      food.push({x, y, word, meaning, type});
     }
+
+    if (type === 'bonus') {
+      word = BONUS_WORDS[Math.floor(Math.random() * BONUS_WORDS.length)];
+      meaning = 'maravilhoso'; 
+    } else if (type === 'apple') {
+      word = '🍎 +life'; meaning = 'vida extra!';
+    } else if (type === 'good') {
+      const w = GOOD[Math.floor(Math.random() * GOOD.length)];
+      word = w.w; meaning = w.pt;
+    } else {
+      const w = BAD[Math.floor(Math.random() * BAD.length)];
+      word = w.w; meaning = w.pt;
+    }
+
+    food.push({x, y, word, meaning, type});
   }
 }
 
@@ -486,8 +514,19 @@ function tick() {
 
   snake.unshift(head);
 
-  // Check food collision
-  const fi = food.findIndex(f => f.x === head.x && f.y === head.y);
+  // Check food collision — any cell the word occupies, not just first char
+  const fi = food.findIndex(f => {
+    if (f.x === head.x && f.y === head.y) return true;
+    // Check all cells the word label occupies
+    const fontSize = f.word.length > 7 ? 8 : f.word.length > 5 ? 9 : 10;
+    const approxCharsPerCell = CELL / (fontSize * 0.6);
+    const cellsWide = Math.ceil(f.word.length / approxCharsPerCell);
+    for (let c = 0; c < cellsWide; c++) {
+      const cx = (f.x + c) % COLS;
+      if (cx === head.x && f.y === head.y) return true;
+    }
+    return false;
+  });
   if (fi >= 0) {
     const eaten = food.splice(fi, 1)[0];
     eatWord(eaten);
@@ -513,7 +552,20 @@ function eatWord(item) {
   const el = document.getElementById('lastWord');
   const mel = document.getElementById('lastWordMeaning');
 
-  if (item.type === 'good') {
+  if (item.type === 'apple') {
+    if (lives < MAX_LIVES) {
+      lives++;
+    } else {
+      score += 20; // already full health — convert to points
+    }
+    streak++;
+    el.className = 'last-word good';
+    el.textContent = '🍎 +1 life!';
+    mel.textContent = lives < MAX_LIVES ? 'vida extra!' : '+20 pts';
+    flash('rgba(255,80,80,0.25)');
+    // Don't grow snake for apple — just reward
+    snake.pop(); // undo the growth that happens before eatWord
+  } else if (item.type === 'good') {
     score += 10;
     streak++;
     if (streak % 5 === 0) score += 15; // streak bonus
@@ -651,7 +703,17 @@ function drawFood(f) {
   ctx.textBaseline = 'middle';
   ctx.fillText(f.word, bx + bw/2, by + bh/2);
 
-  // No visual type hint on the word tile — student must know the adjective!
+  // Apple gets special visual treatment (it's not a word to learn)
+  if (f.type === 'apple') {
+    ctx.font = `${CELL - 4}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = '#ff4444';
+    ctx.shadowBlur = 12;
+    ctx.fillText('🍎', px + CELL/2, py + CELL/2);
+    ctx.shadowBlur = 0;
+    return;
+  }
 }
 
 function drawSnake() {
