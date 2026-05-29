@@ -253,6 +253,43 @@ canvas {
   .game-wrap { flex-direction: column; align-items: center; }
   .side-panel { flex-direction: row; flex-wrap: wrap; max-width: 100%; min-width: unset; }
   .stat-box, .legend-box, .last-word-box { flex: 1; min-width: 120px; }
+  h1 { font-size: .7rem; }
+  .subtitle { font-size: .75rem; margin-bottom: 6px; }
+}
+
+/* D-PAD */
+.dpad-wrap {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  user-select: none;
+}
+.dpad-row { display: flex; gap: 4px; }
+.dpad-btn {
+  width: 56px; height: 56px;
+  background: rgba(255,255,255,.1);
+  border: 2px solid rgba(255,255,255,.2);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .1s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.dpad-btn:active {
+  background: rgba(0,255,136,.3);
+  border-color: var(--green);
+  transform: scale(.93);
+}
+.dpad-spacer { width: 56px; height: 56px; }
+
+@media (max-width: 640px) {
+  .dpad-wrap { display: flex; }
+  .controls-hint { display: none; }
 }
 </style>
 </head>
@@ -260,6 +297,26 @@ canvas {
 
 <h1>🐍 ADJECTIVE SNAKE</h1>
 <p class="subtitle">Eat GOOD adjectives · Avoid BAD ones · Don't hit yourself!</p>
+
+<!-- Mobile compact stats bar -->
+<div id="mobileStats" style="display:none;flex-direction:row;gap:12px;align-items:center;justify-content:center;margin-bottom:8px;width:100%;max-width:420px">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 14px;text-align:center">
+    <div style="font-family:'Press Start 2P',monospace;font-size:.45rem;color:var(--text-dim)">SCORE</div>
+    <div style="font-family:'Press Start 2P',monospace;font-size:.9rem;color:var(--yellow)" id="mScore">0</div>
+  </div>
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 14px;text-align:center">
+    <div style="font-family:'Press Start 2P',monospace;font-size:.45rem;color:var(--text-dim)">LIVES</div>
+    <div style="font-size:1rem" id="mLives">❤️❤️❤️</div>
+  </div>
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 14px;text-align:center">
+    <div style="font-family:'Press Start 2P',monospace;font-size:.45rem;color:var(--text-dim)">LVL</div>
+    <div style="font-family:'Press Start 2P',monospace;font-size:.9rem;color:var(--yellow)" id="mLevel">1</div>
+  </div>
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 14px;text-align:center;min-width:80px">
+    <div style="font-family:'Press Start 2P',monospace;font-size:.45rem;color:var(--text-dim)">LAST</div>
+    <div style="font-size:.7rem;font-weight:900" id="mLastWord">—</div>
+  </div>
+</div>
 
 <div class="game-wrap">
   <!-- LEFT PANEL -->
@@ -318,6 +375,25 @@ canvas {
         <span style="color:var(--text-dim);font-size:.75rem">or</span>
         <span class="key">WASD</span>
         <span style="color:var(--text-dim);font-size:.75rem">or swipe</span>
+      </div>
+    </div>
+
+    <!-- D-PAD (mobile only) -->
+    <div class="dpad-wrap" id="dpad">
+      <div class="dpad-row">
+        <div class="dpad-spacer"></div>
+        <button class="dpad-btn" id="dpadUp"    ontouchstart="dpadPress({x:0,y:-1})" onmousedown="dpadPress({x:0,y:-1})">▲</button>
+        <div class="dpad-spacer"></div>
+      </div>
+      <div class="dpad-row">
+        <button class="dpad-btn" id="dpadLeft"  ontouchstart="dpadPress({x:-1,y:0})" onmousedown="dpadPress({x:-1,y:0})">◀</button>
+        <div class="dpad-spacer" style="background:rgba(255,255,255,.05);border-radius:50%;border:2px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:.5rem;color:var(--text-dim)">D<br/>PAD</div>
+        <button class="dpad-btn" id="dpadRight" ontouchstart="dpadPress({x:1,y:0})"  onmousedown="dpadPress({x:1,y:0})">▶</button>
+      </div>
+      <div class="dpad-row">
+        <div class="dpad-spacer"></div>
+        <button class="dpad-btn" id="dpadDown"  ontouchstart="dpadPress({x:0,y:1})"  onmousedown="dpadPress({x:0,y:1})">▼</button>
+        <div class="dpad-spacer"></div>
       </div>
     </div>
 
@@ -428,9 +504,10 @@ let lang = 'en'; // 'en' or 'pt'
 // ══════════════════════════════════════════
 // GAME CONFIG
 // ══════════════════════════════════════════
-const CELL = 20;
-const COLS = 24;
-const ROWS = 22;
+const isMobile = window.innerWidth <= 640;
+const CELL = isMobile ? Math.floor((window.innerWidth - 32) / 20) : 20;
+const COLS = isMobile ? 20 : 24;
+const ROWS = isMobile ? 20 : 22;
 const W = COLS * CELL;
 const H = ROWS * CELL;
 const MAX_LIVES = 3;
@@ -625,6 +702,7 @@ function eatWord(item) {
     el.className = 'last-word good';
     el.textContent = '✅ ' + item.word;
     mel.textContent = item.meaning;
+    if (isMobile) document.getElementById('mLastWord').textContent = item.word;
     flash('rgba(0,255,136,0.15)');
   } else if (item.type === 'bonus') {
     score += 25;
@@ -841,6 +919,12 @@ function updateUI() {
   document.getElementById('bestVal').textContent = best;
   const hearts = '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives);
   document.getElementById('livesRow').textContent = hearts;
+  // Mobile bar
+  if (isMobile) {
+    document.getElementById('mScore').textContent = score;
+    document.getElementById('mLevel').textContent = level;
+    document.getElementById('mLives').textContent = hearts;
+  }
 }
 
 function updateGoodHint() {
@@ -868,16 +952,24 @@ document.addEventListener('keydown', e => {
   if (e.key === 'p' || e.key === 'P') paused = !paused;
 });
 
-// Touch / swipe
+// D-pad button press
+function dpadPress(nd) {
+  if (!running) return;
+  if (nd.x !== -dir.x || nd.y !== -dir.y) nextDir = nd;
+}
+
+// Touch / swipe on canvas
 canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
-}, {passive: true});
+}, {passive: false});
 
 canvas.addEventListener('touchend', e => {
+  e.preventDefault();
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
-  if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+  if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
 
   let nd;
   if (Math.abs(dx) > Math.abs(dy)) {
@@ -886,7 +978,7 @@ canvas.addEventListener('touchend', e => {
     nd = dy > 0 ? {x:0,y:1} : {x:0,y:-1};
   }
   if (nd.x !== -dir.x || nd.y !== -dir.y) nextDir = nd;
-}, {passive: true});
+}, {passive: false});
 
 // Language selector
 function setLang(l) {
@@ -917,6 +1009,14 @@ function setLang(l) {
     document.getElementById('goodHint').previousElementSibling.textContent = 'ADJ. POSITIVOS';
   }
   updateGoodHint();
+}
+
+// Show mobile UI
+if (isMobile) {
+  document.getElementById('mobileStats').style.display = 'flex';
+  // Hide desktop side panels
+  document.querySelectorAll('.side-panel').forEach(el => el.style.display = 'none');
+  document.querySelector('.game-wrap').style.flexDirection = 'column';
 }
 
 // Initial draw
