@@ -7,6 +7,12 @@ const produtos = [
   { emoji:"📱", label:"Smartphone recomendado", sub:"Ótimo para aulas e gravação", url:"https://meli.la/2DxSGzh" },
   { emoji:"🎧", label:"Fone de Ouvido", sub:"Para aulas online", url:"https://meli.la/15ZyCAH" },
   { emoji:"🎤", label:"Microfone + Amplificador", sub:"Salas até 30 alunos", url:"https://meli.la/1hZQMnn" },
+  // Novos itens Shopee
+  { emoji:"👕", label:"Camiseta Teacher (Feminina 1)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/3g0uAcrTIc" },
+  { emoji:"👕", label:"Camiseta Teacher (Feminina 2)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/3qKKMvqpxf" },
+  { emoji:"👕", label:"Camiseta Teacher (Feminina 3)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/1LczOL0M2C" },
+  { emoji:"👕", label:"Camiseta Teacher (Unissex)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/1VwPadzihF" },
+  { emoji:"👕", label:"Camiseta Teacher (Masculina)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/1gFpmwz5MI" },
 ];
 
 export default function Lojinha() {
@@ -22,9 +28,9 @@ export default function Lojinha() {
         gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",
         gap:14
       }}>
-        {produtos.map(p => (
+        {produtos.map((p, index) => (
           <a
-            key={p.label}
+            key={index}
             href={p.url}
             target="_blank"
             rel="noopener noreferrer sponsored"
@@ -43,7 +49,7 @@ export default function Lojinha() {
             <div style={{
               marginTop:10, padding:"6px 10px", fontSize:12, color:"#fff",
               background:"#b45309", borderRadius:8, fontWeight:700
-            }}>Ver produto →</div>
+            }}>Ver na Shopee →</div>
           </a>
         ))}
       </div>
