@@ -3,6 +3,31 @@ import { supabase } from "./supabase";
 
 const ADMIN_PASSWORD = "V@c@R1A2026";
 
+function PromptCell({ text }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!text) return <span style={{color:"#555"}}>—</span>;
+  const isLong = text.length > 80;
+  return (
+    <div>
+      <span style={{color:"#ddd", wordBreak:"break-word", whiteSpace: expanded ? "pre-wrap" : "normal"}}>
+        {expanded ? text : text.slice(0, 80) + (isLong ? "…" : "")}
+      </span>
+      {isLong && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            marginLeft: 6, background: "transparent", border: "none",
+            color: "#6c63ff", cursor: "pointer", fontSize: "0.78rem",
+            padding: 0, textDecoration: "underline", whiteSpace: "nowrap"
+          }}
+        >
+          {expanded ? "ver menos" : "ver mais"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function AdminPanel({ onClose }) {
   const [auth, setAuth] = useState(false);
   const [senha, setSenha] = useState("");
@@ -27,13 +52,13 @@ export default function AdminPanel({ onClose }) {
       .from("access_logs")
       .select("*")
       .order("timestamp", { ascending: false })
-      .limit(100000);
+      .limit(100);
 
     const { data: interacoes } = await supabase
       .from("interaction_logs")
       .select("*")
       .order("timestamp", { ascending: false })
-      .limit(100000);
+      .limit(100);
 
     setAccessLogs(acessos || []);
     setInteractionLogs(interacoes || []);
@@ -157,7 +182,9 @@ export default function AdminPanel({ onClose }) {
                     <td style={styles.td}>{log.ip_address}</td>
                     <td style={styles.td}>{log.interaction_type}</td>
                     <td style={styles.td}>{log.feature_used}</td>
-                    <td style={{...styles.td, maxWidth:"200px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{log.prompt_text}</td>
+                    <td style={{...styles.td, maxWidth:"260px"}}>
+                      <PromptCell text={log.prompt_text} />
+                    </td>
                     <td style={styles.td}>{log.success ? "✅" : "❌"}</td>
                   </tr>
                 ))}
