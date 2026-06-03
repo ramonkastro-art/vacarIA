@@ -643,7 +643,7 @@ export default function App() {
   const [errorAv, setErrorAv] = useState(null);
   const [providerAv, setProviderAv] = useState("");
   const [diagAv, setDiagAv] = useState("");
-
+  const [loadingStart, setLoadingStart] = useState(0);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstall, setShowInstall] = useState(false);
   // Simple client-side route to show /lojinha page (keeps hooks order).
@@ -680,6 +680,13 @@ export default function App() {
    return () => window.removeEventListener('beforeinstallprompt', handler);
    }, []);
 
+useEffect(() => {
+  if (!loading) return;
+  const interval = setInterval(() => {
+    setLoadingStart(prev => prev);
+  }, 1000);
+  return () => clearInterval(interval);
+}, [loading]);
 
   // Limpa service workers antigos para evitar cache de POST e erros de runtime
   useEffect(() => {
@@ -714,6 +721,7 @@ export default function App() {
     if (!ano || !tema.trim()) { setError("Selecione o ano e digite o tema da aula."); return; }
     if (recursos.length === 0) { setError("Selecione pelo menos um recurso disponível."); return; }
     setLoading(true); setResult(null); setError(null);
+    setLoadingStart(Date.now());
     const inicio = Date.now();
     try {
       const res = await callAPI({ ano, tema, duracao, nivel, recursos, estado });
@@ -893,16 +901,24 @@ export default function App() {
           </div>
         )}
 
-        {loading && (
-          <div className="result-card">
-            <div className="loading-box">
-              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
-                <div className="spinner" />
-                <p style={{color:"#92400e",fontSize:14,fontFamily:"'Space Mono',monospace"}}>Gerando plano com IA...</p>
-              </div>
-            </div>
-          </div>
-        )}
+{loading && (
+  <div className="result-card">
+    <div className="loading-box">
+      <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
+        <div className="spinner" />
+        <p style={{color:"#92400e",fontSize:14,fontFamily:"'Space Mono',monospace"}}>
+          {[
+            "Analisando o tema da aula...",
+            "Estruturando os objetivos pedagógicos...",
+            "Organizando as atividades...",
+            "Preparando warm-up e prática guiada...",
+            "Quase pronto, finalizando o plano..."
+          ][Math.min(Math.floor((Date.now() - loadingStart) / 5000), 4)]}
+        </p>
+      </div>
+    </div>
+  </div>
+)}
 
         {result && !loading && (
           <div className="result-card">
