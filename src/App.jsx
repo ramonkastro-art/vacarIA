@@ -350,6 +350,22 @@ async function fetchWithTimeout(url, opts = {}, timeout = 90000) {
   }
 }
 
+function traduzirErroIA(msg = "") {
+  if (msg.includes("prepayment credits are depleted") || msg.includes("credits are depleted"))
+    return "⚠️ O serviço de IA está temporariamente indisponível (créditos esgotados). Tente novamente mais tarde.";
+  if (msg.includes("Rate limit") || msg.includes("rate limit") || msg.includes("429"))
+    return "⚠️ Limite de uso da IA atingido. Aguarde alguns minutos e tente novamente.";
+  if (msg.includes("quota") || msg.includes("Quota"))
+    return "⚠️ Cota da IA excedida. Tente novamente em breve.";
+  if (msg.includes("API key") || msg.includes("api key") || msg.includes("401"))
+    return "⚠️ Chave de API inválida ou expirada. Contate o administrador.";
+  if (msg.includes("timeout") || msg.includes("aborted") || msg.includes("AbortError"))
+    return "⚠️ A IA demorou demais para responder. Tente novamente.";
+  if (msg.includes("retornou uma resposta vazia"))
+    return "⚠️ A IA não gerou conteúdo. Tente reformular o tema ou tente novamente.";
+  return `⚠️ Erro ao gerar conteúdo: ${msg}`;
+}
+
 async function callAPI(params) {
   const response = await fetchWithTimeout("/api/grok", {
     method: "POST",
@@ -712,7 +728,7 @@ export default function App() {
         success: true
       });
     } catch (e) {
-      setError(e.message);
+      setError(traduzirErroIA(e.message));
       trackInteraction({
         type: "plano_de_aula",
         prompt: `${ano} | ${tema} | ${nivel} | ${duracao}`,
@@ -744,7 +760,7 @@ export default function App() {
         success: true
       });
     } catch (e) {
-      setErrorAv(e.message);
+      setErrorAv(traduzirErroIA(e.message));
       trackInteraction({
         type: "avaliacao",
         prompt: `${anoAv} | ${temaAv} | ${nivelAv} | ${qtdAv}`,
