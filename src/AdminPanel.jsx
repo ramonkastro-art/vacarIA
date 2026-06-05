@@ -52,7 +52,7 @@ export default function AdminPanel({ onClose }) {
       .from("access_logs")
       .select("*")
       .order("timestamp", { ascending: false })
-      .limit(100000);
+      .limit(200000);
 
     const { data: interacoes } = await supabase
       .from("interaction_logs")
