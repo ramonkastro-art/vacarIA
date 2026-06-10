@@ -692,7 +692,7 @@ function GamesPage() {
     { href: "/game-english-quest.html",icon: "🦊", name: "English Quest Kids",  desc: "Flashcards, Quiz, Memória e Ordem em inglês.",                   tag: "🎮 4 jogos" },
     { href: "/game-verb-shooter.html", icon: "🎯", name: "Grammar Shooter",        desc: "Atire na Classe Gramatical e não cometa erros nessa aventura!",        tag: "🔫 Port. e Inglês" },
     { href: "/game-english-vocab.html",  icon: "🧠", name: "Essential Vocab",  desc: "500 palavras essenciais em inglês. Quiz de vocabulário básico!",       tag: "📚 Quiz · Solo" },
-    { href: "/game-adjective-snake.html", icon: "🐍", name: "Adjective Snake",   desc: "Coma adjetivos bons e fuja dos ruins! O clássico Snake em inglês.",    tag: "👾 Port. e Inglês" },
+    { href: "/game-adjective-snake.html", icon: "🐍", name: "Adjective Snake",   desc: "Coma adjetivos bons e fuja dos ruins! O clássico Snake está de volta.",    tag: "👾 Port. e Inglês" },
   ];
   return (
     <div style={{minHeight:"100vh",background:"#fefce8",padding:"32px 16px",fontFamily:"'IBM Plex Sans',sans-serif"}}>
