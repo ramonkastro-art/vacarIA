@@ -25,7 +25,7 @@ const DonationBanner = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <span style={{ fontSize: '18px' }}>☕</span>
         <p style={{ margin: 0, fontSize: '14px', color: '#92400e', fontFamily: "'Space Mono', monospace" }}>
-          O VacarIA é gratuito para professores, mas cada plano gerado tem um custo de IA. Se este site foi útil, considere apoiar o projeto com qualquer valor.
+          O VacarIA é gratuito para professores, mas cada plano e/ou avaliação gerada tem um custo de IA. Se este site está sendo útil para você, considere apoiar o projeto com qualquer valor.
         </p>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button 
@@ -67,10 +67,10 @@ const DonationBanner = () => {
           <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold', color: '#451a03' }}>Chave PIX (E-mail):</p>
           <code style={{ background: '#f3f4f6', padding: '4px 8px', borderRadius: '4px' }}>ramonkastro@gmail.com</code>
           <div style={{ background: '#eee', width: '150px', height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}>
-             {/* Você pode substituir este texto por uma imagem de 150x150 do seu QR Code real mais tarde */}
+             {/* <img src="/pix-qr.png" alt="QR Code Pix" style={{ width: '150px', height: '150px', borderRadius: '8px' }} /> */}
              <span style={{fontSize: '10px', textAlign: 'center', padding: '10px'}}>Aponte o app do banco para o e-mail ou use a chave ao lado</span>
           </div>
-          <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>Dono: Ramon C. Castro</p>
+          <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>Dono: Ramon A. Castro</p>
         </div>
       )}
     </div>
