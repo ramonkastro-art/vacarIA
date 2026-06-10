@@ -4,6 +4,79 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import { trackPageAccess, trackInteraction } from './tracker';
 
+const DonationBanner = () => {
+  const [visible, setVisible] = React.useState(true);
+  const [showQR, setShowQR] = React.useState(false);
+
+  if (!visible) return null;
+
+  return (
+    <div className="no-print" style={{
+      background: '#fffbeb',
+      borderBottom: '1px solid #fde68a',
+      padding: '10px 20px',
+      position: 'relative',
+      zIndex: 1000,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      textAlign: 'center'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <span style={{ fontSize: '18px' }}>☕</span>
+        <p style={{ margin: 0, fontSize: '14px', color: '#92400e', fontFamily: "'Space Mono', monospace" }}>
+          O VacarIA é gratuito para professores, mas cada plano gerado tem um custo de IA. Se este site foi útil, considere apoiar o projeto com qualquer valor.
+        </p>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            onClick={() => setShowQR(!showQR)}
+            style={{
+              background: '#92400e',
+              color: 'white',
+              border: 'none',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 'bold'
+            }}
+          >
+            {showQR ? 'FECHAR PIX' : 'APOIAR COM PIX'}
+          </button>
+          <button 
+            onClick={() => setVisible(false)}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#92400e', fontSize: '12px' }}
+          >
+            [X]
+          </button>
+        </div>
+      </div>
+
+      {showQR && (
+        <div style={{ 
+          marginTop: '15px', 
+          background: 'white', 
+          padding: '15px', 
+          borderRadius: '12px', 
+          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold', color: '#451a03' }}>Chave PIX (E-mail):</p>
+          <code style={{ background: '#f3f4f6', padding: '4px 8px', borderRadius: '4px' }}>ramonkastro@gmail.com</code>
+          <div style={{ background: '#eee', width: '150px', height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}>
+             {/* Você pode substituir este texto por uma imagem de 150x150 do seu QR Code real mais tarde */}
+             <span style={{fontSize: '10px', textAlign: 'center', padding: '10px'}}>Aponte o app do banco para o e-mail ou use a chave ao lado</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>Dono: Ramon C. Castro</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
 const NIVEIS = ["Básico","Intermediário","Avançado"];
@@ -781,11 +854,10 @@ useEffect(() => {
     finally { setLoadingAv(false); }
   };
 
-  return (
-    <>
-
-
-      <div className="app">
+ return (
+  <div className="app">
+    <DonationBanner />
+    
         <header className="header">
           <div className="logo-badge">
             <div className="logo-dot" />
@@ -1073,9 +1145,8 @@ useEffect(() => {
             title="Admin"
           >·</button>
         </footer>
-      </div>
-
+        
       {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
-    </>
+    </div>
   );
 }
