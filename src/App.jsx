@@ -65,10 +65,42 @@ const DonationBanner = () => {
           gap: '10px'
         }}>
           <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: '#451a03' }}>Contribua com o VacarIA:</p>
-          <code style={{ background: '#fef3c7', padding: '6px 12px', borderRadius: '6px', color: '#92400e', fontWeight: 'bold' }}>
-            ramonkastro@gmail.com
-          </code>
           
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <code style={{ background: '#fef3c7', padding: '6px 12px', borderRadius: '6px', color: '#92400e', fontWeight: 'bold' }}>
+              ramonkastro@gmail.com
+            </code>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText('ramonkastro@gmail.com');
+                const btn = document.getElementById('btn-copiar-pix');
+                if (btn) {
+                  const original = btn.innerText;
+                  btn.innerText = 'Copiado!';
+                  btn.style.background = '#16a34a';
+                  setTimeout(() => {
+                    btn.innerText = original;
+                    btn.style.background = '#92400e';
+                  }, 2000);
+                }
+              }}
+              id="btn-copiar-pix"
+              style={{
+                background: '#92400e',
+                color: 'white',
+                border: 'none',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '11px',
+                fontWeight: 'bold',
+                fontFamily: "'Space Mono', monospace"
+              }}
+            >
+              Copiar chave
+            </button>
+          </div>
+
           <img 
             src="/pix-qr.png" 
             alt="QR Code Pix" 
