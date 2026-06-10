@@ -1,6 +1,6 @@
+import React, { useState, useEffect } from "react";
 import AdminPanel from './AdminPanel';
 import Lojinha from "./lojinha";
-import { useState, useEffect } from "react";
 import "./App.css";
 import { trackPageAccess, trackInteraction } from './tracker';
 
