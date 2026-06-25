@@ -25,7 +25,7 @@ const DonationBanner = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <span style={{ fontSize: '18px' }}>☕</span>
         <p style={{ margin: 0, fontSize: '14px', color: '#92400e', fontFamily: "'Space Mono', monospace" }}>
-          O VacarIA é gratuito para professores, mas cada plano e avaliação têm um custo de IA. Se este site está sendo útil para você, considere apoiar o projeto com qualquer valor.
+          O VacarIA é 100% gratuito para você! Mas cada plano e avaliação gerados custam para o desenvolvedor manter a IA rodando. Se o app tem sido útil, qualquer contribuição ajuda a manter o projeto no ar.
         </p>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button 
