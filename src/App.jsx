@@ -48,7 +48,7 @@ function WelcomeBanner({ onClose }) {
         </p>
 
         <p style={{fontSize:".75rem", color:"#a16207", marginBottom:16}}>
-          Sugestões, críticas ou comentários?<br/>
+          Sugestões, críticas ou apoio?<br/>
           <a href="mailto:ramonkastro@gmail.com" style={{color:"#b45309", fontWeight:700}}>
             ramonkastro@gmail.com
           </a>
