@@ -4,115 +4,70 @@ import Lojinha from "./lojinha";
 import "./App.css";
 import { trackPageAccess, trackInteraction } from './tracker';
 
-const DonationBanner = () => {
-  const [visible, setVisible] = React.useState(true);
-  const [showQR, setShowQR] = React.useState(false);
-
-  if (!visible) return null;
-
+function WelcomeBanner({ onClose }) {
   return (
-    <div className="no-print" style={{
-      background: '#fffbeb',
-      borderBottom: '1px solid #fde68a',
-      padding: '10px 20px',
-      position: 'relative',
-      zIndex: 1000,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      textAlign: 'center'
+    <div style={{
+      position:"fixed", inset:0, background:"rgba(0,0,0,.5)",
+      zIndex:9998, display:"flex", alignItems:"center", justifyContent:"center",
+      padding:16, backdropFilter:"blur(3px)"
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <span style={{ fontSize: '18px' }}>☕</span>
-        <p style={{ margin: 0, fontSize: '14px', color: '#92400e', fontFamily: "'Space Mono', monospace" }}>
-          O VacarIA é 100% gratuito para você! Mas cada plano e avaliação gerados custam para o desenvolvedor manter a IA rodando. Se o app tem sido útil, qualquer contribuição ajuda a manter o projeto no ar.
-        </p>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            onClick={() => setShowQR(!showQR)}
-            style={{
-              background: '#92400e',
-              color: 'white',
-              border: 'none',
-              padding: '4px 12px',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 'bold'
-            }}
-          >
-            {showQR ? 'FECHAR PIX' : 'APOIAR COM PIX'}
-          </button>
-          <button 
-            onClick={() => setVisible(false)}
-            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#92400e', fontSize: '12px' }}
-          >
-            [X]
-          </button>
-        </div>
-      </div>
+      <div style={{
+        background:"#fffbeb", border:"2px solid #fde68a", borderRadius:20,
+        padding:"28px 28px 22px", maxWidth:400, width:"100%",
+        boxShadow:"0 20px 60px rgba(0,0,0,.25)", position:"relative",
+        fontFamily:"'IBM Plex Sans',sans-serif", textAlign:"center"
+      }}>
+        <button onClick={onClose} style={{
+          position:"absolute", top:12, right:14, background:"transparent",
+          border:"none", fontSize:"1.2rem", cursor:"pointer", color:"#a16207"
+        }}>✕</button>
 
-      {showQR && (
-        <div style={{ 
-          marginTop: '15px', 
-          background: 'white', 
-          padding: '15px', 
-          borderRadius: '12px', 
-          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '10px'
+        <div style={{fontSize:"2rem", marginBottom:8}}>👋</div>
+
+        <h2 style={{
+          fontFamily:"'Space Mono',monospace", color:"#b45309",
+          fontSize:"1rem", marginBottom:12, letterSpacing:"-0.5px"
+        }}>Bem-vindo ao VacarIA!</h2>
+
+        <p style={{
+          color:"#78350f", fontSize:".88rem", lineHeight:1.75,
+          marginBottom:16
         }}>
-          <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: '#451a03' }}>Contribua com o VacarIA:</p>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <code style={{ background: '#fef3c7', padding: '6px 12px', borderRadius: '6px', color: '#92400e', fontWeight: 'bold' }}>
-              ramonkastro@gmail.com
-            </code>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText('ramonkastro@gmail.com');
-                const btn = document.getElementById('btn-copiar-pix');
-                if (btn) {
-                  const original = btn.innerText;
-                  btn.innerText = 'Copiado!';
-                  btn.style.background = '#16a34a';
-                  setTimeout(() => {
-                    btn.innerText = original;
-                    btn.style.background = '#92400e';
-                  }, 2000);
-                }
-              }}
-              id="btn-copiar-pix"
-              style={{
-                background: '#92400e',
-                color: 'white',
-                border: 'none',
-                padding: '4px 10px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: 'bold',
-                fontFamily: "'Space Mono', monospace"
-              }}
-            >
-              Copiar chave
-            </button>
-          </div>
+          Aqui você gera <strong>planos de aula</strong> e <strong>avaliações</strong> de
+          Língua Inglesa com IA — alinhados à BNCC e ao currículo do seu estado,
+          em segundos. Totalmente gratuito. 🎓
+        </p>
 
-          <img 
-            src="/pix-qr.png" 
-            alt="QR Code Pix" 
-            style={{ width: '180px', height: '180px', borderRadius: '8px', border: '1px solid #eee' }} 
-          />
-          
-          <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>Dono: Ramon A. Castro</p>
-        </div>
-      )}
+        <p style={{
+          color:"#92400e", fontSize:".8rem", lineHeight:1.6,
+          background:"rgba(180,83,9,.06)", borderRadius:10,
+          padding:"10px 14px", marginBottom:18
+        }}>
+          Uma iniciativa de um professor viciado em ajudar — feita com muito café
+          e vontade de facilitar a vida de quem está em sala de aula. ☕
+        </p>
+
+        <p style={{fontSize:".75rem", color:"#a16207", marginBottom:16}}>
+          Sugestões, críticas ou comentários?<br/>
+          <a href="mailto:ramonkastro@gmail.com" style={{color:"#b45309", fontWeight:700}}>
+            ramonkastro@gmail.com
+          </a>
+        </p>
+
+        <button onClick={onClose} style={{
+          width:"100%", padding:"11px",
+          background:"linear-gradient(135deg,#d97706,#b45309)",
+          border:"none", borderRadius:10, color:"#fff",
+          fontFamily:"'Space Mono',monospace", fontSize:".65rem",
+          cursor:"pointer", fontWeight:700,
+          boxShadow:"0 4px 14px rgba(180,83,9,.3)"
+        }}>
+          ✦ VAMOS COMEÇAR!
+        </button>
+      </div>
     </div>
   );
-};
+}
 
 const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
