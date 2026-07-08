@@ -686,6 +686,7 @@ function GamesPage() {
 }
 
 export default function App() {
+  const [showWelcome, setShowWelcome] = useState(true);
   const [showAdmin, setShowAdmin] = useState(false);
   const [ano, setAno] = useState("");
   const [tema, setTema] = useState("");
@@ -848,7 +849,7 @@ useEffect(() => {
 
  return (
   <div className="app">
-    <WelcomeBanner />
+   {showWelcome && <WelcomeBanner onClose={() => setShowWelcome(false)} />}
     
         <header className="header">
           <div className="logo-badge">
