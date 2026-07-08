@@ -848,7 +848,7 @@ useEffect(() => {
 
  return (
   <div className="app">
-    <DonationBanner />
+    <WelcomeBanner />
     
         <header className="header">
           <div className="logo-badge">
