@@ -9,8 +9,10 @@ const produtos = [
   { emoji:"🎧", label:"Fone de Ouvido", sub:"Para aulas online", url:"https://meli.la/15ZyCAH" },
   { emoji:"🎤", label:"Microfone + Amplificador", sub:"Salas até 30 alunos", url:"https://meli.la/1hZQMnn" },
   // Novos itens Shopee
-  { emoji:"👕", label:"Camiseta Teacher (Feminina)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/3qKKMvqpxf" },
+  { emoji:"👚", label:"Camiseta Teacher (Feminina)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/3qKKMvqpxf" },
   { emoji:"👕", label:"Camiseta Teacher (Unissex)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/1VwPadzihF" },
+  { emoji:"🪫", label:"Cafeteira Mondial Dolce Arome", sub:"Para dar aquela força", url:"https://meli.la/15ZLzzm" },
+  { emoji:"☕", label:"Copo térmico termolar", sub:"Perfeito para todo momento", url:"https://meli.la/313GuBE" },
 ];
 
 export default function Lojinha() {
