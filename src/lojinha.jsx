@@ -5,7 +5,7 @@ const produtos = [
   { emoji:"💻", label:"Notebook ASUS VivoBook i5", sub:"Indicação pessoal", url:"https://meli.la/1rfrpns" },
   { emoji:"🖨️", label:"Impressora Multifuncional Ecotank L3250 Epson", sub:"Indicação pessoal", url:"https://meli.la/2tj2i3w" },
   { emoji:"📖", label:"Dicionário de Inglês", sub:"Referência do professor", url:"https://meli.la/1bgNUVv" },
-  { emoji:"📱", label:"Smartphone recomendado", sub:"Ótimo para aulas e gravação", url:"https://s.shopee.com.br/Llzt3ucPH" },
+  { emoji:"📱", label:"Smartphone recomendado", sub:"O melhor custo-benefício", url:"https://s.shopee.com.br/Llzt3ucPH" },
   { emoji:"🎧", label:"Fone de Ouvido", sub:"Para aulas online", url:"https://meli.la/15ZyCAH" },
   { emoji:"🎤", label:"Microfone + Amplificador", sub:"Salas até 30 alunos", url:"https://meli.la/1hZQMnn" },
   { emoji:"🎒", label:"Mochila de Couro", sub:"Usa até aposentar", url:"https://meli.la/1WHwH85" },
