@@ -8,11 +8,11 @@ const produtos = [
   { emoji:"📱", label:"Smartphone recomendado", sub:"Ótimo para aulas e gravação", url:"https://s.shopee.com.br/Llzt3ucPH" },
   { emoji:"🎧", label:"Fone de Ouvido", sub:"Para aulas online", url:"https://meli.la/15ZyCAH" },
   { emoji:"🎤", label:"Microfone + Amplificador", sub:"Salas até 30 alunos", url:"https://meli.la/1hZQMnn" },
-  { emoji:"🎒", label:"Mochila de qualidade", sub:"Leve para todo lugar", url:"https://meli.la/1WHwH85" },
+  { emoji:"🎒", label:"Mochila de Couro", sub:"Usa até aposentar", url:"https://meli.la/1WHwH85" },
   { emoji:"👚", label:"Camiseta Teacher (Feminina)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/3qKKMvqpxf" },
   { emoji:"👕", label:"Camiseta Teacher (Unissex)", sub:"Estampa temática Shopee", url:"https://s.shopee.com.br/1VwPadzihF" },
   { emoji:"🪫", label:"Cafeteira Mondial Dolce Arome", sub:"Para dar aquela força", url:"https://meli.la/15ZLzzm" },
-  { emoji:"☕", label:"Copo térmico termolar", sub:"Perfeito para todo momento", url:"https://meli.la/313GuBE" },
+  { emoji:"☕", label:"Copo Térmico Termolar", sub:"Perfeito para todo momento", url:"https://meli.la/313GuBE" },
 ];
 
 export default function Lojinha() {
