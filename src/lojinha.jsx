@@ -3,6 +3,7 @@ import React from "react";
 const produtos = [
   { emoji:"📘", label:"E-book - A Arte de Cativar Alunos", sub:"Ramon Castro (Amazon)", url:"https://www.amazon.com.br/Arte-Cativar-Alunos-Confiança-Desconhecido-ebook/dp/B0GWSBTRKX/" },
   { emoji:"💻", label:"Notebook ASUS VivoBook i5", sub:"Indicação pessoal", url:"https://meli.la/1rfrpns" },
+  { emoji:"🖨️", label:"Impressora Multifuncional Ecotank L3250 Epson", sub:"Indicação pessoal", url:"https://meli.la/2tj2i3w" },
   { emoji:"📖", label:"Dicionário de Inglês", sub:"Referência do professor", url:"https://meli.la/1bgNUVv" },
   { emoji:"📱", label:"Smartphone recomendado", sub:"Ótimo para aulas e gravação", url:"https://s.shopee.com.br/Llzt3ucPH" },
   { emoji:"🎧", label:"Fone de Ouvido", sub:"Para aulas online", url:"https://meli.la/15ZyCAH" },
@@ -46,7 +47,7 @@ export default function Lojinha() {
             <div style={{
               marginTop:10, padding:"6px 10px", fontSize:12, color:"#fff",
               background:"#b45309", borderRadius:8, fontWeight:700
-            }}>Ver na Shopee →</div>
+            }}>Ver oferta →</div>
           </a>
         ))}
       </div>
