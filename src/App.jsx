@@ -642,13 +642,14 @@ function RadioGroup({ label, options, value, onChange }) {
 
 function GamesPage() {
   const jogos = [
-    { href: "/game-tobe-racer.html",   icon: "🏎️", name: "To BE Racer",        desc: "Corrida com Verb To Be. Escolha o pronome e acelere!",           tag: "⚡ Solo · Ranking" },
-    { href: "/game-whos-door.html",    icon: "🚪", name: "Who's at the Door?",  desc: "Adivinhe a profissão antes do tempo. Multijogador!",             tag: "🌐 Multiplayer" },
-    { href: "/game-english-quest.html",icon: "🦊", name: "English Quest Kids",  desc: "Flashcards, Quiz, Memória e Ordem em inglês.",                   tag: "🎮 4 jogos" },
-    { href: "/game-verb-shooter.html", icon: "🎯", name: "Grammar Shooter",        desc: "Atire na Classe Gramatical e não cometa erros nessa aventura!",        tag: "🔫 Port. e Inglês" },
-    { href: "/game-english-vocab.html",  icon: "🧠", name: "Essential Vocab",  desc: "500 palavras essenciais em inglês. Quiz de vocabulário básico!",       tag: "📚 Quiz · Solo" },
-    { href: "/game-adjective-snake.html", icon: "🐍", name: "Adjective Snake",   desc: "Coma adjetivos bons e fuja dos ruins! O clássico Snake está de volta.",    tag: "👾 Port. e Inglês" },
+    { href: "/game-tobe-racer.html",      icon: "🏎️", name: "To BE Racer",       desc: "Corrida com Verb To Be. Escolha o pronome e acelere!",              tag: "⚡ Solo · Ranking" },
+    { href: "/game-whos-door.html",       icon: "🚪", name: "Who's at the Door?", desc: "Adivinhe a profissão antes do tempo. Multijogador!",                tag: "🌐 Multiplayer" },
+    { href: "/game-english-quest.html",   icon: "🦊", name: "English Quest Kids", desc: "Flashcards, Quiz, Memória e Ordem em inglês.",                      tag: "🎮 4 jogos" },
+    { href: "/game-verb-shooter.html",    icon: "🎯", name: "Grammar Shooter",    desc: "Atire na Classe Gramatical e não cometa erros nessa aventura!",     tag: "🔫 Port. e Inglês" },
+    { href: "/color-chase.html",          icon: "🎨", name: "Color Chase",        desc: "Corra atrás das cores certas em inglês! Reflexo e vocabulário.",    tag: "🌈 Solo · Cores" },
+    { href: "/game-adjective-snake.html", icon: "🐍", name: "Adjective Snake",    desc: "Coma adjetivos bons e fuja dos ruins! O clássico Snake está de volta.", tag: "👾 Port. e Inglês" },
   ];
+
   return (
     <div style={{minHeight:"100vh",background:"#fefce8",padding:"32px 16px",fontFamily:"'IBM Plex Sans',sans-serif"}}>
       <div style={{maxWidth:640,margin:"0 auto"}}>
@@ -661,7 +662,9 @@ function GamesPage() {
         <p style={{color:"#78716c",marginBottom:28,fontSize:15}}>
           Jogos educativos de Língua Inglesa para usar em sala de aula
         </p>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+
+        {/* Grade de jogos — 2 colunas */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
           {jogos.map(j => (
             <a key={j.name} href={j.href} target="_blank" rel="noopener noreferrer"
               style={{background:"#fff",border:"1.5px solid #fde68a",borderRadius:16,padding:"20px 16px",
@@ -680,6 +683,31 @@ function GamesPage() {
             </a>
           ))}
         </div>
+
+        {/* Card de destaque — Essential Vocab (largura total) */}
+        <a href="/game-english-vocab.html" target="_blank" rel="noopener noreferrer"
+          style={{display:"flex",alignItems:"center",gap:20,background:"linear-gradient(135deg,#b45309,#d97706)",
+            border:"none",borderRadius:18,padding:"24px 28px",textDecoration:"none",
+            boxShadow:"0 6px 24px rgba(180,83,9,.28)",transition:"all .2s",width:"100%"}}
+          onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 10px 32px rgba(180,83,9,.38)"}}
+          onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 6px 24px rgba(180,83,9,.28)"}}
+        >
+          <span style={{fontSize:48,flexShrink:0}}>🧠</span>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            <span style={{fontFamily:"'Space Mono',monospace",fontSize:15,fontWeight:700,color:"#fff",letterSpacing:"-0.3px"}}>
+              Essential Vocab
+            </span>
+            <span style={{fontSize:13,color:"#fef3c7",lineHeight:1.5}}>
+              As 500 palavras mais usadas em inglês. Quiz de vocabulário básico indispensável para qualquer nível!
+            </span>
+            <span style={{fontSize:10,background:"rgba(255,255,255,.18)",border:"1px solid rgba(255,255,255,.35)",
+              borderRadius:100,padding:"3px 12px",color:"#fff",fontFamily:"'Space Mono',monospace",
+              alignSelf:"flex-start",marginTop:2}}>
+              📚 Quiz · Vocabulário Essencial · Solo
+            </span>
+          </div>
+        </a>
+
       </div>
     </div>
   );
