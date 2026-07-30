@@ -15,6 +15,8 @@
     .header-sub{color:#fef3c7;font-size:14px;margin-top:6px;opacity:.9}
     .container{max-width:900px;margin:0 auto;padding:36px 20px 60px}
     .section-title{font-size:1.1rem;font-weight:700;color:#b45309;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+
+    /* Grade de jogos */
     .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:16px}
     .game-card{background:#fff;border-radius:16px;padding:22px 18px;text-decoration:none;color:#1e293b;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1.5px solid #e2e8f0;transition:transform .18s,box-shadow .18s,border-color .18s;display:flex;flex-direction:column;gap:6px}
     .game-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(180,83,9,.18);border-color:#b45309}
@@ -22,10 +24,37 @@
     .game-card-name{font-size:1rem;font-weight:700;color:#1e293b}
     .game-card-desc{font-size:13px;color:#64748b;line-height:1.5;flex:1}
     .game-card-tag{display:inline-block;margin-top:8px;font-size:11px;font-weight:600;color:#b45309;background:#fef3c7;border-radius:20px;padding:3px 10px}
-    .game-card-wide{background:#fff;border-radius:16px;padding:22px 24px;text-decoration:none;color:#1e293b;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1.5px solid #e2e8f0;transition:transform .18s,box-shadow .18s,border-color .18s;display:flex;flex-direction:row;align-items:center;gap:20px}
+
+    /* Card largo (Adjective Snake) */
+    .game-card-wide{background:#fff;border-radius:16px;padding:22px 24px;text-decoration:none;color:#1e293b;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1.5px solid #e2e8f0;transition:transform .18s,box-shadow .18s,border-color .18s;display:flex;flex-direction:row;align-items:center;gap:20px;margin-bottom:16px}
     .game-card-wide:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(180,83,9,.18);border-color:#b45309}
+
+    /* Seção destaque Essential Vocab */
+    .vocab-section{margin-top:32px}
+    .vocab-section .section-title{margin-bottom:14px}
+    .vocab-highlight{background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:20px;padding:32px 36px;text-decoration:none;color:#fff;display:flex;flex-direction:row;align-items:center;gap:28px;box-shadow:0 6px 32px rgba(37,99,235,.30);border:2px solid #3b82f6;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden}
+    .vocab-highlight::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,.06);border-radius:50%}
+    .vocab-highlight::after{content:'';position:absolute;bottom:-30px;left:60px;width:120px;height:120px;background:rgba(255,255,255,.04);border-radius:50%}
+    .vocab-highlight:hover{transform:translateY(-5px);box-shadow:0 14px 48px rgba(37,99,235,.40)}
+    .vocab-highlight-icon{font-size:4rem;flex-shrink:0;position:relative;z-index:1}
+    .vocab-highlight-body{flex:1;position:relative;z-index:1}
+    .vocab-highlight-badge{display:inline-block;font-size:11px;font-weight:700;color:#1e3a5f;background:#fde68a;border-radius:20px;padding:3px 12px;margin-bottom:10px;letter-spacing:.3px}
+    .vocab-highlight-name{font-size:1.45rem;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-.3px}
+    .vocab-highlight-desc{font-size:14px;color:#bfdbfe;line-height:1.6;margin-bottom:14px}
+    .vocab-highlight-tags{display:flex;flex-wrap:wrap;gap:8px}
+    .vocab-tag{font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px}
+    .vocab-cta{flex-shrink:0;background:#fde68a;color:#1e3a5f;font-weight:800;font-size:14px;border-radius:12px;padding:12px 22px;text-align:center;position:relative;z-index:1;transition:background .18s,transform .18s;white-space:nowrap}
+    .vocab-highlight:hover .vocab-cta{background:#fbbf24;transform:scale(1.04)}
+
     .footer{text-align:center;margin-top:48px;font-size:12px;color:#a8a29e}
     .footer em{font-style:italic;color:#c4b5a0}
+
+    @media(max-width:600px){
+      .vocab-highlight{flex-direction:column;text-align:center;padding:28px 20px}
+      .vocab-highlight-tags{justify-content:center}
+      .vocab-cta{width:100%}
+      .game-card-wide{flex-direction:column;text-align:center}
+    }
   </style>
 </head>
 <body>
@@ -34,8 +63,10 @@
     <div class="header-title">Vacar<span>IA</span> · Jogos</div>
     <div class="header-sub">Gamificação para o ensino de Língua Inglesa 🎮</div>
   </div>
+
   <div class="container">
     <div class="section-title">🕹️ Escolha um jogo</div>
+
     <div class="games-grid">
       <a class="game-card" href="/game-tobe-racer.html" target="_blank" rel="noopener noreferrer">
         <div class="game-card-icon">🏎️</div>
@@ -53,23 +84,50 @@
         <div class="game-card-icon">🦊</div>
         <div class="game-card-name">English Quest Kids</div>
         <div class="game-card-desc">Flashcards, Quiz, Memória e Ordem. Cores, dias, animais e meses em inglês!</div>
-        <span class="game-card-tag">🎮 4 jogos · Para Adultos e crianças</span>
+        <span class="game-card-tag">🎮 4 jogos</span>
       </a>
       <a class="game-card" href="/game-verb-shooter.html" target="_blank" rel="noopener noreferrer">
         <div class="game-card-icon">🔫</div>
-        <div class="game-card-name">Gramma Shooter Game</div>
+        <div class="game-card-name">Grammar Shooter</div>
         <div class="game-card-desc">Acerte apenas na classe gramatical selecionada e não cometa erros nessa aventura!</div>
-        <span class="game-card-tag">🎯 · Para Acertar no Alvo</span>
+        <span class="game-card-tag">🎯 Port. e Inglês</span>
+      </a>
+      <!-- Color Chase -->
+      <a class="game-card" href="/color-chase" target="_blank" rel="noopener noreferrer">
+        <div class="game-card-icon">🎨</div>
+        <div class="game-card-name">Color Chase</div>
+        <div class="game-card-desc">Corra atrás das cores certas em inglês! Velocidade e vocabulário num jogo cheio de cor!</div>
+        <span class="game-card-tag">👻 Solo · Cores</span>
+      </a>
+      <!-- Adjective Snake — na grade, ao lado do Color Chase -->
+      <a class="game-card" href="/game-adjective-snake.html" target="_blank" rel="noopener noreferrer">
+        <div class="game-card-icon">🐍</div>
+        <div class="game-card-name">Adjective Snake</div>
+        <div class="game-card-desc">Coma adjetivos bons e fuja dos ruins! O clássico Snake está de volta com vocabulário em inglês.</div>
+        <span class="game-card-tag">🌿 Port. e Inglês</span>
       </a>
     </div>
-    <a class="game-card-wide" href="/game-english-vocab.html" target="_blank" rel="noopener noreferrer">
-      <div class="game-card-icon" style="font-size:2.8rem">🦉</div>
-      <div>
-        <div class="game-card-name" style="font-size:1.05rem">English Vocabulary Quest Pro</div>
-        <div class="game-card-desc">Domine o vocabulário essencial, Phrasal Verbs e expressões para conversação real!</div>
-        <span class="game-card-tag">🎯 · As 500 palavras mais usadas e vocabulário avançado</span>
-      </div>
-    </a>
+
+    <!-- Essential Vocab — destaque total -->
+    <div class="vocab-section">
+      <div class="section-title">📚 Curso de Vocabulário em Destaque</div>
+      <a class="vocab-highlight" href="/game-english-vocab.html" target="_blank" rel="noopener noreferrer">
+        <div class="vocab-highlight-icon">🧠</div>
+        <div class="vocab-highlight-body">
+          <div class="vocab-highlight-badge">⭐ RECOMENDADO PARA INICIANTES</div>
+          <div class="vocab-highlight-name">Essential Vocab</div>
+          <div class="vocab-highlight-desc">Domine as 500 palavras mais usadas do inglês com quizzes interativos e progressão por nível. O ponto de partida ideal para qualquer aluno!</div>
+          <div class="vocab-highlight-tags">
+            <span class="vocab-tag">📝 Quiz</span>
+            <span class="vocab-tag">🎯 Solo</span>
+            <span class="vocab-tag">🏆 500 palavras essenciais</span>
+            <span class="vocab-tag">📈 Vocabulário básico</span>
+          </div>
+        </div>
+        <div class="vocab-cta">Jogar agora →</div>
+      </a>
+    </div>
+
     <div class="footer">
       VacarIA · Assistente Pedagógico para Professores de Inglês<br/>
       Desenvolvido por Ramon Castro<br/>
@@ -79,17 +137,11 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = "https://nqtjcpkgbdwqkjzqzqzq.supabase.co";
-    // Lê as variáveis do meta tag injetado pelo Vite ou usa fallback
-    const _url = document.querySelector("meta[name=supabase-url]")?.content || "";
-    const _key = document.querySelector("meta[name=supabase-key]")?.content || "";
-
     async function trackGame(feature) {
       try {
         const ipRes = await fetch("https://api.ipify.org?format=json");
         const { ip } = await ipRes.json();
         const { createClient } = supabase;
-        // Pega as credenciais do sessionStorage (injetadas pelo App.jsx)
         const url = sessionStorage.getItem("sb_url") || "";
         const key = sessionStorage.getItem("sb_key") || "";
         if (!url || !key) return;
@@ -105,13 +157,12 @@
       } catch(e) { console.warn("Track error:", e); }
     }
 
-    document.querySelectorAll(".game-card, .game-card-wide").forEach(card => {
+    document.querySelectorAll(".game-card, .game-card-wide, .vocab-highlight").forEach(card => {
       card.addEventListener("click", function() {
-        const name = this.querySelector(".game-card-name")?.textContent || "Jogo";
+        const name = this.querySelector(".game-card-name, .vocab-highlight-name")?.textContent || "Jogo";
         trackGame(name);
       });
     });
   </script>
-
 </body>
 </html>

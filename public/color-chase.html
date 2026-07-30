@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Color Chase — Aprenda Cores em Inglês</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#1b1035;
+    --wall:#ff6b4a;
+    --cream:#fbf3e7;
+    --plum:#241436;
+    --gold:#ffd93d;
+    --ghost:#5b4b8a;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: radial-gradient(ellipse at top, #2a1a4a 0%, #140a28 70%);
+    font-family:'Nunito', sans-serif;
+    color:var(--cream);
+    overflow-x:hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #app{
+    max-width:560px;
+    margin:0 auto;
+    padding:14px 14px 24px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+  }
+  h1{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:clamp(22px,6vw,32px);
+    margin:6px 0 2px;
+    text-align:center;
+    color:var(--gold);
+    text-shadow: 0 3px 0 rgba(0,0,0,0.35);
+    letter-spacing:0.5px;
+  }
+  .subtitle{
+    font-size:13px;
+    color:#c9b8ef;
+    margin-bottom:12px;
+    text-align:center;
+  }
+
+  #hud{
+    width:100%;
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .flashcard{
+    flex:1;
+    border-radius:14px;
+    padding:8px 10px;
+    font-family:'Baloo 2', sans-serif;
+    text-align:center;
+    border:3px solid rgba(0,0,0,0.25);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.25);
+    position:relative;
+  }
+  .flashcard .eyebrow{
+    font-family:'Nunito', sans-serif;
+    font-weight:800;
+    font-size:10px;
+    letter-spacing:1.5px;
+    opacity:0.85;
+  }
+  .flashcard .word{
+    font-size:clamp(16px,4.6vw,22px);
+    font-weight:800;
+    line-height:1.15;
+    text-transform:uppercase;
+  }
+  .flashcard .pt{
+    font-family:'Nunito', sans-serif;
+    font-size:10px;
+    font-weight:700;
+    opacity:0.75;
+    text-transform:none;
+  }
+  .card-eat{ background:var(--cream); color:var(--plum); }
+  .card-avoid{ background:#2a1440; color:var(--cream); border-color:rgba(91,75,138,0.7); }
+  .card-avoid .eyebrow{ color:#c9b8ef; }
+  .card-avoid .word{ color:#d8cdfb; }
+
+  #statusbar{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    margin-bottom:8px;
+    padding:0 2px;
+  }
+  #lives{ letter-spacing:2px; }
+  #timerWrap{
+    flex:1;
+    height:8px;
+    background:rgba(255,255,255,0.12);
+    border-radius:6px;
+    margin:0 10px;
+    overflow:hidden;
+  }
+  #timerBar{
+    height:100%;
+    width:100%;
+    background:var(--gold);
+    border-radius:6px;
+    transition:width 0.2s linear, background 0.3s;
+  }
+
+  #canvasWrap{
+    position:relative;
+    width:100%;
+    max-width:476px;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.35), 0 8px 30px rgba(0,0,0,0.5);
+    border:4px solid var(--wall);
+  }
+  canvas{
+    display:block;
+    width:100%;
+    height:auto;
+    background:var(--bg-deep);
+  }
+
+  .overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(15,8,30,0.92);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:20px;
+    gap:10px;
+  }
+  .overlay h2{
+    font-family:'Baloo 2', sans-serif;
+    color:var(--gold);
+    font-size:clamp(20px,5.5vw,28px);
+    margin:0;
+  }
+  .overlay p{
+    font-size:14px;
+    color:#e6dcff;
+    max-width:380px;
+    margin:0;
+    line-height:1.5;
+  }
+  .overlay .legend{
+    display:flex;
+    gap:14px;
+    margin:6px 0;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .legend .dot{ width:16px; height:16px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:middle; }
+  .btn{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:17px;
+    background:var(--gold);
+    color:#241436;
+    border:none;
+    border-radius:12px;
+    padding:12px 30px;
+    cursor:pointer;
+    box-shadow:0 4px 0 #c9a400;
+    margin-top:6px;
+    transition:transform 0.05s;
+  }
+  .btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #c9a400; }
+  .hidden{ display:none !important; }
+
+  #dpad{
+    display:none;
+    margin-top:16px;
+    grid-template-columns:56px 56px 56px;
+    grid-template-rows:56px 56px 56px;
+    gap:6px;
+  }
+  @media (pointer:coarse){
+    #dpad{ display:grid; }
+  }
+  .padbtn{
+    background:rgba(255,255,255,0.1);
+    border:2px solid rgba(255,255,255,0.25);
+    border-radius:12px;
+    color:var(--cream);
+    font-size:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    user-select:none;
+  }
+  .padbtn:active{ background:rgba(255,217,61,0.35); }
+  #pad-up{ grid-column:2; grid-row:1; }
+  #pad-left{ grid-column:1; grid-row:2; }
+  #pad-right{ grid-column:3; grid-row:2; }
+  #pad-down{ grid-column:2; grid-row:3; }
+
+  .toast{
+    position:absolute;
+    left:50%;
+    top:38%;
+    transform:translate(-50%,-50%);
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:19px;
+    padding:8px 18px;
+    border-radius:10px;
+    pointer-events:none;
+    opacity:0;
+    text-align:center;
+    line-height:1.3;
+    white-space:nowrap;
+  }
+  .footer-note{
+    font-size:11px;
+    color:#8a78b5;
+    margin-top:14px;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>🎓 Color Chase</h1>
+  <div class="subtitle">Coma só a cor certa em inglês e fuja dos perseguidores!</div>
+
+  <div id="hud">
+    <div class="flashcard card-eat">
+      <div class="eyebrow">EAT ONLY (COMA SÓ)</div>
+      <div class="word" id="eatWord">YELLOW</div>
+      <div class="pt" id="eatWordPt">amarelo</div>
+    </div>
+    <div class="flashcard card-avoid">
+      <div class="eyebrow">RUN FROM (FUJA)</div>
+      <div class="word">GHOSTS 👻</div>
+      <div class="pt">os perseguidores</div>
+    </div>
+  </div>
+
+  <div id="statusbar">
+    <div id="scoreDisplay">Score: 0</div>
+    <div id="timerWrap"><div id="timerBar"></div></div>
+    <div id="lives">❤️❤️❤️</div>
+  </div>
+
+  <div id="canvasWrap">
+    <canvas id="game" width="476" height="532"></canvas>
+
+    <div class="overlay" id="startOverlay">
+      <h2>Color Chase</h2>
+      <p>Use as <strong>setas</strong> ou <strong>WASD</strong> (ou o direcional na tela) para mover seu personagem pelo labirinto.</p>
+      <p>Tem frutinhas de <strong>várias cores</strong> espalhadas. Coma <strong>somente</strong> a cor indicada no card EAT!</p>
+      <p>Comeu a cor errada? Você fica <strong>tonto</strong> por alguns segundos — e os <strong>👻 perseguidores</strong> podem te pegar enquanto isso!</p>
+      <button class="btn" id="startBtn">JOGAR ▶</button>
+    </div>
+
+    <div class="overlay hidden" id="roundOverlay">
+      <h2 id="roundTitle">Round Complete!</h2>
+      <p id="roundText"></p>
+      <button class="btn" id="nextBtn">CONTINUAR ▶</button>
+    </div>
+
+    <div class="overlay hidden" id="gameOverOverlay">
+      <h2>Game Over</h2>
+      <p id="finalScoreText"></p>
+      <p id="bestScoreText" style="color:var(--gold);font-weight:800;"></p>
+      <button class="btn" id="restartBtn">JOGAR DE NOVO ▶</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <div id="dpad">
+    <div class="padbtn" id="pad-up">▲</div>
+    <div class="padbtn" id="pad-left">◀</div>
+    <div class="padbtn" id="pad-right">▶</div>
+    <div class="padbtn" id="pad-down">▼</div>
+  </div>
+
+  <div class="footer-note">Secretaria Municipal de Educação de Vacaria · Jogo educativo de vocabulário de cores</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Config ----------
+  const COLS = 17, ROWS = 19, CELL = 28;
+  const CANVAS_W = COLS * CELL, CANVAS_H = ROWS * CELL;
+
+  const PALETTE = [
+    { key:"yellow", en:"yellow", pt:"amarelo", hex:"#ffd93d" },
+    { key:"red",    en:"red",    pt:"vermelho", hex:"#ff4757" },
+    { key:"purple", en:"purple", pt:"roxo",     hex:"#a855f7" },
+    { key:"blue",   en:"blue",   pt:"azul",     hex:"#3b82f6" },
+    { key:"green",  en:"green",  pt:"verde",    hex:"#22c55e" },
+    { key:"orange", en:"orange", pt:"laranja",  hex:"#fb923c" },
+    { key:"pink",   en:"pink",   pt:"rosa",     hex:"#f472b6" },
+    { key:"brown",  en:"brown",  pt:"marrom",   hex:"#a56336" }
+  ];
+
+  const ROUND_TIME = 55;
+  const START_LIVES = 3;
+  const STUN_TIME = 2.5;
+  const FRUITS_PER_COLOR = 4;
+
+  // ---------- Maze ----------
+  let maze = [];
+  for (let r = 0; r < ROWS; r++) maze.push(new Array(COLS).fill(0));
+  for (let c = 0; c < COLS; c++) { maze[0][c] = 1; maze[ROWS-1][c] = 1; }
+  for (let r = 0; r < ROWS; r++) { maze[r][0] = 1; maze[r][COLS-1] = 1; }
+  const midRow = Math.floor(ROWS/2);
+  maze[midRow][0] = 0;
+  maze[midRow][COLS-1] = 0;
+
+  const pillars = [
+    [3,4,2,3],[3,4,13,14],
+    [3,4,7,9],
+    [7,8,2,3],[7,8,13,14],
+    [7,8,7,7],[7,8,9,9],
+    [11,12,4,5],[11,12,11,12],
+    [11,12,8,8],
+    [15,16,2,3],[15,16,13,14],
+    [15,16,7,9]
+  ];
+  pillars.forEach(([r0,r1,c0,c1]) => {
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) maze[r][c] = 1;
+  });
+
+  function isOpen(row, col) {
+    if (row < 0 || row >= ROWS) return false;
+    let c = col;
+    if (c < 0) c = COLS - 1;
+    if (c >= COLS) c = 0;
+    return maze[row][c] === 0;
+  }
+
+  function openCellsList() {
+    const list = [];
+    for (let r = 1; r < ROWS - 1; r++) {
+      for (let c = 1; c < COLS - 1; c++) {
+        if (maze[r][c] === 0) list.push([r, c]);
+      }
+    }
+    return list;
+  }
+
+  // ---------- Entities ----------
+  const DIRS = {
+    up:    {dc: 0, dr: -1},
+    down:  {dc: 0, dr: 1},
+    left:  {dc: -1, dr: 0},
+    right: {dc: 1, dr: 0},
+    none:  {dc: 0, dr: 0}
+  };
+
+  function cellCenter(row, col) {
+    return { x: col * CELL + CELL/2, y: row * CELL + CELL/2 };
+  }
+
+  // Grid-progress based movement: position is (gridRow, gridCol) plus a
+  // 0..1 progress fraction toward the next cell in `dir`. This avoids the
+  // pixel-distance "atCenter" check, which caused slow movers to snap back
+  // to the exact same spot every frame and never actually move.
+  class Mover {
+    constructor(row, col, speed) {
+      this.gridRow = row;
+      this.gridCol = col;
+      this.dir = "none";
+      this.wantDir = "none";
+      this.progress = 0;
+      this.speed = speed; // pixels/second equivalent; converted to cells/sec internally
+    }
+    get row() { return this.gridRow; }
+    get col() {
+      let c = this.gridCol;
+      if (c < 0) c = COLS - 1;
+      if (c >= COLS) c = 0;
+      return c;
+    }
+    canGo(dirName) {
+      const d = DIRS[dirName];
+      if (!d || (d.dc === 0 && d.dr === 0)) return false;
+      return isOpen(this.row + d.dr, this.col + d.dc);
+    }
+    arriveDecision(decideFn) {
+      const desired = decideFn ? decideFn(this) : this.wantDir;
+      if (desired && desired !== "none" && this.canGo(desired)) {
+        this.dir = desired;
+      } else if (!this.canGo(this.dir)) {
+        this.dir = "none";
+      }
+    }
+    step(dt, decideFn) {
+      if (this.dir === "none" || this.progress === 0) {
+        this.arriveDecision(decideFn);
+      }
+      if (this.dir === "none") return;
+
+      this.progress += (this.speed / CELL) * dt;
+      while (this.progress >= 1) {
+        this.progress -= 1;
+        const d = DIRS[this.dir];
+        this.gridRow += d.dr;
+        this.gridCol += d.dc;
+        if (this.gridCol < 0) this.gridCol = COLS - 1;
+        if (this.gridCol >= COLS) this.gridCol = 0;
+        this.arriveDecision(decideFn);
+        if (this.dir === "none") { this.progress = 0; break; }
+      }
+    }
+    get x() {
+      const c0 = cellCenter(this.gridRow, this.gridCol);
+      if (this.dir === "none" || this.progress === 0) return c0.x;
+      const d = DIRS[this.dir];
+      const c1 = cellCenter(this.gridRow + d.dr, this.gridCol + d.dc);
+      return c0.x + (c1.x - c0.x) * this.progress;
+    }
+    get y() {
+      const c0 = cellCenter(this.gridRow, this.gridCol);
+      if (this.dir === "none" || this.progress === 0) return c0.y;
+      const d = DIRS[this.dir];
+      const c1 = cellCenter(this.gridRow + d.dr, this.gridCol + d.dc);
+      return c0.y + (c1.y - c0.y) * this.progress;
+    }
+  }
+
+  // ---------- Game state ----------
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  let state = "start";
+  let roundIndex = 0;
+  let score = 0;
+  let lives = START_LIVES;
+  let timeLeft = ROUND_TIME;
+  let player, enemies = [], fruits = [];
+  let mouthPhase = 0;
+  let invuln = 0;
+  let stunTimer = 0;
+  let bestScore = 0;
+  let targetColor = PALETTE[0];
+  try { bestScore = parseInt(localStorage.getItem("colorChaseBest") || "0", 10); } catch(e) { bestScore = 0; }
+
+  const eatWordEl = document.getElementById("eatWord");
+  const eatWordPtEl = document.getElementById("eatWordPt");
+  const scoreDisplay = document.getElementById("scoreDisplay");
+  const livesEl = document.getElementById("lives");
+  const timerBar = document.getElementById("timerBar");
+  const toastEl = document.getElementById("toast");
+  const startOverlay = document.getElementById("startOverlay");
+  const roundOverlay = document.getElementById("roundOverlay");
+  const gameOverOverlay = document.getElementById("gameOverOverlay");
+
+  function updateHUD() {
+    eatWordEl.textContent = targetColor.en;
+    eatWordPtEl.textContent = targetColor.pt;
+    document.querySelector(".card-eat .word").style.color = targetColor.hex;
+    scoreDisplay.textContent = "Score: " + score;
+    livesEl.textContent = "❤️".repeat(Math.max(lives,0)) + "🖤".repeat(Math.max(START_LIVES-lives,0));
+  }
+
+  function showToast(html, color, duration) {
+    toastEl.innerHTML = html;
+    toastEl.style.color = color;
+    toastEl.style.background = "rgba(0,0,0,0.6)";
+    toastEl.style.opacity = "1";
+    toastEl.style.transition = "none";
+    toastEl.style.top = "38%";
+    requestAnimationFrame(() => {
+      toastEl.style.transition = "opacity " + (duration||0.9) + "s, top " + (duration||0.9) + "s";
+      toastEl.style.top = "30%";
+      toastEl.style.opacity = "0";
+    });
+  }
+
+  function difficultyForRound(idx) {
+    const enemySpeed = Math.min(2.4 + idx * 0.22, 4.4) * CELL;
+    const enemyCount = Math.min(2 + Math.floor(idx / 3), 4);
+    const colorCount = Math.min(3 + Math.floor(idx / 2), PALETTE.length);
+    return { enemySpeed, enemyCount, colorCount };
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i+1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function startRound() {
+    targetColor = PALETTE[roundIndex % PALETTE.length];
+    const diff = difficultyForRound(roundIndex);
+
+    const playerStart = [17, 8];
+    player = new Mover(playerStart[0], playerStart[1], 4.6 * CELL);
+
+    const enemyStarts = [[9,4],[9,12],[5,8],[13,8]];
+    enemies = [];
+    for (let i = 0; i < diff.enemyCount; i++) {
+      const s = enemyStarts[i % enemyStarts.length];
+      const e = new Mover(s[0], s[1], diff.enemySpeed);
+      e.dir = ["left","right","up","down"][i % 4];
+      enemies.push(e);
+    }
+
+    // pick which colors appear this round (always include target)
+    const others = PALETTE.filter(c => c.key !== targetColor.key);
+    shuffle(others);
+    const colorsThisRound = [targetColor, ...others.slice(0, diff.colorCount - 1)];
+
+    const cells = openCellsList();
+    const forbidden = new Set([playerStart.join(","), ...enemyStarts.slice(0,diff.enemyCount).map(s=>s.join(","))]);
+    const candidates = cells.filter(([r,c]) => {
+      if (forbidden.has(r+","+c)) return false;
+      const dist = Math.abs(r-playerStart[0]) + Math.abs(c-playerStart[1]);
+      return dist > 2;
+    });
+    shuffle(candidates);
+
+    fruits = [];
+    let ptr = 0;
+    colorsThisRound.forEach(colorDef => {
+      for (let i = 0; i < FRUITS_PER_COLOR && ptr < candidates.length; i++, ptr++) {
+        const [r,c] = candidates[ptr];
+        fruits.push({ row:r, col:c, eaten:false, color:colorDef });
+      }
+    });
+    shuffle(fruits);
+
+    timeLeft = ROUND_TIME;
+    invuln = 1.2;
+    stunTimer = 0;
+    updateHUD();
+  }
+
+  function loseLife() {
+    lives--;
+    invuln = 1.6;
+    stunTimer = 0;
+    updateHUD();
+    showToast("Ops! 😵", "#ff4757", 0.8);
+    playTone(140, 0.25, "sawtooth");
+    player.gridRow = 17; player.gridCol = 8; player.progress = 0;
+    player.dir = "none"; player.wantDir = "none";
+    if (lives <= 0) {
+      endGame();
+    }
+  }
+
+  function endGame() {
+    state = "gameOver";
+    if (score > bestScore) {
+      bestScore = score;
+      try { localStorage.setItem("colorChaseBest", String(bestScore)); } catch(e) {}
+    }
+    document.getElementById("finalScoreText").textContent = "Sua pontuação: " + score + " · Rodada " + (roundIndex+1);
+    document.getElementById("bestScoreText").textContent = "Recorde: " + bestScore;
+    gameOverOverlay.classList.remove("hidden");
+  }
+
+  function completeRound() {
+    state = "roundEnd";
+    score += 50;
+    const next = PALETTE[(roundIndex+1) % PALETTE.length];
+    document.getElementById("roundTitle").textContent = "Great job! 🎉";
+    document.getElementById("roundText").innerHTML =
+      "Você comeu todas as frutinhas <strong style='color:"+targetColor.hex+"'>"+targetColor.en.toUpperCase()+"</strong> (" + targetColor.pt + ")!<br>" +
+      "Próxima cor: <strong style='color:"+next.hex+"'>"+next.en.toUpperCase()+"</strong> (" + next.pt + ")";
+    roundOverlay.classList.remove("hidden");
+    updateHUD();
+  }
+
+  // ---------- Audio ----------
+  let audioCtx = null;
+  function playTone(freq, dur, type) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type || "square";
+      o.frequency.value = freq;
+      g.gain.value = 0.06;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      o.stop(audioCtx.currentTime + dur + 0.02);
+    } catch(e) {}
+  }
+
+  // ---------- Input ----------
+  const keyMap = {
+    ArrowUp:"up", ArrowDown:"down", ArrowLeft:"left", ArrowRight:"right",
+    w:"up", s:"down", a:"left", d:"right",
+    W:"up", S:"down", A:"left", D:"right"
+  };
+  window.addEventListener("keydown", (e) => {
+    const d = keyMap[e.key];
+    if (d) {
+      if (player && stunTimer <= 0) player.wantDir = d;
+      e.preventDefault();
+    }
+  }, {passive:false});
+
+  function bindPad(id, dir) {
+    const el = document.getElementById(id);
+    const set = (ev) => { ev.preventDefault(); if (player && stunTimer <= 0) player.wantDir = dir; };
+    el.addEventListener("touchstart", set, {passive:false});
+    el.addEventListener("mousedown", set);
+  }
+  bindPad("pad-up","up"); bindPad("pad-down","down"); bindPad("pad-left","left"); bindPad("pad-right","right");
+
+  // ---------- Enemy AI ----------
+  // Called by Mover.step() exactly when the enemy arrives at a fresh cell.
+  function enemyDecide(mover) {
+    const opts = ["up","down","left","right"].filter(d => mover.canGo(d));
+    const reverse = {up:"down",down:"up",left:"right",right:"left"}[mover.dir];
+    let choices = opts.filter(d => d !== reverse);
+    if (choices.length === 0) choices = opts;
+    if (choices.length === 0) return mover.dir;
+    if (Math.random() < 0.55 && player) {
+      let best = choices[0], bestDist = Infinity;
+      choices.forEach(d => {
+        const dd = DIRS[d];
+        const nr = mover.row + dd.dr, nc = mover.col + dd.dc;
+        const dist = Math.abs(nr - player.row) + Math.abs(nc - player.col);
+        if (dist < bestDist) { bestDist = dist; best = d; }
+      });
+      return best;
+    }
+    return choices[Math.floor(Math.random() * choices.length)];
+  }
+
+  function playerDecide(mover) { return mover.wantDir; }
+
+  // ---------- Drawing ----------
+  function drawMaze() {
+    ctx.fillStyle = "#1b1035";
+    ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+    ctx.fillStyle = "#ff6b4a";
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (maze[r][c] === 1) {
+          ctx.fillRect(c*CELL+1, r*CELL+1, CELL-2, CELL-2);
+        }
+      }
+    }
+  }
+
+  function drawFruit(f, bob) {
+    if (f.eaten) return;
+    const p = cellCenter(f.row, f.col);
+    const r = CELL*0.26;
+    ctx.save();
+    ctx.translate(p.x, p.y + Math.sin(bob)*1.4);
+    // body
+    ctx.fillStyle = f.color.hex;
+    ctx.beginPath();
+    ctx.arc(0, r*0.12, r, 0, Math.PI*2);
+    ctx.fill();
+    // shine
+    ctx.fillStyle = "rgba(255,255,255,0.35)";
+    ctx.beginPath();
+    ctx.arc(-r*0.35, -r*0.05, r*0.28, 0, Math.PI*2);
+    ctx.fill();
+    // stem
+    ctx.strokeStyle = "#5b3a21";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, -r*0.85);
+    ctx.lineTo(r*0.15, -r*1.3);
+    ctx.stroke();
+    // leaf
+    ctx.fillStyle = "#3fae4a";
+    ctx.beginPath();
+    ctx.ellipse(r*0.5, -r*1.25, r*0.32, r*0.18, -0.5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawEnemy(e) {
+    const r = CELL*0.42;
+    ctx.save();
+    ctx.translate(e.x, e.y);
+    ctx.fillStyle = "rgba(91,75,138,0.92)";
+    ctx.beginPath();
+    ctx.arc(0, -r*0.1, r, Math.PI, 0);
+    ctx.lineTo(r, r*0.7);
+    for (let i = 0; i < 4; i++) {
+      const x0 = r - (i*2*r/4);
+      ctx.quadraticCurveTo(x0 - r/4, r*1.05, x0 - r/2, r*0.7);
+    }
+    ctx.lineTo(-r, r*0.7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.arc(-r*0.32,-r*0.15,r*0.24,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(r*0.32,-r*0.15,r*0.24,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#ff4757";
+    const eyeDx = DIRS[e.dir].dc * r*0.12, eyeDy = DIRS[e.dir].dr * r*0.12;
+    ctx.beginPath(); ctx.arc(-r*0.32+eyeDx, -r*0.15+eyeDy, r*0.12, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(r*0.32+eyeDx, -r*0.15+eyeDy, r*0.12, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawPlayer() {
+    const r = CELL*0.42;
+    let angle = { up: -Math.PI/2, down: Math.PI/2, left: Math.PI, right: 0, none: 0 }[player.dir];
+    const mouth = (Math.sin(mouthPhase) * 0.5 + 0.5) * 0.28 + 0.02;
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    if (stunTimer > 0) {
+      angle = Math.sin(mouthPhase*3) * 0.6;
+      ctx.globalAlpha = 0.85;
+    } else if (invuln > 0 && Math.floor(invuln*10) % 2 === 0) {
+      ctx.globalAlpha = 0.4;
+    }
+    ctx.rotate(angle);
+    ctx.fillStyle = stunTimer > 0 ? "#c9b8ef" : "#ffd93d";
+    ctx.beginPath();
+    ctx.arc(0, 0, r, mouth*Math.PI, (2-mouth)*Math.PI);
+    ctx.lineTo(0,0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    if (stunTimer > 0) {
+      ctx.save();
+      ctx.translate(player.x, player.y - r*1.4);
+      ctx.font = "14px sans-serif";
+      ctx.textAlign = "center";
+      const spin = mouthPhase * 2;
+      for (let i = 0; i < 3; i++) {
+        const a = spin + i * (Math.PI*2/3);
+        ctx.fillText("⭐", Math.cos(a)*12, Math.sin(a)*6);
+      }
+      ctx.restore();
+    }
+  }
+
+  // ---------- Main loop ----------
+  let lastT = performance.now();
+  function loop(t) {
+    const dt = Math.min((t - lastT) / 1000, 0.05);
+    lastT = t;
+    if (state === "playing") update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  function update(dt) {
+    mouthPhase += dt * 8;
+    if (invuln > 0) invuln = Math.max(0, invuln - dt);
+
+    if (stunTimer > 0) {
+      stunTimer = Math.max(0, stunTimer - dt);
+    } else {
+      player.step(dt, playerDecide);
+    }
+    enemies.forEach(e => e.step(dt, enemyDecide));
+
+    // fruit pickup
+    let targetRemaining = 0;
+    fruits.forEach(f => {
+      if (f.eaten) return;
+      if (f.color.key === targetColor.key) targetRemaining++;
+      if (player.row === f.row && player.col === f.col) {
+        const dx = player.x - cellCenter(f.row, f.col).x;
+        const dy = player.y - cellCenter(f.row, f.col).y;
+        if (Math.hypot(dx,dy) < CELL*0.5) {
+          f.eaten = true;
+          if (f.color.key === targetColor.key) {
+            targetRemaining--;
+            score += 10;
+            playTone(660, 0.08, "square");
+            showToast(f.color.en.toUpperCase() + "! ✅", f.color.hex, 0.6);
+          } else {
+            score = Math.max(0, score - 5);
+            stunTimer = STUN_TIME;
+            playTone(180, 0.3, "triangle");
+            showToast("Oops, that's " + f.color.en.toUpperCase() + "!<br>You wanted " + targetColor.en.toUpperCase(), f.color.hex, 1.1);
+          }
+          updateHUD();
+        }
+      }
+    });
+
+    if (invuln <= 0) {
+      for (const e of enemies) {
+        if (Math.hypot(e.x - player.x, e.y - player.y) < CELL*0.55) {
+          loseLife();
+          break;
+        }
+      }
+    }
+
+    timeLeft -= dt;
+    const pct = Math.max(0, timeLeft / ROUND_TIME);
+    timerBar.style.width = (pct*100) + "%";
+    timerBar.style.background = pct < 0.25 ? "#ff4757" : "#ffd93d";
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+      loseLife();
+      if (state === "playing") startRound();
+    }
+
+    if (targetRemaining === 0 && state === "playing") {
+      state = "roundEnd";
+      completeRound();
+    }
+  }
+
+  function render() {
+    drawMaze();
+    const bob = mouthPhase;
+    fruits.forEach(f => drawFruit(f, bob + f.row));
+    enemies.forEach(e => drawEnemy(e));
+    if (player) drawPlayer();
+  }
+
+  // ---------- Overlay wiring ----------
+  document.getElementById("startBtn").addEventListener("click", () => {
+    startOverlay.classList.add("hidden");
+    roundIndex = 0; score = 0; lives = START_LIVES;
+    startRound();
+    state = "playing";
+    updateHUD();
+  });
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    roundOverlay.classList.add("hidden");
+    roundIndex++;
+    startRound();
+    state = "playing";
+  });
+
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    gameOverOverlay.classList.add("hidden");
+    roundIndex = 0; score = 0; lives = START_LIVES;
+    startRound();
+    state = "playing";
+    updateHUD();
+  });
+
+  updateHUD();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
