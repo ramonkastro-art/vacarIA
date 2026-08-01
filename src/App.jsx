@@ -646,7 +646,7 @@ function GamesPage() {
     { href: "/game-whos-door.html",       icon: "🚪", name: "Who's at the Door?", desc: "Adivinhe a profissão antes do tempo. Multijogador!",                tag: "🌐 Multiplayer" },
     { href: "/game-english-quest.html",   icon: "🦊", name: "English Quest Kids", desc: "Flashcards, Quiz, Memória e Ordem em inglês.",                      tag: "🎮 4 jogos" },
     { href: "/game-verb-shooter.html",    icon: "🎯", name: "Grammar Shooter",    desc: "Atire na Classe Gramatical e não cometa erros nessa aventura!",     tag: "🔫 Port. e Inglês" },
-    { href: "/color-chase.html",          icon: "🎨", name: "Color Chase",        desc: "Corra atrás das cores certas em inglês! Reflexo e vocabulário.",    tag: "🌈 Solo · Cores" },
+    { href: "/color-chase.html",          icon: "🎨", name: "Color Chase",        desc: "Corra atrás das cores certas em inglês! Reflexo e vocabulário.",    tag: "👻 Solo · Cores" },
     { href: "/game-adjective-snake.html", icon: "🐍", name: "Adjective Snake",    desc: "Coma adjetivos bons e fuja dos ruins! O clássico Snake está de volta.", tag: "👾 Port. e Inglês" },
   ];
 

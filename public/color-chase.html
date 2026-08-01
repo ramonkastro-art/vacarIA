@@ -21,45 +21,68 @@
     background: radial-gradient(ellipse at top, #2a1a4a 0%, #140a28 70%);
     font-family:'Nunito', sans-serif;
     color:var(--cream);
-    overflow-x:hidden;
+    overflow:hidden;
     -webkit-tap-highlight-color: transparent;
   }
   #app{
     max-width:560px;
     margin:0 auto;
-    padding:14px 14px 24px;
+    padding:8px 10px;
     display:flex;
     flex-direction:column;
     align-items:center;
-    min-height:100vh;
+    height:100vh;
+    height:100dvh;
+    overflow:hidden;
+    position:relative;
+  }
+  #muteBtn{
+    position:absolute;
+    top:6px;
+    right:6px;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.1);
+    border:2px solid rgba(255,255,255,0.25);
+    color:var(--cream);
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:20;
   }
   h1{
     font-family:'Baloo 2', sans-serif;
     font-weight:800;
-    font-size:clamp(22px,6vw,32px);
-    margin:6px 0 2px;
+    font-size:clamp(18px,5vw,30px);
+    margin:2px 0 0;
     text-align:center;
     color:var(--gold);
     text-shadow: 0 3px 0 rgba(0,0,0,0.35);
     letter-spacing:0.5px;
+    flex-shrink:0;
   }
   .subtitle{
-    font-size:13px;
+    font-size:12px;
     color:#c9b8ef;
-    margin-bottom:12px;
+    margin-bottom:6px;
     text-align:center;
+    flex-shrink:0;
   }
 
   #hud{
     width:100%;
     display:flex;
     gap:8px;
-    margin-bottom:10px;
+    margin-bottom:6px;
+    flex-shrink:0;
   }
   .flashcard{
     flex:1;
-    border-radius:14px;
-    padding:8px 10px;
+    border-radius:12px;
+    padding:5px 8px;
     font-family:'Baloo 2', sans-serif;
     text-align:center;
     border:3px solid rgba(0,0,0,0.25);
@@ -69,14 +92,14 @@
   .flashcard .eyebrow{
     font-family:'Nunito', sans-serif;
     font-weight:800;
-    font-size:10px;
-    letter-spacing:1.5px;
+    font-size:9px;
+    letter-spacing:1.2px;
     opacity:0.85;
   }
   .flashcard .word{
-    font-size:clamp(16px,4.6vw,22px);
+    font-size:clamp(15px,4vw,21px);
     font-weight:800;
-    line-height:1.15;
+    line-height:1.1;
     text-transform:uppercase;
   }
   .flashcard .pt{
@@ -98,9 +121,10 @@
     align-items:center;
     font-family:'Baloo 2', sans-serif;
     font-weight:700;
-    font-size:14px;
-    margin-bottom:8px;
+    font-size:13px;
+    margin-bottom:6px;
     padding:0 2px;
+    flex-shrink:0;
   }
   #lives{ letter-spacing:2px; }
   #timerWrap{
@@ -119,19 +143,27 @@
     transition:width 0.2s linear, background 0.3s;
   }
 
+  #canvasArea{
+    flex:1 1 auto;
+    min-height:0;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
   #canvasWrap{
     position:relative;
-    width:100%;
-    max-width:476px;
     border-radius:10px;
     overflow:hidden;
     box-shadow: 0 8px 0 rgba(0,0,0,0.35), 0 8px 30px rgba(0,0,0,0.5);
     border:4px solid var(--wall);
+    flex-shrink:0;
   }
   canvas{
     display:block;
     width:100%;
-    height:auto;
+    height:100%;
     background:var(--bg-deep);
   }
 
@@ -185,28 +217,60 @@
     transition:transform 0.05s;
   }
   .btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #c9a400; }
+  .btn-secret{
+    background:linear-gradient(90deg,#ff4757,#ffd93d,#22c55e,#3b82f6,#a855f7);
+    background-size:300% 100%;
+    animation:rainbowShift 4s linear infinite;
+    color:#1b1035;
+    font-size:14px;
+    padding:9px 18px;
+    box-shadow:0 4px 0 rgba(0,0,0,0.35);
+  }
+  .btn-secret:active{ box-shadow:0 1px 0 rgba(0,0,0,0.35); }
+  @keyframes rainbowShift{
+    0%{ background-position:0% 50%; }
+    100%{ background-position:300% 50%; }
+  }
+  body.legendary #canvasWrap{ border-color:#ffd93d; box-shadow:0 8px 0 rgba(0,0,0,0.35), 0 0 24px rgba(255,217,61,0.55); }
+  #legendaryBadge{
+    display:none;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:11px;
+    letter-spacing:1px;
+    color:#1b1035;
+    background:linear-gradient(90deg,#ffd93d,#f472b6);
+    border-radius:8px;
+    padding:2px 8px;
+    margin-bottom:4px;
+  }
+  body.legendary #legendaryBadge{ display:inline-block; }
   .hidden{ display:none !important; }
 
   #dpad{
     display:none;
-    margin-top:16px;
-    grid-template-columns:56px 56px 56px;
-    grid-template-rows:56px 56px 56px;
-    gap:6px;
+    position:fixed;
+    left:10px;
+    bottom:10px;
+    grid-template-columns:50px 50px 50px;
+    grid-template-rows:50px 50px 50px;
+    gap:5px;
+    z-index:15;
   }
   @media (pointer:coarse){
     #dpad{ display:grid; }
   }
   .padbtn{
-    background:rgba(255,255,255,0.1);
-    border:2px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.12);
+    border:2px solid rgba(255,255,255,0.3);
     border-radius:12px;
     color:var(--cream);
-    font-size:22px;
+    font-size:20px;
     display:flex;
     align-items:center;
     justify-content:center;
     user-select:none;
+    backdrop-filter: blur(2px);
   }
   .padbtn:active{ background:rgba(255,217,61,0.35); }
   #pad-up{ grid-column:2; grid-row:1; }
@@ -231,16 +295,25 @@
     white-space:nowrap;
   }
   .footer-note{
-    font-size:11px;
+    font-size:10px;
     color:#8a78b5;
-    margin-top:14px;
+    margin-top:4px;
     text-align:center;
+    flex-shrink:0;
+  }
+  @media (max-height:680px), (pointer:coarse){
+    .footer-note{ display:none; }
+  }
+  @media (max-height:520px){
+    .subtitle{ display:none; }
   }
 </style>
 </head>
 <body>
 <div id="app">
+  <button id="muteBtn" title="Som">🔊</button>
   <h1>🎓 Color Chase</h1>
+  <div id="legendaryBadge">🌟 MODO LENDÁRIO — 1 VIDA</div>
   <div class="subtitle">Coma só a cor certa em inglês e fuja dos perseguidores!</div>
 
   <div id="hud">
@@ -262,6 +335,7 @@
     <div id="lives">❤️❤️❤️</div>
   </div>
 
+  <div id="canvasArea">
   <div id="canvasWrap">
     <canvas id="game" width="476" height="532"></canvas>
 
@@ -271,12 +345,36 @@
       <p>Tem frutinhas de <strong>várias cores</strong> espalhadas. Coma <strong>somente</strong> a cor indicada no card EAT!</p>
       <p>Comeu a cor errada? Você fica <strong>tonto</strong> por alguns segundos — e os <strong>👻 perseguidores</strong> podem te pegar enquanto isso!</p>
       <button class="btn" id="startBtn">JOGAR ▶</button>
+      <button class="btn btn-secret hidden" id="secretBtnStart">🌈 DESAFIO LENDÁRIO ▶</button>
     </div>
 
     <div class="overlay hidden" id="roundOverlay">
       <h2 id="roundTitle">Round Complete!</h2>
       <p id="roundText"></p>
       <button class="btn" id="nextBtn">CONTINUAR ▶</button>
+    </div>
+
+    <div class="overlay hidden" id="victoryOverlay">
+      <h2>🏆 Você é um CAMPEÃO! 🏆</h2>
+      <p>Você aprendeu todas as 8 cores em inglês e completou o Color Chase!</p>
+      <p id="victoryScoreText" style="font-weight:800;color:var(--gold);"></p>
+      <button class="btn" id="playAgainBtn">JOGAR NOVAMENTE ▶</button>
+      <button class="btn btn-secret" id="secretBtn">✨ Desbloqueei um desafio secreto! Tentar? ✨</button>
+    </div>
+
+    <div class="overlay hidden" id="legendaryWinOverlay">
+      <h2>🌈 LENDA DAS CORES! 🌈</h2>
+      <p>Você comeu as <strong>8 cores em inglês</strong>, em sequência, sem pausas — <strong>com apenas 1 vida</strong>. Isso é maestria de verdade!</p>
+      <p id="legendaryScoreText" style="font-weight:800;color:var(--gold);"></p>
+      <button class="btn" id="legendaryPlayAgainBtn">JOGAR NOVAMENTE ▶</button>
+    </div>
+
+    <div class="overlay hidden" id="legendaryFailOverlay">
+      <h2>Quase lá, herói! 💪</h2>
+      <p id="legendaryFailText"></p>
+      <p>No Desafio Lendário você tem só <strong>1 vida</strong> — sem chances extras. Bora tentar de novo?</p>
+      <button class="btn" id="legendaryRetryBtn">TENTAR DE NOVO ▶</button>
+      <button class="btn" id="legendaryBackBtn" style="background:transparent;color:var(--cream);box-shadow:none;">Voltar ao modo normal</button>
     </div>
 
     <div class="overlay hidden" id="gameOverOverlay">
@@ -287,6 +385,7 @@
     </div>
 
     <div class="toast" id="toast"></div>
+  </div>
   </div>
 
   <div id="dpad">
@@ -306,6 +405,21 @@
   // ---------- Config ----------
   const COLS = 17, ROWS = 19, CELL = 28;
   const CANVAS_W = COLS * CELL, CANVAS_H = ROWS * CELL;
+  const ASPECT = CANVAS_W / CANVAS_H;
+
+  const canvasArea = document.getElementById("canvasArea");
+  const canvasWrapEl = document.getElementById("canvasWrap");
+  function fitCanvas() {
+    const availW = canvasArea.clientWidth;
+    const availH = canvasArea.clientHeight;
+    if (availW <= 0 || availH <= 0) return;
+    let w = availW, h = w / ASPECT;
+    if (h > availH) { h = availH; w = h * ASPECT; }
+    canvasWrapEl.style.width = Math.floor(w) + "px";
+    canvasWrapEl.style.height = Math.floor(h) + "px";
+  }
+  window.addEventListener("resize", fitCanvas);
+  window.addEventListener("orientationchange", () => setTimeout(fitCanvas, 100));
 
   const PALETTE = [
     { key:"yellow", en:"yellow", pt:"amarelo", hex:"#ffd93d" },
@@ -452,14 +566,22 @@
   let roundIndex = 0;
   let score = 0;
   let lives = START_LIVES;
+  let maxLives = START_LIVES;
+  let legendaryMode = false;
   let timeLeft = ROUND_TIME;
   let player, enemies = [], fruits = [];
   let mouthPhase = 0;
   let invuln = 0;
   let stunTimer = 0;
+  let timeSinceLastEat = 0;
+  const STALL_THRESHOLD = 9;   // seconds without eating a correct fruit before ghosts start speeding up
+  const STALL_RAMP = 0.045;    // speed multiplier added per second beyond the threshold
+  const STALL_MAX_BOOST = 0.3; // cap: ghosts can get at most 30% faster from stalling
   let bestScore = 0;
+  let legendaryUnlocked = false;
   let targetColor = PALETTE[0];
   try { bestScore = parseInt(localStorage.getItem("colorChaseBest") || "0", 10); } catch(e) { bestScore = 0; }
+  try { legendaryUnlocked = localStorage.getItem("colorChaseLegendaryUnlocked") === "1"; } catch(e) { legendaryUnlocked = false; }
 
   const eatWordEl = document.getElementById("eatWord");
   const eatWordPtEl = document.getElementById("eatWordPt");
@@ -470,13 +592,18 @@
   const startOverlay = document.getElementById("startOverlay");
   const roundOverlay = document.getElementById("roundOverlay");
   const gameOverOverlay = document.getElementById("gameOverOverlay");
+  const victoryOverlay = document.getElementById("victoryOverlay");
+  const legendaryWinOverlay = document.getElementById("legendaryWinOverlay");
+  const legendaryFailOverlay = document.getElementById("legendaryFailOverlay");
+  const secretBtnStart = document.getElementById("secretBtnStart");
+  if (legendaryUnlocked) secretBtnStart.classList.remove("hidden");
 
   function updateHUD() {
     eatWordEl.textContent = targetColor.en;
     eatWordPtEl.textContent = targetColor.pt;
     document.querySelector(".card-eat .word").style.color = targetColor.hex;
     scoreDisplay.textContent = "Score: " + score;
-    livesEl.textContent = "❤️".repeat(Math.max(lives,0)) + "🖤".repeat(Math.max(START_LIVES-lives,0));
+    livesEl.textContent = "❤️".repeat(Math.max(lives,0)) + "🖤".repeat(Math.max(maxLives-lives,0));
   }
 
   function showToast(html, color, duration) {
@@ -494,9 +621,9 @@
   }
 
   function difficultyForRound(idx) {
-    const enemySpeed = Math.min(2.4 + idx * 0.22, 4.4) * CELL;
-    const enemyCount = Math.min(2 + Math.floor(idx / 3), 4);
-    const colorCount = Math.min(3 + Math.floor(idx / 2), PALETTE.length);
+    const enemySpeed = Math.min(2.1 + idx * 0.13, 3.4) * CELL;
+    const enemyCount = Math.min(2 + Math.floor(idx / 4), 3);
+    const colorCount = Math.min(3 + Math.floor(idx / 3), PALETTE.length);
     return { enemySpeed, enemyCount, colorCount };
   }
 
@@ -510,7 +637,7 @@
 
   function startRound() {
     targetColor = PALETTE[roundIndex % PALETTE.length];
-    const diff = difficultyForRound(roundIndex);
+    const diff = legendaryMode ? difficultyForRound(PALETTE.length - 1) : difficultyForRound(roundIndex);
 
     const playerStart = [17, 8];
     player = new Mover(playerStart[0], playerStart[1], 4.6 * CELL);
@@ -520,9 +647,11 @@
     for (let i = 0; i < diff.enemyCount; i++) {
       const s = enemyStarts[i % enemyStarts.length];
       const e = new Mover(s[0], s[1], diff.enemySpeed);
+      e.baseSpeed = diff.enemySpeed;
       e.dir = ["left","right","up","down"][i % 4];
       enemies.push(e);
     }
+    timeSinceLastEat = 0;
 
     // pick which colors appear this round (always include target)
     const others = PALETTE.filter(c => c.key !== targetColor.key);
@@ -558,18 +687,22 @@
     lives--;
     invuln = 1.6;
     stunTimer = 0;
+    timeSinceLastEat = 0;
     updateHUD();
     showToast("Ops! 😵", "#ff4757", 0.8);
-    playTone(140, 0.25, "sawtooth");
     player.gridRow = 17; player.gridCol = 8; player.progress = 0;
     player.dir = "none"; player.wantDir = "none";
     if (lives <= 0) {
-      endGame();
+      if (legendaryMode) { failLegendary(); } else { endGame(); }
+    } else {
+      playLoseLifeSound();
     }
   }
 
   function endGame() {
     state = "gameOver";
+    stopMusic();
+    playGameOverSound();
     if (score > bestScore) {
       bestScore = score;
       try { localStorage.setItem("colorChaseBest", String(bestScore)); } catch(e) {}
@@ -580,8 +713,27 @@
   }
 
   function completeRound() {
-    state = "roundEnd";
     score += 50;
+
+    if (legendaryMode) {
+      if (roundIndex + 1 >= PALETTE.length) {
+        winLegendary();
+        return;
+      }
+      roundIndex++;
+      const next = PALETTE[roundIndex % PALETTE.length];
+      showToast("Next: " + next.en.toUpperCase() + "! 🌈", next.hex, 1.1);
+      startRound();
+      state = "playing";
+      updateHUD();
+      return;
+    }
+
+    if (roundIndex + 1 >= PALETTE.length) {
+      winGame();
+      return;
+    }
+    state = "roundEnd";
     const next = PALETTE[(roundIndex+1) % PALETTE.length];
     document.getElementById("roundTitle").textContent = "Great job! 🎉";
     document.getElementById("roundText").innerHTML =
@@ -591,22 +743,170 @@
     updateHUD();
   }
 
+  function winGame() {
+    state = "won";
+    stopMusic();
+    playVictorySound();
+    if (score > bestScore) {
+      bestScore = score;
+      try { localStorage.setItem("colorChaseBest", String(bestScore)); } catch(e) {}
+    }
+    document.getElementById("victoryScoreText").textContent =
+      "Pontuação final: " + score + (score >= bestScore ? " — novo recorde! 🌟" : " · Recorde: " + bestScore);
+    victoryOverlay.classList.remove("hidden");
+    updateHUD();
+    if (!legendaryUnlocked) {
+      legendaryUnlocked = true;
+      try { localStorage.setItem("colorChaseLegendaryUnlocked", "1"); } catch(e) {}
+      secretBtnStart.classList.remove("hidden");
+    }
+  }
+
+  function enterLegendary() {
+    legendaryMode = true;
+    document.body.classList.add("legendary");
+    roundIndex = 0; score = 0; maxLives = 1; lives = 1;
+    startRound();
+    state = "playing";
+    updateHUD();
+    if (musicOn) startMusic();
+  }
+
+  function winLegendary() {
+    state = "won";
+    stopMusic();
+    playVictorySound();
+    if (score > bestScore) {
+      bestScore = score;
+      try { localStorage.setItem("colorChaseBest", String(bestScore)); } catch(e) {}
+    }
+    document.getElementById("legendaryScoreText").textContent =
+      "Pontuação final: " + score + " · Recorde: " + bestScore;
+    legendaryWinOverlay.classList.remove("hidden");
+    updateHUD();
+  }
+
+  function failLegendary() {
+    state = "gameOver";
+    stopMusic();
+    playGameOverSound();
+    document.getElementById("legendaryFailText").innerHTML =
+      "Você chegou até a cor <strong style='color:"+targetColor.hex+"'>"+targetColor.en.toUpperCase()+"</strong> (" + targetColor.pt + ").";
+    legendaryFailOverlay.classList.remove("hidden");
+  }
+
+
+
   // ---------- Audio ----------
   let audioCtx = null;
-  function playTone(freq, dur, type) {
+  function playTone(freq, dur, type, volume) {
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
       o.type = type || "square";
       o.frequency.value = freq;
-      g.gain.value = 0.06;
+      g.gain.value = volume != null ? volume : 0.06;
       o.connect(g); g.connect(audioCtx.destination);
       o.start();
       g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
       o.stop(audioCtx.currentTime + dur + 0.02);
     } catch(e) {}
   }
+
+  // Three original sound effects (not reproductions of any existing game's
+  // audio) built with simple oscillator frequency sweeps/sequences, in the
+  // same spirit as classic arcade stingers.
+
+  // "Ficar tonto" — a wobbly up-down siren, like cartoon dizzy stars.
+  function playDizzySound() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "sine";
+      const t0 = audioCtx.currentTime;
+      o.frequency.setValueAtTime(700, t0);
+      o.frequency.exponentialRampToValueAtTime(320, t0 + 0.15);
+      o.frequency.exponentialRampToValueAtTime(700, t0 + 0.3);
+      o.frequency.exponentialRampToValueAtTime(320, t0 + 0.45);
+      g.gain.value = 0.05;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t0);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.55);
+      o.stop(t0 + 0.57);
+    } catch(e) {}
+  }
+
+  // "Perder uma vida" (still has lives left) — a quick downward glide.
+  function playLoseLifeSound() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "sawtooth";
+      const t0 = audioCtx.currentTime;
+      o.frequency.setValueAtTime(520, t0);
+      o.frequency.exponentialRampToValueAtTime(90, t0 + 0.55);
+      g.gain.value = 0.07;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t0);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+      o.stop(t0 + 0.62);
+    } catch(e) {}
+  }
+
+  // "Game Over" — a short descending melody ending on a held low note.
+  function playGameOverSound() {
+    const notes = [392, 349, 330, 294, 262];
+    notes.forEach((f, i) => {
+      const isLast = i === notes.length - 1;
+      setTimeout(() => playTone(f, isLast ? 0.6 : 0.2, "triangle", 0.07), i * 210);
+    });
+  }
+
+  // "Campeão" — fanfarra ascendente animada de vitória.
+  function playVictorySound() {
+    const notes = [523, 659, 784, 1047, 784, 1047];
+    notes.forEach((f, i) => {
+      const isLast = i === notes.length - 1;
+      setTimeout(() => playTone(f, isLast ? 0.5 : 0.16, "square", 0.07), i * 140);
+    });
+  }
+
+  // Original retro arcade-style loop (not a reproduction of any existing
+  // copyrighted composition) — a cheerful chiptune arpeggio at low volume,
+  // plus a soft alternating bass note underneath.
+  const MUSIC_BPM = 152;
+  const NOTE_DUR = 60 / MUSIC_BPM / 2;
+  const MELODY = [523,659,784,659, 587,698,880,698, 523,659,784,880, 784,659,587,494];
+  let musicOn = true;
+  let musicInterval = null;
+  let musicIndex = 0;
+  const muteBtn = document.getElementById("muteBtn");
+
+  function playMusicStep() {
+    if (!musicOn) return;
+    const freq = MELODY[musicIndex % MELODY.length];
+    playTone(freq, NOTE_DUR * 0.85, "square", 0.028);
+    if (musicIndex % 4 === 0) {
+      playTone(freq / 4, NOTE_DUR * 3.5, "triangle", 0.02);
+    }
+    musicIndex++;
+  }
+  function startMusic() {
+    if (musicInterval) return;
+    musicIndex = 0;
+    musicInterval = setInterval(playMusicStep, NOTE_DUR * 1000);
+  }
+  function stopMusic() {
+    if (musicInterval) { clearInterval(musicInterval); musicInterval = null; }
+  }
+  muteBtn.addEventListener("click", () => {
+    musicOn = !musicOn;
+    muteBtn.textContent = musicOn ? "🔊" : "🔇";
+    if (musicOn && state === "playing") startMusic(); else if (!musicOn) stopMusic();
+  });
 
   // ---------- Input ----------
   const keyMap = {
@@ -655,12 +955,17 @@
 
   // ---------- Drawing ----------
   function drawMaze() {
-    ctx.fillStyle = "#1b1035";
+    ctx.fillStyle = legendaryMode ? "#0a0518" : "#1b1035";
     ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
-    ctx.fillStyle = "#ff6b4a";
+    const t = performance.now() / 1000;
+    if (!legendaryMode) ctx.fillStyle = "#ff6b4a";
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         if (maze[r][c] === 1) {
+          if (legendaryMode) {
+            const hue = (t * 45 + (r + c) * 14) % 360;
+            ctx.fillStyle = "hsl(" + hue + ",85%,62%)";
+          }
           ctx.fillRect(c*CELL+1, r*CELL+1, CELL-2, CELL-2);
         }
       }
@@ -772,6 +1077,10 @@
     mouthPhase += dt * 8;
     if (invuln > 0) invuln = Math.max(0, invuln - dt);
 
+    timeSinceLastEat += dt;
+    const adaptiveBoost = Math.min(STALL_MAX_BOOST, Math.max(0, (timeSinceLastEat - STALL_THRESHOLD) * STALL_RAMP));
+    enemies.forEach(e => { e.speed = e.baseSpeed * (1 + adaptiveBoost); });
+
     if (stunTimer > 0) {
       stunTimer = Math.max(0, stunTimer - dt);
     } else {
@@ -792,12 +1101,13 @@
           if (f.color.key === targetColor.key) {
             targetRemaining--;
             score += 10;
+            timeSinceLastEat = 0;
             playTone(660, 0.08, "square");
             showToast(f.color.en.toUpperCase() + "! ✅", f.color.hex, 0.6);
           } else {
             score = Math.max(0, score - 5);
             stunTimer = STUN_TIME;
-            playTone(180, 0.3, "triangle");
+            playDizzySound();
             showToast("Oops, that's " + f.color.en.toUpperCase() + "!<br>You wanted " + targetColor.en.toUpperCase(), f.color.hex, 1.1);
           }
           updateHUD();
@@ -839,12 +1149,20 @@
   }
 
   // ---------- Overlay wiring ----------
+  function resetToNormalMode() {
+    legendaryMode = false;
+    maxLives = START_LIVES;
+    document.body.classList.remove("legendary");
+  }
+
   document.getElementById("startBtn").addEventListener("click", () => {
     startOverlay.classList.add("hidden");
+    resetToNormalMode();
     roundIndex = 0; score = 0; lives = START_LIVES;
     startRound();
     state = "playing";
     updateHUD();
+    if (musicOn) startMusic();
   });
 
   document.getElementById("nextBtn").addEventListener("click", () => {
@@ -856,12 +1174,60 @@
 
   document.getElementById("restartBtn").addEventListener("click", () => {
     gameOverOverlay.classList.add("hidden");
+    resetToNormalMode();
     roundIndex = 0; score = 0; lives = START_LIVES;
     startRound();
     state = "playing";
     updateHUD();
+    if (musicOn) startMusic();
   });
 
+  document.getElementById("playAgainBtn").addEventListener("click", () => {
+    victoryOverlay.classList.add("hidden");
+    resetToNormalMode();
+    roundIndex = 0; score = 0; lives = START_LIVES;
+    startRound();
+    state = "playing";
+    updateHUD();
+    if (musicOn) startMusic();
+  });
+
+  document.getElementById("secretBtn").addEventListener("click", () => {
+    victoryOverlay.classList.add("hidden");
+    enterLegendary();
+  });
+
+  secretBtnStart.addEventListener("click", () => {
+    startOverlay.classList.add("hidden");
+    enterLegendary();
+  });
+
+  document.getElementById("legendaryPlayAgainBtn").addEventListener("click", () => {
+    legendaryWinOverlay.classList.add("hidden");
+    resetToNormalMode();
+    roundIndex = 0; score = 0; lives = START_LIVES;
+    startRound();
+    state = "playing";
+    updateHUD();
+    if (musicOn) startMusic();
+  });
+
+  document.getElementById("legendaryRetryBtn").addEventListener("click", () => {
+    legendaryFailOverlay.classList.add("hidden");
+    enterLegendary();
+  });
+
+  document.getElementById("legendaryBackBtn").addEventListener("click", () => {
+    legendaryFailOverlay.classList.add("hidden");
+    resetToNormalMode();
+    roundIndex = 0; score = 0; lives = START_LIVES;
+    startRound();
+    state = "playing";
+    updateHUD();
+    if (musicOn) startMusic();
+  });
+
+  fitCanvas();
   updateHUD();
   requestAnimationFrame(loop);
 })();
