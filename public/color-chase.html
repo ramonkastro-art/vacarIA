@@ -573,6 +573,20 @@
   let mouthPhase = 0;
   let invuln = 0;
   let stunTimer = 0;
+  let powerTimer = 0;
+  let starRounds = new Set();
+  const POWER_DURATION = 7;   // seconds ghosts stay "scared" and edible
+  const POWER_WARN_TIME = 2.5; // last seconds where ghosts flash faster as a warning
+  const POWER_SPEED_FACTOR = 0.55; // ghosts move slower while scared
+
+  // Picks 3-4 rounds (out of rounds 2-8) that will feature the power star,
+  // re-rolled at the start of every fresh 8-round run.
+  function pickStarRounds() {
+    const pool = [1,2,3,4,5,6,7];
+    shuffle(pool);
+    const count = 3 + Math.floor(Math.random() * 2); // 3 or 4
+    starRounds = new Set(pool.slice(0, count));
+  }
   let timeSinceLastEat = 0;
   const STALL_THRESHOLD = 9;   // seconds without eating a correct fruit before ghosts start speeding up
   const STALL_RAMP = 0.045;    // speed multiplier added per second beyond the threshold
@@ -636,6 +650,7 @@
   }
 
   function startRound() {
+    if (roundIndex === 0) pickStarRounds();
     targetColor = PALETTE[roundIndex % PALETTE.length];
     const diff = legendaryMode ? difficultyForRound(PALETTE.length - 1) : difficultyForRound(roundIndex);
 
@@ -652,6 +667,7 @@
       enemies.push(e);
     }
     timeSinceLastEat = 0;
+    powerTimer = 0;
 
     // pick which colors appear this round (always include target)
     const others = PALETTE.filter(c => c.key !== targetColor.key);
@@ -676,6 +692,20 @@
       }
     });
     shuffle(fruits);
+
+    // Power star: rare pickup that lets the player eat ghosts for a few
+    // seconds. Only appears in 3-4 of the 8 rounds per run (never the
+    // first, so beginners learn the core rules before this shows up).
+    if (starRounds.has(roundIndex) && ptr < candidates.length) {
+      const farCandidates = candidates.slice(ptr).filter(([r,c]) => {
+        const dist = Math.abs(r-playerStart[0]) + Math.abs(c-playerStart[1]);
+        return dist > 5;
+      });
+      const pick = (farCandidates.length ? farCandidates : candidates.slice(ptr))[0];
+      if (pick) {
+        fruits.push({ row:pick[0], col:pick[1], eaten:false, power:true });
+      }
+    }
 
     timeLeft = ROUND_TIME;
     invuln = 1.2;
@@ -874,6 +904,32 @@
     });
   }
 
+  // Power star pickup — a bright ascending sparkle.
+  function playPowerUpSound() {
+    const notes = [392, 494, 587, 784];
+    notes.forEach((f, i) => {
+      setTimeout(() => playTone(f, 0.14, "square", 0.06), i * 80);
+    });
+  }
+
+  // Eating a scared ghost — a quick punchy "gulp".
+  function playEatGhostSound() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "square";
+      const t0 = audioCtx.currentTime;
+      o.frequency.setValueAtTime(880, t0);
+      o.frequency.exponentialRampToValueAtTime(220, t0 + 0.18);
+      g.gain.value = 0.07;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t0);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.2);
+      o.stop(t0 + 0.22);
+    } catch(e) {}
+  }
+
   // Original retro arcade-style loop (not a reproduction of any existing
   // copyrighted composition) — a cheerful chiptune arpeggio at low volume,
   // plus a soft alternating bass note underneath.
@@ -951,6 +1007,35 @@
     return choices[Math.floor(Math.random() * choices.length)];
   }
 
+  // Used while the power star is active: ghosts run away from the player
+  // instead of chasing.
+  function enemyFlee(mover) {
+    const opts = ["up","down","left","right"].filter(d => mover.canGo(d));
+    const reverse = {up:"down",down:"up",left:"right",right:"left"}[mover.dir];
+    let choices = opts.filter(d => d !== reverse);
+    if (choices.length === 0) choices = opts;
+    if (choices.length === 0) return mover.dir;
+    if (Math.random() < 0.75 && player) {
+      let best = choices[0], bestDist = -Infinity;
+      choices.forEach(d => {
+        const dd = DIRS[d];
+        const nr = mover.row + dd.dr, nc = mover.col + dd.dc;
+        const dist = Math.abs(nr - player.row) + Math.abs(nc - player.col);
+        if (dist > bestDist) { bestDist = dist; best = d; }
+      });
+      return best;
+    }
+    return choices[Math.floor(Math.random() * choices.length)];
+  }
+
+  function eatGhost(e) {
+    enemies = enemies.filter(en => en !== e);
+    score += 100;
+    playEatGhostSound();
+    showToast("+100 👻", "#ffd93d", 0.6);
+    updateHUD();
+  }
+
   function playerDecide(mover) { return mover.wantDir; }
 
   // ---------- Drawing ----------
@@ -975,6 +1060,40 @@
   function drawFruit(f, bob) {
     if (f.eaten) return;
     const p = cellCenter(f.row, f.col);
+
+    if (f.power) {
+      const pulse = 1 + Math.sin(bob*2.2) * 0.15;
+      const r = CELL * 0.3 * pulse;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(bob*0.5);
+      // soft glow
+      const glow = ctx.createRadialGradient(0,0,0,0,0,r*2.2);
+      glow.addColorStop(0, "rgba(255,217,61,0.55)");
+      glow.addColorStop(1, "rgba(255,217,61,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(0,0,r*2.2,0,Math.PI*2); ctx.fill();
+      // 5-point star
+      ctx.fillStyle = "#fff6d8";
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const outerA = -Math.PI/2 + i*(Math.PI*2/5);
+        const innerA = outerA + Math.PI/5;
+        const ox = Math.cos(outerA)*r, oy = Math.sin(outerA)*r;
+        const ix = Math.cos(innerA)*r*0.45, iy = Math.sin(innerA)*r*0.45;
+        if (i === 0) ctx.moveTo(ox, oy); else ctx.lineTo(ox, oy);
+        ctx.lineTo(ix, iy);
+      }
+      ctx.closePath();
+      ctx.fillStyle = "#ffd93d";
+      ctx.fill();
+      ctx.strokeStyle = "#fff6d8";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
     const r = CELL*0.26;
     ctx.save();
     ctx.translate(p.x, p.y + Math.sin(bob)*1.4);
@@ -1005,9 +1124,11 @@
 
   function drawEnemy(e) {
     const r = CELL*0.42;
+    const scared = powerTimer > 0;
+    const flashing = scared && powerTimer < POWER_WARN_TIME && Math.floor(powerTimer*8) % 2 === 0;
     ctx.save();
     ctx.translate(e.x, e.y);
-    ctx.fillStyle = "rgba(91,75,138,0.92)";
+    ctx.fillStyle = scared ? (flashing ? "rgba(255,255,255,0.95)" : "rgba(43,58,145,0.95)") : "rgba(91,75,138,0.92)";
     ctx.beginPath();
     ctx.arc(0, -r*0.1, r, Math.PI, 0);
     ctx.lineTo(r, r*0.7);
@@ -1018,13 +1139,28 @@
     ctx.lineTo(-r, r*0.7);
     ctx.closePath();
     ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.beginPath(); ctx.arc(-r*0.32,-r*0.15,r*0.24,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(r*0.32,-r*0.15,r*0.24,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = "#ff4757";
-    const eyeDx = DIRS[e.dir].dc * r*0.12, eyeDy = DIRS[e.dir].dr * r*0.12;
-    ctx.beginPath(); ctx.arc(-r*0.32+eyeDx, -r*0.15+eyeDy, r*0.12, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(r*0.32+eyeDx, -r*0.15+eyeDy, r*0.12, 0, Math.PI*2); ctx.fill();
+    if (scared) {
+      // scared face: small dot eyes, wavy worried mouth
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(-r*0.32,-r*0.15,r*0.14,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(r*0.32,-r*0.15,r*0.14,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-r*0.4, r*0.25);
+      for (let i = 0; i <= 4; i++) {
+        ctx.lineTo(-r*0.4 + i*(r*0.8/4), r*0.25 + (i%2===0?0:-r*0.12));
+      }
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(-r*0.32,-r*0.15,r*0.24,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(r*0.32,-r*0.15,r*0.24,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#ff4757";
+      const eyeDx = DIRS[e.dir].dc * r*0.12, eyeDy = DIRS[e.dir].dr * r*0.12;
+      ctx.beginPath(); ctx.arc(-r*0.32+eyeDx, -r*0.15+eyeDy, r*0.12, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(r*0.32+eyeDx, -r*0.15+eyeDy, r*0.12, 0, Math.PI*2); ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -1076,22 +1212,38 @@
   function update(dt) {
     mouthPhase += dt * 8;
     if (invuln > 0) invuln = Math.max(0, invuln - dt);
+    if (powerTimer > 0) powerTimer = Math.max(0, powerTimer - dt);
 
     timeSinceLastEat += dt;
     const adaptiveBoost = Math.min(STALL_MAX_BOOST, Math.max(0, (timeSinceLastEat - STALL_THRESHOLD) * STALL_RAMP));
-    enemies.forEach(e => { e.speed = e.baseSpeed * (1 + adaptiveBoost); });
+    enemies.forEach(e => {
+      e.speed = powerTimer > 0 ? e.baseSpeed * POWER_SPEED_FACTOR : e.baseSpeed * (1 + adaptiveBoost);
+    });
 
     if (stunTimer > 0) {
       stunTimer = Math.max(0, stunTimer - dt);
     } else {
       player.step(dt, playerDecide);
     }
-    enemies.forEach(e => e.step(dt, enemyDecide));
+    enemies.forEach(e => e.step(dt, powerTimer > 0 ? enemyFlee : enemyDecide));
 
     // fruit pickup
     let targetRemaining = 0;
     fruits.forEach(f => {
       if (f.eaten) return;
+      if (f.power) {
+        if (player.row === f.row && player.col === f.col) {
+          const dx = player.x - cellCenter(f.row, f.col).x;
+          const dy = player.y - cellCenter(f.row, f.col).y;
+          if (Math.hypot(dx,dy) < CELL*0.5) {
+            f.eaten = true;
+            powerTimer = POWER_DURATION;
+            playPowerUpSound();
+            showToast("POWER UP! 🌟<br>Eat the ghosts!", "#ffd93d", 1.0);
+          }
+        }
+        return;
+      }
       if (f.color.key === targetColor.key) targetRemaining++;
       if (player.row === f.row && player.col === f.col) {
         const dx = player.x - cellCenter(f.row, f.col).x;
@@ -1118,8 +1270,12 @@
     if (invuln <= 0) {
       for (const e of enemies) {
         if (Math.hypot(e.x - player.x, e.y - player.y) < CELL*0.55) {
-          loseLife();
-          break;
+          if (powerTimer > 0) {
+            eatGhost(e);
+          } else {
+            loseLife();
+            break;
+          }
         }
       }
     }
