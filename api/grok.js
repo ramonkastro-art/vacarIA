@@ -38,7 +38,7 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: 'openai/gpt-oss-120b',
           messages,
           temperature: body.temperature ?? 0.65,
           max_tokens: body.max_tokens ?? 4000,
@@ -49,10 +49,12 @@ export default async function handler(req, res) {
       if (groqRes.ok) return res.status(200).json({ ...data, _provider: 'groq' })
 
       const status = groqRes.status
-      if (status !== 429 && status !== 503 && status !== 402) {
+      const errCode = data?.error?.code
+      const isRetryable = status === 429 || status === 503 || status === 402 || errCode === 'model_decommissioned'
+      if (!isRetryable) {
         return res.status(status).json(data)
       }
-      console.warn('[grok] Groq indisponível, tentando Gemini...', status)
+      console.warn('[grok] Groq indisponível, tentando Gemini...', status, errCode || '')
     } catch (e) {
       console.warn('[grok] Groq erro:', e.message)
     }
