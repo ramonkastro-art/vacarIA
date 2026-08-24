@@ -444,7 +444,7 @@ async function callAPI(params) {
         { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos, params.estado) },
       ],
       temperature: 0.65,
-      max_tokens: 8000,
+      max_tokens: 2500,
     }),
   });
   const data = await response.json();
@@ -467,7 +467,7 @@ async function callAvaliacao(params) {
         { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.qtd) },
       ],
       temperature: 0.3,
-      max_tokens: 8000,
+      max_tokens: 2500,
     }),
   });
   const data = await response.json();

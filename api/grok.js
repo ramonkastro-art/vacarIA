@@ -41,7 +41,7 @@ export default async function handler(req, res) {
           model: 'openai/gpt-oss-120b',
           messages,
           temperature: body.temperature ?? 0.65,
-          max_tokens: body.max_tokens ?? 4000,
+          max_tokens: body.max_tokens ?? 2500,
         }),
       }, 25000)
 
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
 
       const status = groqRes.status
       const errCode = data?.error?.code
-      const isRetryable = status === 429 || status === 503 || status === 402 || errCode === 'model_decommissioned'
+      const isRetryable = status === 429 || status === 503 || status === 402 || status === 413 || errCode === 'model_decommissioned'
       if (!isRetryable) {
         return res.status(status).json(data)
       }
