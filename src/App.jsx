@@ -34,7 +34,7 @@ function WelcomeBanner({ onClose }) {
           marginBottom:16
         }}>
           Aqui você gera <strong>planos de aula</strong> e <strong>avaliações</strong> de
-          Língua Inglesa com IA — alinhados à BNCC e ao currículo do seu estado,
+          Inglês ou Espanhol com IA — alinhados à BNCC e aos referenciais curriculares,
           em segundos. Totalmente gratuito. 🎓
         </p>
 
@@ -69,9 +69,50 @@ function WelcomeBanner({ onClose }) {
   );
 }
 
-const ANOS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano","6º Ano","7º Ano","8º Ano","9º Ano"];
+const ANOS = [
+  "Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano",
+  "6º Ano","7º Ano","8º Ano","9º Ano",
+  "1ª Série — Ensino Médio","2ª Série — Ensino Médio","3ª Série — Ensino Médio"
+];
+const ANOS_INICIAIS = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"];
+const ANOS_FINAIS = ["6º Ano","7º Ano","8º Ano","9º Ano"];
+const ANOS_ENSINO_MEDIO = ["1ª Série — Ensino Médio","2ª Série — Ensino Médio","3ª Série — Ensino Médio"];
+const isEnsinoMedio = (ano) => ANOS_ENSINO_MEDIO.includes(ano);
+
+// Habilidades oficiais da BNCC para Linguagens e suas Tecnologias no Ensino Médio.
+// No Ensino Médio, a BNCC organiza essas habilidades por área; EM13LGG403 é a habilidade
+// que trata especificamente do uso do inglês como língua de comunicação global.
+const BNCC_EM_INGLES = `
+EM13LGG101 — Compreender e analisar processos de produção e circulação de discursos, nas diferentes linguagens, para fazer escolhas fundamentadas em função de interesses pessoais e coletivos.
+EM13LGG102 — Analisar visões de mundo, conflitos de interesse, preconceitos e ideologias presentes nos discursos veiculados nas diferentes mídias, ampliando suas possibilidades de explicação, interpretação e intervenção crítica da/na realidade.
+EM13LGG103 — Analisar o funcionamento das linguagens, para interpretar e produzir criticamente discursos em textos de diversas semioses (visuais, verbais, sonoras, gestuais).
+EM13LGG104 — Utilizar as diferentes linguagens, levando em conta seus funcionamentos, para a compreensão e produção de textos e discursos em diversos campos de atuação social.
+EM13LGG105 — Analisar e experimentar diversos processos de remediação de produções multissemióticas, multimídia e transmídia, desenvolvendo diferentes modos de participação e intervenção social.
+EM13LGG201 — Utilizar as diversas linguagens (artísticas, corporais e verbais) em diferentes contextos, valorizando-as como fenômeno social, cultural, histórico, variável, heterogêneo e sensível aos contextos de uso.
+EM13LGG202 — Analisar interesses, relações de poder e perspectivas de mundo nos discursos das diversas práticas de linguagem (artísticas, corporais e verbais), compreendendo criticamente como circulam, constituem-se e (re)produzem significação e ideologias.
+EM13LGG203 — Analisar os diálogos e os processos de disputa por legitimidade nas práticas de linguagem e em suas produções (artísticas, corporais e verbais).
+EM13LGG204 — Dialogar e produzir entendimento mútuo, nas diversas linguagens (artísticas, corporais e verbais), com vistas ao interesse comum pautado em princípios e valores de equidade assentados na democracia e nos Direitos Humanos.
+EM13LGG301 — Participar de processos de produção individual e colaborativa em diferentes linguagens (artísticas, corporais e verbais), levando em conta suas formas e seus funcionamentos, para produzir sentidos em diferentes contextos.
+EM13LGG302 — Posicionar-se criticamente diante de diversas visões de mundo presentes nos discursos em diferentes linguagens, levando em conta seus contextos de produção e de circulação.
+EM13LGG303 — Debater questões polêmicas de relevância social, analisando diferentes argumentos e opiniões, para formular, negociar e sustentar posições, frente à análise de perspectivas distintas.
+EM13LGG304 — Formular propostas, intervir e tomar decisões que levem em conta o bem comum e os Direitos Humanos, a consciência socioambiental e o consumo responsável em âmbito local, regional e global.
+EM13LGG305 — Mapear e criar, por meio de práticas de linguagem, possibilidades de atuação social, política, artística e cultural para enfrentar desafios contemporâneos, discutindo princípios e objetivos dessa atuação de maneira crítica, criativa, solidária e ética.
+EM13LGG401 — Analisar criticamente textos de modo a compreender e caracterizar as línguas como fenômeno (geo)político, histórico, social, cultural, variável, heterogêneo e sensível aos contextos de uso.
+EM13LGG402 — Empregar, nas interações sociais, a variedade e o estilo de língua adequados à situação comunicativa, ao(s) interlocutor(es) e ao gênero do discurso, respeitando os usos das línguas por esse(s) interlocutor(es) e sem preconceito linguístico.
+EM13LGG403 — Fazer uso do inglês como língua de comunicação global, levando em conta a multiplicidade e variedade de usos, usuários e funções dessa língua no mundo contemporâneo.
+EM13LGG701 — Explorar tecnologias digitais da informação e comunicação (TDIC), compreendendo seus princípios e funcionalidades, e utilizá-las de modo ético, criativo, responsável e adequado a práticas de linguagem em diferentes contextos.
+EM13LGG702 — Avaliar o impacto das tecnologias digitais da informação e comunicação (TDIC) na formação do sujeito e em suas práticas sociais, para fazer uso crítico dessa mídia em práticas de seleção, compreensão e produção de discursos em ambiente digital.
+EM13LGG703 — Utilizar diferentes linguagens, mídias e ferramentas digitais em processos de produção coletiva, colaborativa e projetos autorais em ambientes digitais.
+EM13LGG704 — Apropriar-se criticamente de processos de pesquisa e busca de informação, por meio de ferramentas e dos novos formatos de produção e distribuição do conhecimento na cultura de rede.`;
+
+const BNCC_EM_ESPANHOL = `
+No Ensino Médio, a BNCC não estabelece uma sequência de códigos exclusivos de Língua Espanhola. Para Espanhol, utilize habilidades da Área de Linguagens e suas Tecnologias que sejam realmente pertinentes ao objetivo da aula, sem apresentar essas habilidades como se fossem códigos específicos de Espanhol. Referências possíveis incluem: EM13LGG101–105 (produção, circulação e análise de discursos); EM13LGG201–204 (diversidade, identidades, diálogo e relações de poder); EM13LGG301–305 (produção, posicionamento crítico, debate e atuação social); EM13LGG401–402 (línguas, variação e adequação aos contextos de uso); EM13LGG701–704 (práticas de linguagem e tecnologias digitais). NÃO use EM13LGG403 como habilidade específica de Espanhol, pois a redação oficial dessa habilidade trata do inglês como língua de comunicação global.`;
 const DURACOES = ["1 período (40 min)","2 períodos (80 min)"];
 const NIVEIS = ["Básico","Intermediário","Avançado"];
+const IDIOMAS = [
+  { value: "ingles", label: "🇺🇸 Inglês" },
+  { value: "espanhol", label: "🇪🇸 Espanhol" },
+];
 const ESTADOS = [
   { uf: "AC", nome: "Acre", ref: "Documento Curricular do Estado do Acre (DCAC)" },
   { uf: "AL", nome: "Alagoas", ref: "Referencial Curricular de Alagoas (REFERENCEAL)" },
@@ -106,7 +147,7 @@ const RECURSOS = ["Quadro negro apenas","Cards / Flashcards","Notebook / Computa
 // Tipos fixos — definidos internamente, sem seleção pelo usuário
 const QTD_QUESTOES = ["10 questões (1 página)","20 questões (2 páginas)"];
 
-function buildPrompt(ano, tema, duracao, nivel, recursos, estado) {
+function buildPrompt(ano, tema, duracao, nivel, recursos, estado, idioma = "ingles") {
   const estadoInfo = ESTADOS.find(e => e.uf === (estado || "RS")) || ESTADOS.find(e => e.uf === "RS");
   const refEstadual = estadoInfo.ref;
   const ufEstado = estadoInfo.uf;
@@ -115,56 +156,75 @@ function buildPrompt(ano, tema, duracao, nivel, recursos, estado) {
   const temArLivre = recursos.includes("Ar livre 🌿");
   const duracaoMin = duracao === "2 períodos (80 min)" ? "80 minutos" : "40 minutos";
   const recursosStr = recursos.join(", ");
+  const espanhol = idioma === "espanhol";
+  const lingua = espanhol ? "Língua Espanhola" : "Língua Inglesa";
+  const nomeLingua = espanhol ? "Espanhol" : "Inglês";
+  const efI = ANOS_INICIAIS.includes(ano);
+  const efII = ANOS_FINAIS.includes(ano);
+  const ensinoMedio = isEnsinoMedio(ano);
+  const codigoBNCC = ensinoMedio
+    ? (espanhol
+        ? BNCC_EM_ESPANHOL
+        : `Use SOMENTE códigos e descrições EXATOS da BNCC oficial para Linguagens e suas Tecnologias no Ensino Médio. Selecione 2 a 4 habilidades realmente pertinentes ao tema. Para aulas de inglês, EM13LGG403 pode ser usada quando o objetivo envolver o inglês como língua de comunicação global. Nunca invente códigos. Banco oficial para consulta interna:${BNCC_EM_INGLES}`)
+    : espanhol
+      ? "Não existem códigos específicos de Língua Espanhola na BNCC do Ensino Fundamental. NÃO invente códigos. Para espanhol, use competências/habilidades descritivas alinhadas à Área de Linguagens e, quando pertinente, ao currículo estadual/municipal, sem atribuir códigos de Língua Inglesa."
+      : "Use SOMENTE códigos e descrições EXATOS da BNCC oficial para Língua Inglesa. NÃO parafraseie, NÃO invente códigos. Selecione 2 a 4 habilidades reais. Padrões: EF06LIxx (6º), EF07LIxx (7º), EF08LIxx (8º), EF09LIxx (9º).";
+  const exemplosLinguagem = espanhol
+    ? "em espanhol, prontos para o professor usar imediatamente"
+    : "em inglês, prontos para o professor usar imediatamente";
+  const exemplosCulturais = espanhol
+    ? `Valorize a diversidade do mundo hispânico (Brasil e países hispanofalantes), evitando estereótipos. Quando o tema permitir, contextualize exemplos com países como Argentina, Uruguai, Chile, Espanha, México, Colômbia e outros, de forma pedagogicamente adequada.`
+    : `Contextualize exemplos e referências culturais com a identidade e realidade do ${nomeEstado}.`;
+  const nivelIdioma = nivel === "Avançado"
+    ? `Nível AVANÇADO: os enunciados e instruções do plano podem estar em ${nomeLingua}, pois a turma tem capacidade de compreender. Escreva o plano predominantemente em ${nomeLingua}, exceto BNCC, referências e observações pedagógicas ao professor, que devem permanecer em português.`
+    : `O plano deve estar 100% em PORTUGUÊS BRASILEIRO. Use ${nomeLingua} apenas para vocabulário-alvo, comandos, frases e estruturas linguísticas ensinadas.`;
 
-  const efI = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"].includes(ano);
+  return `Você é um especialista pedagógico em ${lingua}, com domínio profundo de:
+- ensino comunicativo de ${nomeLingua}, metodologias ativas, ensino híbrido, aprendizagem baseada em projetos, gamificação, estratégias lúdicas e dinâmicas;
+- educação linguística, interculturalidade e diversidade dos contextos em que a língua é falada;
+- BNCC, Área de Linguagens, e referenciais curriculares estaduais/municipais pertinentes.
 
-  return `Você é um especialista pedagógico em Língua Inglesa, com domínio profundo de:
-- BNCC (Base Nacional Comum Curricular) — Componente: Língua Inglesa
-- Referencial Curricular Estadual (BNCC + adaptações ${ufEstado})
-- Metodologias ativas, ensino híbrido, aprendizagem baseada em projetos, gamificação, estratégias lúdicas e dinâmicas para ensino de inglês
+REGRA ABSOLUTA: Gere SOMENTE o plano de aula finalizado. Nenhuma introdução, explicação, comentário ou texto fora do plano. O documento começa diretamente com "# Plano de Aula — ${lingua}".
 
-REGRA ABSOLUTA: Gere SOMENTE o plano de aula finalizado. Nenhuma introdução, explicação, comentário ou texto fora do plano. O documento começa diretamente com "# Plano de Aula — Língua Inglesa".
-
-REGRA DE COERÊNCIA TOTAL: Todos os objetivos de aprendizagem, habilidades BNCC e atividades devem ser coerentes entre si. O que é declarado nos objetivos DEVE aparecer nas atividades. O que aparece nas atividades DEVE estar nos critérios de avaliação.
+REGRA DE COERÊNCIA TOTAL: Todos os objetivos de aprendizagem, habilidades/competências e atividades devem ser coerentes entre si. O que é declarado nos objetivos DEVE aparecer nas atividades. O que aparece nas atividades DEVE estar nos critérios de avaliação.
 
 REGRA DE VARIAÇÃO: Varie os tipos de atividade, dinâmicas e exemplos. Evite repetir estruturas idênticas entre seções. Cada seção da aula deve ter uma abordagem distinta.
 
 REGRA DE EXEMPLOS OBRIGATÓRIOS:
-Em TODAS as seções que envolvam vocabulário, frases ou estruturas linguísticas, inclua OBRIGATORIAMENTE exemplos reais entre aspas simples, prontos para o professor usar imediatamente no quadro ou oralmente.
+Em TODAS as seções que envolvam vocabulário, frases ou estruturas linguísticas, inclua OBRIGATORIAMENTE exemplos reais entre aspas simples, ${exemplosLinguagem}.
 Mínimo de 3 exemplos por seção que envolva linguagem.
-Formato: 'frase ou palavra em inglês' — NUNCA deixe instrução genérica sem exemplo concreto.
+Formato: 'frase ou palavra em ${nomeLingua}' — NUNCA deixe instrução genérica sem exemplo concreto.
 Exemplos devem ser adequados ao nível ${nivel} e à realidade do aluno.
 
 ══════════════════════════════
 RESTRIÇÕES INTERNAS (não aparecem no plano)
 ══════════════════════════════
-
 RESTRIÇÃO 1 — DISCIPLINA EXCLUSIVA:
-Este plano é ESTRITAMENTE de LÍNGUA INGLESA.
-Independente do tema "${tema}", estruture a aula como aula de Inglês.
+Este plano é ESTRITAMENTE de ${lingua}.
+Independente do tema "${tema}", estruture a aula como aula de ${nomeLingua}.
 
 RESTRIÇÃO 2 — IDIOMA DO PLANO:
-${nivel === "Avançado"
-  ? "Nível AVANÇADO: os enunciados e instruções do plano podem estar em INGLÊS, pois a turma tem capacidade de compreender. Escreva o plano em inglês, exceto BNCC, referências e observações pedagógicas ao professor, que devem permanecer em português."
-  : "O plano deve estar 100% em PORTUGUÊS BRASILEIRO. Use inglês apenas para vocabulário-alvo, comandos e estruturas gramaticais ensinados."}
+${nivelIdioma}
 
-RESTRIÇÃO 3 — BNCC (OBRIGATÓRIO, verbatim):
-Use SOMENTE códigos e descrições EXATOS da BNCC oficial para Língua Inglesa.
-NÃO parafraseie, NÃO invente códigos. Selecione 2 a 4 habilidades reais.
-Padrões: EF06LIxx (6º), EF07LIxx (7º), EF08LIxx (8º), EF09LIxx (9º).
-Antes de inserir cada código, verifique internamente se ele existe na BNCC. Se não tiver certeza, omita e use apenas os que tem certeza.
+RESTRIÇÃO 3 — BASE CURRICULAR:
+${codigoBNCC}
+${espanhol
+  ? `Para ${lingua}, a BNCC não deve ser apresentada como se possuísse habilidades específicas codificadas da disciplina. Use o título "## Habilidades e Competências Trabalhadas" e descreva 2–4 habilidades/competências em português, relacionando-as à Área de Linguagens, às práticas de linguagem e ao currículo local quando houver referência segura.`
+  : `Para ${lingua}, use códigos BNCC exatos nos anos finais. Antes de inserir cada código, verifique internamente se ele existe na BNCC. Se não tiver certeza, omita e use apenas os que tem certeza.`}
 
 RESTRIÇÃO 4 — REFERENCIAL CURRICULAR ESTADUAL:
 O professor é do estado de ${nomeEstado} (${ufEstado}).
-Referencie o ${refEstadual} como documento curricular estadual complementar à BNCC.
-Quando existir adaptação estadual de habilidade BNCC, use o sufixo ${ufEstado} (ex: EF06LI01${ufEstado}).
-Contextualize exemplos e referências culturais com a identidade e realidade do ${nomeEstado}.
+Use o ${refEstadual} como referência curricular complementar, mas NÃO invente códigos ou habilidades específicas. ${exemplosCulturais}
+${espanhol ? "Se o currículo estadual não tiver uma orientação específica de Espanhol claramente conhecida, diga isso de forma transparente e trabalhe com competências gerais de linguagem e ensino de língua adicional, sem fabricar referências." : "Quando existir adaptação estadual de habilidade BNCC, use somente códigos reais e verificáveis."}
 
-RESTRIÇÃO 5 — BNCC NO ENSINO FUNDAMENTAL I:
+RESTRIÇÃO 5 — ETAPA DE ENSINO:
 ${efI
-  ? `Este plano é para ${ano}. A BNCC NÃO prevê códigos de Língua Inglesa para anos iniciais.
-NUNCA invente códigos EFxxLIxx. Use o título "## Habilidades Trabalhadas" e descreva 2–4 competências em português inspiradas na BNCC, SEM códigos.`
-  : `Este plano é para ${ano} (anos finais). Use códigos BNCC exatos de Língua Inglesa.`}
+  ? `Este plano é para ${ano}, nos anos iniciais. Não invente códigos de Língua Inglesa ou Língua Espanhola. Use o título "## Habilidades e Competências Trabalhadas" e descreva 2–4 competências em português.`
+  : ensinoMedio
+    ? (espanhol
+      ? `Este plano é para ${ano}, no Ensino Médio. Use o título "## Habilidades e Competências Trabalhadas". Selecione 2–4 habilidades da Área de Linguagens e suas Tecnologias pertinentes ao tema, podendo informar os códigos EM13LGG quando aplicáveis, mas deixe explícito que são habilidades da área e NÃO códigos específicos de Espanhol. Não use EM13LGG403 como habilidade específica de Espanhol.`
+      : `Este plano é para ${ano}, no Ensino Médio. Use o título "## Habilidades BNCC Alinhadas" e selecione 2–4 habilidades oficiais EM13LGG pertinentes ao tema, com código e descrição fiel. Para temas diretamente relacionados ao inglês como língua de comunicação global, considere EM13LGG403. Não invente códigos nem trate EM13LGG como se fossem todos códigos exclusivos de Inglês.`)
+    : `Este plano é para ${ano}, nos anos finais. ${espanhol ? "Não invente códigos específicos de Espanhol; descreva as competências e habilidades trabalhadas." : "Use códigos BNCC exatos de Língua Inglesa."}`}
 
 RESTRIÇÃO 6 — RECURSOS DISPONÍVEIS:
 O professor tem acesso a: ${recursosStr}.
@@ -177,22 +237,21 @@ ${temArLivre
   ? `RESTRIÇÃO 7B — AR LIVRE (OBRIGATÓRIO):
 A aula será realizada em espaço externo (quadra poliesportiva ou gramado).
 TODAS as atividades devem ser lúdicas, dinâmicas e adequadas ao espaço aberto.
-Obrigatoriamente sugira jogos e brincadeiras que ensinem o conteúdo de inglês de forma corporal, colaborativa e divertida.
+Obrigatoriamente sugira jogos e brincadeiras que ensinem o conteúdo de ${nomeLingua} de forma corporal, colaborativa e divertida.
 Use materiais simples: bola, placas/cartazes com palavras ou imagens, giz no chão, cones, bambolês, fitas coloridas, cartões plastificados.
-Para cada atividade, descreva: nome do jogo/brincadeira, objetivo linguístico, materiais necessários, organização do espaço, regras passo a passo e como o professor media em inglês/português.
-Exemplos de dinâmicas possíveis: caça ao vocabulário (word hunt), corrida com placas de palavras, jogo da memória gigante no chão, bingo em movimento, passa-a-bola com perguntas, circuito de estações com desafios de inglês, mímica de vocabulário, corrida de revezamento com frases.
-Priorize atividades que gerem movimento, interação e uso oral da língua inglesa.`
-  : ``}
+Para cada atividade, descreva: nome do jogo/brincadeira, objetivo linguístico, materiais necessários, organização do espaço, regras passo a passo e como o professor media em ${nomeLingua}/português.
+Priorize atividades que gerem movimento, interação e uso oral da língua-alvo.`
+  : ""}
 
 RESTRIÇÃO 7 — NÍVEL DA TURMA:
 Nível: ${nivel}.
-${nivel === "Básico" ? "Use vocabulário simples, muita repetição, suporte visual e instruções curtas. Não exija produção oral espontânea — prefira repetição corida e respostas curtas." : ""}
-${nivel === "Intermediário" ? "Equilibre atividades de produção e reconhecimento. Permita respostas mais elaboradas. Inclua ao menos uma atividade de produção oral ou escrita semi-guiada." : ""}
-${nivel === "Avançado" ? "Proponha desafios de produção oral e escrita, discussões e autonomia na língua. Minimize o suporte visual e incentive respostas elaboradas em inglês." : ""}
+${nivel === "Básico" ? `Use vocabulário simples, muita repetição, suporte visual e instruções curtas. Não exija produção oral espontânea — prefira repetição, associação, escolha e respostas curtas em ${nomeLingua}.` : ""}
+${nivel === "Intermediário" ? `Equilibre atividades de produção e reconhecimento. Permita respostas mais elaboradas. Inclua ao menos uma atividade de produção oral ou escrita semi-guiada em ${nomeLingua}.` : ""}
+${nivel === "Avançado" ? `Proponha desafios de produção oral e escrita, discussões, leitura e autonomia na língua. Minimize o suporte visual e incentive respostas elaboradas em ${nomeLingua}.` : ""}
 
 RESTRIÇÃO 8 — OBJETIVOS DE APRENDIZAGEM:
 Gere exatamente 3 objetivos de aprendizagem, no formato:
-"Ao final da aula, o aluno será capaz de [verbo de ação observable] + [conteúdo específico]."
+"Ao final da aula, o aluno será capaz de [verbo de ação observável] + [conteúdo específico]."
 Os verbos devem ser mensuráveis (identificar, nomear, usar, produzir, distinguir, descrever, etc.).
 Cada objetivo deve corresponder a uma seção da aula (Apresentação, Prática, Produção).
 
@@ -205,22 +264,26 @@ Exemplos de critérios: participação oral, acerto em jogo/dinâmica, uso corre
 
 Crie o plano exatamente neste formato:
 
-# Plano de Aula — Língua Inglesa
+# Plano de Aula — ${lingua}
 **Tema:** ${tema}
-**Série:** ${ano} | **Duração:** ${duracaoMin} | **Nível:** ${nivel} | **Estado:** ${nomeEstado} | **Componente:** Língua Inglesa
+**Série:** ${ano} | **Duração:** ${duracaoMin} | **Nível:** ${nivel} | **Estado:** ${nomeEstado} | **Componente:** ${lingua}
 **Recursos:** ${recursosStr}
 
 ---
 
-${efI ? "## Habilidades Trabalhadas" : "## Habilidades BNCC Alinhadas"}
+${efI || espanhol ? "## Habilidades e Competências Trabalhadas" : "## Habilidades BNCC Alinhadas"}
 ${efI
-  ? `[Descreva 2–4 competências em português, SEM códigos, inspiradas na BNCC de Língua Inglesa para ${ano}]`
-  : `[Liste 2–4 habilidades com código exato e descrição verbatim da BNCC — padrão EF0${ano.charAt(0)}LIxx]`}
+  ? `[Descreva 2–4 competências em português, SEM códigos, relacionadas ao ensino de ${lingua} para ${ano}]`
+  : ensinoMedio
+    ? espanhol
+      ? `[Descreva 2–4 habilidades da Área de Linguagens e suas Tecnologias pertinentes ao ensino de Espanhol para ${ano}. Quando útil, informe o código EM13LGG correspondente, deixando claro que é habilidade da área, não código específico de Espanhol. NÃO use EM13LGG403 como habilidade específica de Espanhol.]`
+      : `[Liste 2–4 habilidades oficiais EM13LGG com código exato e descrição fiel da BNCC. Escolha as mais pertinentes ao tema e, quando fizer sentido, inclua EM13LGG403 para o uso do inglês como língua de comunicação global.]`
+    : espanhol
+      ? `[Descreva 2–4 habilidades/competências em português, SEM códigos específicos de Espanhol, relacionadas à Área de Linguagens, às práticas de linguagem e ao ensino de língua adicional]`
+      : `[Liste 2–4 habilidades com código exato e descrição fiel da BNCC — padrão EF0${ano.charAt(0)}LIxx]`}
 
 ## Referencial Curricular Estadual — ${refEstadual}
-${efI
-  ? `[Descreva como as competências acima se alinham às orientações do ${refEstadual} para anos iniciais de ${nomeEstado}. Mencione adaptações locais se houver.]`
-  : `[Liste 1–2 habilidades ou orientações específicas do ${refEstadual} complementares às habilidades BNCC acima. Quando existir código estadual, use o sufixo ${ufEstado} — ex: EF06LI01${ufEstado}.]`}
+[Descreva como as competências acima se alinham às orientações do ${refEstadual} e às orientações curriculares locais para ${lingua}. Não invente códigos ou trechos. Se não houver orientação específica de ${nomeLingua} claramente identificada, informe isso e use o referencial apenas como apoio geral.]
 
 ---
 
@@ -240,21 +303,21 @@ ${duracao === "2 períodos (80 min)"
   ? `### PERÍODO 1 (40 min)
 
 ### 1. Aquecimento — Warm Up (8–10 min)
-[${temArLivre ? "Dinâmica de movimento no espaço externo para ativar o vocabulário — ex: corrida de nomes, bola com perguntas, aquecimento corporal em inglês" : "Descrição passo a passo da atividade de engajamento inicial"}]
+[${temArLivre ? "Dinâmica de movimento no espaço externo para ativar o vocabulário — adaptada ao ensino de " + nomeLingua : "Descrição passo a passo da atividade de engajamento inicial"}]
 > 💬 Exemplos de falas do professor: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 2. Apresentação — Presentation (15 min)
-[${temNotebook ? "Introdução do conteúdo com atividade digital — indique ferramenta, URL e passo a passo de uso" : temArLivre ? "Apresentação lúdica no espaço externo: placas/cartazes dispostos pela quadra/gramado, professor apresenta estrutura em inglês de forma oral e gestual" : "Introdução clara e passo a passo do conteúdo novo"}]
+[${temNotebook ? "Introdução do conteúdo com atividade digital — indique ferramenta, URL e passo a passo de uso" : temArLivre ? "Apresentação lúdica no espaço externo: placas/cartazes dispostos pela quadra/gramado, professor apresenta a estrutura de forma oral e gestual" : "Introdução clara e passo a passo do conteúdo novo"}]
 > 💬 Vocabulário/estrutura apresentada: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 3. Prática Guiada — Guided Practice (15 min)
-[${temArLivre ? "JOGO/BRINCADEIRA 1 — Nome: | Objetivo linguístico: | Materiais: | Organização do espaço: | Regras passo a passo: | Como o professor media em inglês/português:" : temNotebook ? "Atividade digital guiada — indique ferramenta, URL, passo a passo e como o professor monitora" : "Atividade de prática guiada com suporte do professor"}]
+[${temArLivre ? "JOGO/BRINCADEIRA 1 — Nome: | Objetivo linguístico: | Materiais: | Organização do espaço: | Regras passo a passo: | Como o professor media em " + nomeLingua + "/português:" : temNotebook ? "Atividade digital guiada — indique ferramenta, URL, passo a passo e como o professor monitora" : "Atividade de prática guiada com suporte do professor"}]
 > 💬 Estrutura praticada: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### PERÍODO 2 (40 min)
 
 ### 4. Prática Livre — Free Practice (20 min)
-[${temArLivre ? "JOGO/BRINCADEIRA 2 (mais desafiador) — Nome: | Objetivo: | Organização: | Regras: | Como estimular produção oral em inglês durante a atividade:" : temNotebook ? "Atividade com recurso digital de produção — indique qual, URL e como o aluno interage" : "Atividade de produção semi-guiada com crescente autonomia"}]
+[${temArLivre ? "JOGO/BRINCADEIRA 2 (mais desafiador) — Nome: | Objetivo: | Organização: | Regras: | Como estimular produção oral em " + nomeLingua + ":" : temNotebook ? "Atividade com recurso digital de produção — indique qual, URL e como o aluno interage" : "Atividade de produção semi-guiada com crescente autonomia"}]
 > 💬 Produção esperada dos alunos: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 5. Produção — Production (12 min)
@@ -262,7 +325,7 @@ ${duracao === "2 períodos (80 min)"
 > 💬 Exemplos de produção autônoma esperada: '[exemplo 1]' / '[exemplo 2]'
 
 ### 6. Fechamento — Wrap Up (8 min)
-[${temArLivre ? "Roda final: alunos sentados no gramado/quadra, professor recapitula vocabulário com perguntas rápidas, alunos respondem em inglês" : "Recapitulação dialogada, exit ticket informal e encerramento"}]
+[${temArLivre ? "Roda final: alunos sentados no gramado/quadra, professor recapitula vocabulário com perguntas rápidas, alunos respondem em " + nomeLingua : "Recapitulação dialogada, exit ticket informal e encerramento"}]
 > 💬 Perguntas de fechamento: '[exemplo 1]' / '[exemplo 2]'`
   : `### 1. Aquecimento — Warm Up (5–8 min)
 [Descrição passo a passo da atividade de engajamento inicial${temArLivre ? " — dinâmica de movimento para engajar no espaço externo" : ""}]
@@ -273,7 +336,7 @@ ${duracao === "2 períodos (80 min)"
 > 💬 Vocabulário/estrutura apresentada: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 3. Prática — Practice (12–15 min)
-[${temArLivre ? "JOGO/BRINCADEIRA PRINCIPAL — Nome: | Objetivo linguístico: | Materiais: | Organização do espaço: | Regras passo a passo: | Como o professor conduz em inglês/português:" : temNotebook ? "Atividade digital guiada — indique ferramenta, URL e passo a passo" : "Atividade de prática guiada com suporte gradual do professor"}]
+[${temArLivre ? "JOGO/BRINCADEIRA PRINCIPAL — Nome: | Objetivo linguístico: | Materiais: | Organização do espaço: | Regras passo a passo: | Como o professor conduz em " + nomeLingua + "/português:" : temNotebook ? "Atividade digital guiada — indique ferramenta, URL e passo a passo" : "Atividade de prática guiada com suporte gradual do professor"}]
 > 💬 Estrutura praticada: '[exemplo 1]' / '[exemplo 2]' / '[exemplo 3]'
 
 ### 4. Produção — Production (5–8 min)
@@ -281,7 +344,7 @@ ${duracao === "2 períodos (80 min)"
 > 💬 Produção esperada dos alunos: '[exemplo 1]' / '[exemplo 2]'
 
 ### 5. Fechamento — Wrap Up (3–5 min)
-[${temArLivre ? "Roda final: recapitulação oral do vocabulário/estrutura trabalhada — professor faz perguntas rápidas e alunos respondem em inglês" : "Recapitulação dialogada, exit ticket informal e encerramento"}]
+[${temArLivre ? "Roda final: recapitulação oral do vocabulário/estrutura trabalhada — professor faz perguntas rápidas e alunos respondem em " + nomeLingua : "Recapitulação dialogada, exit ticket informal e encerramento"}]
 > 💬 Perguntas de fechamento: '[exemplo 1]' / '[exemplo 2]'`}
 
 ---
@@ -300,106 +363,124 @@ ${[1,2,3].map(i => `
 ${temNotebook ? "[Liste todas as ferramentas digitais usadas no plano com URL real de acesso + 1 sugestão extra de recurso digital relacionado ao tema]" : "[Sugestões de materiais físicos, livros didáticos ou recursos de baixo custo relacionados ao tema]"}
 
 ---
-*Plano gerado pelo VacarIA — Assistente Pedagógico para Professores de Inglês*`;
+
+*Plano gerado pelo VacarIA — Assistente Pedagógico para Professores de ${nomeLingua}*`;
 }
 
-function buildPromptAvaliacao(ano, tema, nivel, qtd) {
-  const efI = ["Pré Escola","1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"].includes(ano);
+function buildPromptAvaliacao(ano, tema, nivel, qtd, idioma = "ingles") {
+  const efI = ANOS_INICIAIS.includes(ano);
+  const ensinoMedio = isEnsinoMedio(ano);
   const vinte = qtd && qtd.includes("20");
   const avancado = nivel === "Avançado";
   const basico = nivel === "Básico";
   const qtdTotal = vinte ? 20 : 10;
+  const espanhol = idioma === "espanhol";
+  const nomeLingua = espanhol ? "Espanhol" : "Inglês";
+  const idiomaBase = espanhol ? "espanhol" : "inglês";
+  const cabecalho = espanhol ? "ATIVIDADE DE ESPANHOL" : "ATIVIDADE DE INGLÊS";
+  const alternativaIdioma = espanhol ? "ESPANHOL" : "INGLÊS";
+  const relacaoDireita = "PORTUGUÊS";
+  const exemploProfissao = espanhol
+    ? '¿Qué profesión cuida de los pacientes en un hospital? → a) Doctor  b) Profesor  c) Abogado  d) Artista'
+    : 'Qual profissão cuida de pacientes em um hospital? → a) Doctor  b) Teacher  c) Lawyer  d) Artist';
+  const efIRegra = efI
+    ? "Anos iniciais: sem textos longos, foco em vocabulário visual, concreto e contextualizado."
+    : ensinoMedio
+      ? (espanhol
+        ? "Ensino Médio: aumente a complexidade lexical e discursiva, priorizando interpretação, uso contextual da língua, gêneros textuais, interculturalidade e pensamento crítico. A avaliação pode mobilizar habilidades da Área de Linguagens, mas não deve inventar códigos específicos de Espanhol."
+        : "Ensino Médio: aumente a complexidade lexical e discursiva, priorizando interpretação, uso contextual da língua, gêneros textuais, interculturalidade e pensamento crítico. A avaliação deve ser compatível com habilidades EM13LGG pertinentes ao tema; nunca invente códigos." )
+      : "Adeque a complexidade ao " + ano + ".";
+  const idiomaEnunciados = avancado
+    ? `${alternativaIdioma.toLowerCase()} (nível avançado).`
+    : "português.";
+  const regraAlternativas = espanhol
+    ? "ALTERNATIVAS (a/b/c/d): SEMPRE em espanhol em TODOS os níveis. Sem exceção, salvo quando a questão exigir explicitamente uma resposta em português."
+    : "ALTERNATIVAS (a/b/c/d): SEMPRE em inglês em TODOS os níveis. Sem exceção, salvo quando a questão exigir explicitamente uma resposta em português.";
 
-return "Você é professor especialista em Língua Inglesa.\n" +
-  "Crie uma atividade avaliativa de Língua Inglesa para " + ano + ", nível " + nivel + ", tema: \"" + tema + "\".\n\n" +
+  return `Você é professor especialista em Língua ${nomeLingua}.
+Crie uma atividade avaliativa de Língua ${nomeLingua} para ${ano}, nível ${nivel}, tema: "${tema}".
 
-  "REGRA ABSOLUTA: Sua resposta deve conter APENAS a atividade pronta. " +
-  "NÃO repita estas instruções no output. NÃO escreva seções como REGRAS GERAIS, " +
-  "INSTRUÇÕES DETALHADAS, DISTRIBUIÇÃO DAS QUESTÕES. Essas são instruções INTERNAS para você. " +
-  "O documento gerado começa diretamente com ATIVIDADE DE INGLÊS e termina com GABARITO.\n\n" +
+REGRA ABSOLUTA: Sua resposta deve conter APENAS a atividade pronta.
+NÃO repita estas instruções no output. NÃO escreva seções como REGRAS GERAIS, INSTRUÇÕES DETALHADAS, DISTRIBUIÇÃO DAS QUESTÕES. Essas são instruções INTERNAS para você.
+O documento gerado começa diretamente com ${cabecalho} e termina com GABARITO.
 
-  "CABEÇALHO (copie exatamente):\n" +
-  "ATIVIDADE DE INGLÊS\n" +
-  "Nome: _____________________________________________ Turma: _______\n\n" +
+CABEÇALHO (copie exatamente):
+${cabecalho}
+Nome: _____________________________________________ Turma: _______
 
-  "══════════════════════════════\n" +
-  "REGRAS GERAIS\n" +
-  "══════════════════════════════\n" +
-  "1. Gere EXATAMENTE " + qtdTotal + " questões numeradas sequencialmente (1 até " + qtdTotal + ").\n" +
-  "2. IDIOMA DOS ENUNCIADOS: " + (avancado ? "inglês (nível avançado)." : "português.") + "\n" +
-  "3. ALTERNATIVAS (a/b/c/d): SEMPRE em inglês em TODOS os níveis. Sem exceção.\n" +
-  "4. " + (efI ? "Anos iniciais: sem textos longos, foco em vocabulário visual e concreto." : "Adeque complexidade ao " + ano + ".") + "\n" +
-  "5. Varie os contextos e evite questões óbvias, repetitivas ou muito semelhantes entre si.\n\n" +
+══════════════════════════════
+REGRAS GERAIS
+══════════════════════════════
+1. Gere EXATAMENTE ${qtdTotal} questões numeradas sequencialmente (1 até ${qtdTotal}).
+2. IDIOMA DOS ENUNCIADOS: ${idiomaEnunciados}
+3. ${regraAlternativas}
+4. ${efIRegra}
+5. Varie os contextos e evite questões óbvias, repetitivas ou muito semelhantes entre si.
+6. Para ${nomeLingua}, respeite ortografia, acentuação, concordância e uso real da língua. NÃO misture estruturas de inglês e espanhol.
+${espanhol ? "7. Valorize contextos culturais diversos do mundo hispanofalante e evite estereótipos culturais." : ""}
 
-  "══════════════════════════════\n" +
-  "DISTRIBUIÇÃO OBRIGATÓRIA DAS " + qtdTotal + " QUESTÕES\n" +
-  "══════════════════════════════\n" +
-  "- Múltipla escolha: " + Math.round(qtdTotal * 0.55) + " questões\n" +
-  "- Relacione colunas: 1 bloco com 8 pares (conta como 1 questão)\n" +
-  "- Interpretação de texto: 1 texto com " + Math.round(qtdTotal * 0.20) + " perguntas abertas\n" +
-  "- Charadas/Enigmas: " + (qtdTotal - Math.round(qtdTotal * 0.55) - 1 - Math.round(qtdTotal * 0.20)) + " questões\n" +
-  "Distribua nessa ordem: primeiro múltipla escolha, depois relacione, depois interpretação, depois charadas.\n\n" +
+══════════════════════════════
+DISTRIBUIÇÃO OBRIGATÓRIA DAS ${qtdTotal} QUESTÕES
+══════════════════════════════
+- Múltipla escolha: ${Math.round(qtdTotal * 0.55)} questões
+- Relacione colunas: 1 bloco com 8 pares (conta como 1 questão)
+- Interpretação de texto: 1 texto com ${Math.round(qtdTotal * 0.20)} perguntas abertas
+- Charadas/Enigmas: ${qtdTotal - Math.round(qtdTotal * 0.55) - 1 - Math.round(qtdTotal * 0.20)} questões
+Distribua nessa ordem: primeiro múltipla escolha, depois relacione, depois interpretação, depois charadas.
 
-  "══════════════════════════════\n" +
-  "INSTRUÇÕES DETALHADAS\n" +
-  "══════════════════════════════\n\n" +
+══════════════════════════════
+INSTRUÇÕES DETALHADAS
+══════════════════════════════
 
-  "MÚLTIPLA ESCOLHA — regras obrigatórias:\n" +
-  "✓ O enunciado deve identificar EXATAMENTE qual resposta está correta. Sem ambiguidade.\n" +
-  "✓ ERRADO: \"Complete: I want to be a ___\" (aceita qualquer resposta — sem contexto definidor)\n" +
-  "✓ CERTO: \"Qual profissão cuida de pacientes em um hospital?\" → a) Doctor  b) Teacher  c) Lawyer  d) Artist\n" +
-  "✓ CERTO: \"Na série Grey\'s Anatomy, Meredith Grey é uma:\" → a) Doctor  b) Lawyer  c) Engineer  d) Teacher\n" +
-  "✓ CERTO: \"Qual palavra em inglês significa \'advogado\'?\" → a) Lawyer  b) Doctor  c) Nurse  d) Engineer\n" +
-  "✓ Alternativas SEMPRE em inglês. Todas as 4 opções devem ser do mesmo campo semântico do tema.\n" +
-  (basico ? "✓ Exemplo - Nível BÁSICO: a) Lawyer (Advogado)  b) Doctor (Médico)  c) Nurse (Enfermeiro)  d) Teacher (Professor)\n" : "") +
-  "✓ Use contextos variados: definição, tradução, contexto cultural, completar frase com resposta única.\n" +
+MÚLTIPLA ESCOLHA — regras obrigatórias:
+✓ O enunciado deve identificar EXATAMENTE qual resposta está correta. Sem ambiguidade.
+✓ Exemplo de questão bem definida: "${exemploProfissao}"
+✓ Todas as 4 opções devem pertencer ao mesmo campo semântico do tema.
+✓ Use contextos variados: definição, tradução, contexto cultural, completar frase com resposta única.
+✓ COERÊNCIA ENUNCIADO × ALTERNATIVAS:
+  - Se o enunciado pede "Como se diz X em ${idiomaBase}?" → alternativas em ${alternativaIdioma.toLowerCase()}.
+  - Se o enunciado pede "O que significa X em português?" → alternativas em português.
+  - NUNCA misture idiomas de forma que torne a questão ambígua.
+✓ ALTERNATIVAS ÚNICAS:
+  - As 4 alternativas devem ser palavras ou expressões DIFERENTES entre si.
+  - NUNCA repita a mesma alternativa duas vezes na mesma questão.
+  - Antes de finalizar cada questão, verifique duplicatas e substitua por opção distinta do mesmo campo semântico.
+${basico ? `✓ Exemplo - Nível BÁSICO: crie opções simples e concretas em ${alternativaIdioma.toLowerCase()}, com apoio de contexto ou imagem descrita quando útil.` : ""}
 
-  "✓ COERÊNCIA ENUNCIADO × ALTERNATIVAS — REGRA CRÍTICA:\n" +
-  "  - Se o enunciado pede 'Qual palavra em inglês significa X?' ou 'Como se diz X em inglês?' → alternativas em INGLÊS.\n" +
-  "  - Se o enunciado pede 'O que significa X em português?' ou 'Qual a tradução de X?' → alternativas em PORTUGUÊS.\n" +
-  "  - NUNCA misture: enunciado pedindo tradução para português com alternativas em inglês, ou vice-versa.\n" +
-  "  - Quando quiser testar vocabulário mas manter alternativas em inglês, reformule para: 'Qual é a definição de X?' ou 'X descreve o quê?'\n" +
+RELACIONE COLUNAS — regras obrigatórias:
+✓ Coluna ESQUERDA: palavras ou expressões em ${alternativaIdioma.toLowerCase()} (com letra identificadora).
+✓ Coluna DIREITA: traduções em ${relacaoDireita.toLowerCase()} (com parênteses vazios). SEMPRE embaralhadas.
+✓ ERRADO: relacionar ${alternativaIdioma.toLowerCase()} com ${alternativaIdioma.toLowerCase()}, ou português com português.
+✓ CERTO: (A) ${espanhol ? "Doctor" : "Doctor"} | ( ) ${espanhol ? "Médico" : "Médico"} / (B) ${espanhol ? "Abogado" : "Lawyer"} | ( ) ${espanhol ? "Advogado" : "Advogado"}
+✓ Formato OBRIGATÓRIO com | separando as colunas. Mínimo 8 pares.
 
-  "✓ ALTERNATIVAS ÚNICAS — REGRA CRÍTICA:\n" +
-  "  - As 4 alternativas (a, b, c, d) devem ser SEMPRE palavras ou expressões DIFERENTES entre si.\n" +
-  "  - NUNCA repita a mesma alternativa duas vezes na mesma questão.\n" +
-  "  - Antes de finalizar cada questão, verifique duplicatas e substitua por opção distinta do mesmo campo semântico.\n\n" +
+INTERPRETAÇÃO DE TEXTO — regras obrigatórias:
+✓ Texto autêntico em ${idiomaBase} com Fonte citada. Tamanho: ${basico ? "3-4 linhas simples" : nivel === "Intermediário" ? "5-7 linhas" : "7-10 linhas"}.
+✓ Perguntas em português sobre o texto (localização, vocabulário, interpretação), exceto no nível avançado, em que podem estar em ${idiomaBase}.
+✓ Questões abertas com 2 linhas de resposta:
+  _______________________________________________________
+  _______________________________________________________
+✓ Não invente fonte, autor ou link. Se o texto for criado especificamente para a avaliação, indique "Texto elaborado para esta atividade" como fonte.
 
-  "RELACIONE COLUNAS — regras obrigatórias:\n" +
-  "✓ Coluna ESQUERDA: palavras em INGLÊS (com letra identificadora).\n" +
-  "✓ Coluna DIREITA: traduções em PORTUGUÊS (com parênteses vazios). SEMPRE embaralhadas.\n" +
-  "✓ ERRADO: relacionar inglês com inglês, ou português com português.\n" +
-  "✓ CERTO: (A) Doctor | ( ) Médico  /  (B) Lawyer | ( ) Advogado\n" +
-  "✓ Formato OBRIGATÓRIO com | separando as colunas. Mínimo 8 pares.\n\n" +
+CHARADA/ENIGMA — regras obrigatórias:
+✓ A charada é SEMPRE escrita em ${idiomaBase} simples.
+✓ Use vocabulário acessível e frases curtas, adequado ao nível.
+✓ A resposta é SEMPRE uma palavra ou expressão em ${idiomaBase} relacionada ao tema.
+✓ Formato: [charada em ${idiomaBase} simples]? ___________
 
-  "INTERPRETAÇÃO DE TEXTO — regras obrigatórias:\n" +
-  "✓ Texto autêntico em inglês com Fonte citada. Tamanho: " + (basico ? "3-4 linhas simples" : nivel === "Intermediário" ? "5-7 linhas" : "7-10 linhas") + ".\n" +
-  "✓ Perguntas em português sobre o texto (localização, vocabulário, interpretação).\n" +
-  "✓ Questões abertas com 2 linhas de resposta:\n" +
-  "  _______________________________________________________\n" +
-  "  _______________________________________________________\n\n" +
+══════════════════════════════
+GABARITO
+══════════════════════════════
+Ao final, adicione um GABARITO completo no formato:
+GABARITO
+1. [resposta]
+2. [resposta]... (todas as questões, inclusive as abertas com resposta esperada)
+Para o bloco "Relacione colunas": liste as letras na ordem da coluna direita. Ex: Relacione: B / D / A / H / E / C / F / G
 
-  "CHARADA/ENIGMA — regras obrigatórias:\n" +
-  "✓ A charada é SEMPRE escrita em inglês simples, em TODOS os níveis.\n" +
-  "✓ Use inglês básico e acessível: frases curtas, vocabulário simples.\n" +
-  "✓ Exemplo: \"I work in a hospital and help sick people. Who am I? ___________\"\n" +
-  "✓ Descreve poeticamente algo relacionado ao tema \"" + tema + "\".\n" +
-  "✓ A resposta é SEMPRE uma palavra em inglês do tema.\n" +
-  "✓ Formato: [charada em inglês simples]? ___________\n\n" +
-
-  "══════════════════════════════\n" +
-  "GABARITO\n" +
-  "══════════════════════════════\n" +
-  "Ao final, adicione um GABARITO completo no formato:\n" +
-  "GABARITO\n" +
-  "1. [resposta]\n" +
-  "2. [resposta]... (todas as questões, inclusive as abertas com resposta esperada)\n" +
-  "Para o bloco 'Relacione colunas': liste as letras na ordem da coluna direita. Ex: Relacione: B / D / A / H / E / C / F / G\n\n" +
-
-  "ATENÇÃO FINAL CRÍTICA: " +
-  "Sua resposta começa com 'ATIVIDADE DE INGLÊS' e termina com o GABARITO. " +
-  "Nada mais. Sem 'REGRAS GERAIS', sem 'INSTRUÇÕES DETALHADAS', sem 'DISTRIBUIÇÃO DAS QUESTÕES'. " +
-  "Essas seções são instruções para VOCÊ, não para o aluno. O aluno não pode vê-las.";
+ATENÇÃO FINAL CRÍTICA:
+Sua resposta começa com '${cabecalho}' e termina com o GABARITO.
+Nada mais. Sem 'REGRAS GERAIS', sem 'INSTRUÇÕES DETALHADAS', sem 'DISTRIBUIÇÃO DAS QUESTÕES'.
+Essas seções são instruções para VOCÊ, não para o aluno. O aluno não pode vê-las.`;
 }
 
 async function fetchWithTimeout(url, opts = {}, timeout = 90000) {
@@ -439,9 +520,9 @@ async function callAPI(params) {
       messages: [
         {
           role: "system",
-          content: "Você é um especialista pedagógico em Língua Inglesa. Responda sempre em português brasileiro, com precisão técnica e linguagem acessível a professores.",
+          content: `Você é um especialista pedagógico em ${params.idioma === "espanhol" ? "Língua Espanhola" : "Língua Inglesa"}. Responda com precisão técnica e linguagem acessível a professores.`,
         },
-        { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos, params.estado) },
+        { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos, params.estado, params.idioma) },
       ],
       temperature: 0.65,
       max_tokens: 2500,
@@ -462,9 +543,9 @@ async function callAvaliacao(params) {
       messages: [
         {
           role: "system",
-          content: "Você é um professor especialista em Língua Inglesa. Siga as instruções com precisão absoluta. Crie avaliações pedagógicas corretas, sem erros de lógica, com alternativas sempre em inglês e relacionamentos sempre inglês↔português.",
+          content: `Você é um professor especialista em ${params.idioma === "espanhol" ? "Língua Espanhola" : "Língua Inglesa"}. Siga as instruções com precisão absoluta. Crie avaliações pedagógicas corretas, sem erros de lógica, respeitando o idioma selecionado e os relacionamentos entre língua-alvo e português.`,
         },
-        { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.qtd) },
+        { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.qtd, params.idioma) },
       ],
       temperature: 0.3,
       max_tokens: 2500,
@@ -546,7 +627,7 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
   const footer =
     "<div class='pdf-footer'>" +
     "<div>" +
-    "<div>VacarIA · Assistente Pedagógico para Professores de Inglês</div>" +
+    "<div>VacarIA · Assistente Pedagógico para Professores de Línguas</div>" +
     "<div style='font-size:7.5pt;color:#c4b5a0'>Desenvolvido por Ramon Castro · " + new Date().toLocaleDateString("pt-BR") + "</div>" +
     "<div style='font-size:7.5pt;color:#c4b5a0;font-style:italic;margin-top:2px'>Execute com autenticidade. Protagonize em sala de aula.</div>" +
     "</div>" +
@@ -555,7 +636,7 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
   return "<div id='pdf-wrap' style='width:794px;margin:0 auto;background:#fff;padding:44px 60px;font-family:Arial,sans-serif;font-size:10.5pt;color:#1e293b;line-height:1.6'>" +
     "<style>" + css + "</style>" +
     "<div class='pdf-header'><div class='pdf-title'>Vacar<span>IA</span>" + (subtitle ? " — " + subtitle : "") + "</div>" +
-    "<div class='pdf-sub'>Rede de Ensino de Inglês<br/>" + title + "</div></div>" +
+    "<div class='pdf-sub'>Assistente Pedagógico<br/>" + title + "</div></div>" +
     printEl.innerHTML +
     footer +
     "</div>";
@@ -564,8 +645,9 @@ function buildPdfHtml(printEl, title, subtitle, headerColor, footerBorderColor) 
 function handlePrint(params) {
   const printEl = document.getElementById("plano-para-pdf");
   if (!printEl) return;
-  const filename = "Plano_de_Aula_Lingua_Inglesa";
-  const htmlContent = buildPdfHtml(printEl, "Plano de Aula — Lingua Inglesa", null, "#b45309", "#fde68a");
+  const filename = "Plano_de_Aula_" + (params?.idioma === "espanhol" ? "Lingua_Espanhola" : "Lingua_Inglesa");
+  const isSpanish = params?.idioma === "espanhol";
+  const htmlContent = buildPdfHtml(printEl, isSpanish ? "Plano de Aula — Lingua Espanhola" : "Plano de Aula — Lingua Inglesa", null, "#b45309", "#fde68a");
   sessionStorage.setItem("vacaria_pdf", JSON.stringify({ html: htmlContent, title: "Plano de Aula" }));
   sessionStorage.setItem("vacaria_pdf_filename", filename);
   sessionStorage.setItem("vacaria_pdf_color", "#b45309");
@@ -586,8 +668,9 @@ function handlePrintAvaliacao(params) {
     }
     if (removing) el.remove();
   });
-  const filename = "Avaliacao_de_Lingua_Inglesa";
-  const htmlContent = buildPdfHtml(clone, "Avaliacao de Lingua Inglesa", "Avaliacao", "#6d28d9", "#e9d5ff");
+  const filename = "Avaliacao_de_" + (params?.idioma === "espanhol" ? "Lingua_Espanhola" : "Lingua_Inglesa");
+  const isSpanish = params?.idioma === "espanhol";
+  const htmlContent = buildPdfHtml(clone, isSpanish ? "Avaliacao de Lingua Espanhola" : "Avaliacao de Lingua Inglesa", "Avaliacao", "#6d28d9", "#e9d5ff");
   sessionStorage.setItem("vacaria_pdf", JSON.stringify({ html: htmlContent, title: "Avaliacao" }));
   sessionStorage.setItem("vacaria_pdf_filename", filename);
   sessionStorage.setItem("vacaria_pdf_color", "#6d28d9");
@@ -721,6 +804,7 @@ export default function App() {
   const [duracao, setDuracao] = useState("1 período (40 min)");
   const [nivel, setNivel] = useState("Básico");
   const [estado, setEstado] = useState("RS");
+  const [idioma, setIdioma] = useState("ingles");
   const [recursos, setRecursos] = useState(["Quadro negro apenas"]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -749,10 +833,6 @@ export default function App() {
     return <GamesPage />;
   }
 
-  // ✅ NOVO: Registra acesso ao carregar o app
-  useEffect(() => {
-    trackPageAccess()
-  }, [])
   // ✅ NOVO: Registra acesso ao carregar o app
   useEffect(() => {
     trackPageAccess()
@@ -818,12 +898,12 @@ useEffect(() => {
     setLoadingStart(Date.now());
     const inicio = Date.now();
     try {
-      const res = await callAPI({ ano, tema, duracao, nivel, recursos, estado });
+      const res = await callAPI({ idioma, ano, tema, duracao, nivel, recursos, estado });
       setResult(res.text);
       setProvider(res.provider);
       trackInteraction({
         type: "plano_de_aula",
-        prompt: `${ano} | ${tema} | ${nivel} | ${duracao}`,
+        prompt: `${idioma} | ${ano} | ${tema} | ${nivel} | ${duracao}`,
         responseSummary: res.text?.slice(0, 200),
         feature: "Plano de Aula",
         durationMs: Date.now() - inicio,
@@ -833,7 +913,7 @@ useEffect(() => {
       setError(traduzirErroIA(e.message));
       trackInteraction({
         type: "plano_de_aula",
-        prompt: `${ano} | ${tema} | ${nivel} | ${duracao}`,
+        prompt: `${idioma} | ${ano} | ${tema} | ${nivel} | ${duracao}`,
         feature: "Plano de Aula",
         durationMs: Date.now() - inicio,
         success: false,
@@ -849,13 +929,13 @@ useEffect(() => {
     setLoadingAv(true); setResultAv(null); setErrorAv(null);
     const inicio = Date.now();
     try {
-      const res = await callAvaliacao({ ano: anoAv, tema: temaAv, nivel: nivelAv, qtd: qtdAv });
+      const res = await callAvaliacao({ idioma, ano: anoAv, tema: temaAv, nivel: nivelAv, qtd: qtdAv });
       setResultAv(res.text);
       setProviderAv(res.provider);
       setDiagAv(res.diag || "");
       trackInteraction({
         type: "avaliacao",
-        prompt: `${anoAv} | ${temaAv} | ${nivelAv} | ${qtdAv}`,
+        prompt: `${idioma} | ${anoAv} | ${temaAv} | ${nivelAv} | ${qtdAv}`,
         responseSummary: res.text?.slice(0, 200),
         feature: "Avaliação",
         durationMs: Date.now() - inicio,
@@ -865,7 +945,7 @@ useEffect(() => {
       setErrorAv(traduzirErroIA(e.message));
       trackInteraction({
         type: "avaliacao",
-        prompt: `${anoAv} | ${temaAv} | ${nivelAv} | ${qtdAv}`,
+        prompt: `${idioma} | ${anoAv} | ${temaAv} | ${nivelAv} | ${qtdAv}`,
         feature: "Avaliação",
         durationMs: Date.now() - inicio,
         success: false,
@@ -882,10 +962,10 @@ useEffect(() => {
         <header className="header">
           <div className="logo-badge">
             <div className="logo-dot" />
-            <span>Professores de Inglês · Vacaria/RS</span>
+            <span>Professores de {idioma === "espanhol" ? "Espanhol" : "Inglês"} · Vacaria/RS</span>
           </div>
           <div className="title">Vacar<span>IA</span></div>
-          <p className="subtitle">Assistente pedagógico com IA para planejamento de aulas de Língua Inglesa</p>
+          <p className="subtitle">Assistente pedagógico com IA para planejamento de aulas de Língua {idioma === "espanhol" ? "Espanhola" : "Inglesa"}</p>
         </header>
 
         {showInstall && (
@@ -918,12 +998,26 @@ useEffect(() => {
         {modo === "plano" && <div className="card" style={{borderTopLeftRadius:0,borderTopRightRadius:0,borderTop:"none"}}>
 
           {/* Ano */}
+          <RadioGroup
+            label="Idioma / Disciplina"
+            options={IDIOMAS.map(i => i.label)}
+            value={IDIOMAS.find(i => i.value === idioma)?.label || IDIOMAS[0].label}
+            onChange={label => setIdioma(IDIOMAS.find(i => i.label === label)?.value || "ingles")}
+          />
           <div className="field">
             <label>Ano / Série</label>
             <div className="select-wrapper">
               <select className="select" value={ano} onChange={e => setAno(e.target.value)}>
                 <option value="">Selecione o ano...</option>
-                {ANOS.map(a => <option key={a} value={a}>{a}</option>)}
+                <optgroup label="Educação Infantil e Anos Iniciais">
+                  {ANOS_INICIAIS.map(a => <option key={a} value={a}>{a}</option>)}
+                </optgroup>
+                <optgroup label="Anos Finais do Ensino Fundamental">
+                  {ANOS_FINAIS.map(a => <option key={a} value={a}>{a}</option>)}
+                </optgroup>
+                <optgroup label="Ensino Médio">
+                  {ANOS_ENSINO_MEDIO.map(a => <option key={a} value={a}>{a}</option>)}
+                </optgroup>
               </select>
             </div>
           </div>
@@ -942,7 +1036,7 @@ useEffect(() => {
           <div className="field">
             <label>Tema da Aula</label>
             <textarea className="textarea" value={tema} onChange={e => setTema(e.target.value)}
-              placeholder="Ex: Greetings and Introductions, Verb To Be, Numbers 1–20, Colors..." rows={3} />
+              placeholder={idioma === "espanhol" ? "Ex: Saludos y presentaciones, Verbos ser y estar, Números 1–20, Colores..." : "Ex: Greetings and Introductions, Verb To Be, Numbers 1–20, Colors..."} rows={3} />
           </div>
 
           <hr className="divider" />
@@ -968,19 +1062,33 @@ useEffect(() => {
         {/* AVALIAÇÃO */}
         {modo === "avaliacao" && (
           <div className="card" style={{borderTopLeftRadius:0,borderTopRightRadius:0,borderTop:"none"}}>
+            <RadioGroup
+              label="Idioma / Disciplina"
+              options={IDIOMAS.map(i => i.label)}
+              value={IDIOMAS.find(i => i.value === idioma)?.label || IDIOMAS[0].label}
+              onChange={label => setIdioma(IDIOMAS.find(i => i.label === label)?.value || "ingles")}
+            />
             <div className="field">
               <label>Ano / Série</label>
               <div className="select-wrapper">
                 <select className="select" value={anoAv} onChange={e => setAnoAv(e.target.value)}>
                   <option value="">Selecione o ano...</option>
-                  {ANOS.map(a => <option key={a} value={a}>{a}</option>)}
+                  <optgroup label="Educação Infantil e Anos Iniciais">
+                    {ANOS_INICIAIS.map(a => <option key={a} value={a}>{a}</option>)}
+                  </optgroup>
+                  <optgroup label="Anos Finais do Ensino Fundamental">
+                    {ANOS_FINAIS.map(a => <option key={a} value={a}>{a}</option>)}
+                  </optgroup>
+                  <optgroup label="Ensino Médio">
+                    {ANOS_ENSINO_MEDIO.map(a => <option key={a} value={a}>{a}</option>)}
+                  </optgroup>
                 </select>
               </div>
             </div>
             <div className="field">
               <label>Tema / Conteúdo Avaliado</label>
               <textarea className="textarea" value={temaAv} onChange={e => setTemaAv(e.target.value)}
-                placeholder="Ex: Verb To Be, Daily Routines, Present Continuous, Colors and Numbers..." rows={3} />
+                placeholder={idioma === "espanhol" ? "Ex: Saludos, rutinas diarias, presente de indicativo, colores y números..." : "Ex: Verb To Be, Daily Routines, Present Continuous, Colors and Numbers..."} rows={3} />
             </div>
             <hr className="divider" />
             <RadioGroup label="Nível da Turma" options={NIVEIS} value={nivelAv} onChange={setNivelAv} />
@@ -1020,13 +1128,13 @@ useEffect(() => {
                 <span className="result-tag">Plano Gerado</span>
                 {provider && (
                   <span className="provider-badge">
-                    {provider === "groq" ? "Groq · LLaMA 3.3" : provider === "gemini" ? "Gemini · Fallback" : "IA"}
+                    {provider === "groq" ? "Groq · GPT-OSS-120B" : provider === "gemini" ? "Gemini · Fallback" : "IA"}
                   </span>
                 )}
               </div>
               <div style={{display:"flex",gap:8}}>
-                <button className="action-btn pdf" onClick={() => handlePrint({ ano, tema })}>↓ PDF</button>
-                <button className="docx-btn" onClick={() => handleDocx(result, "Plano_" + ano + "_" + tema)}>↓ Editar DOCX</button>
+                <button className="action-btn pdf" onClick={() => handlePrint({ ano, tema, idioma })}>↓ PDF</button>
+                <button className="docx-btn" onClick={() => handleDocx(result, "Plano_" + (idioma === "espanhol" ? "Espanhol_" : "Ingles_") + ano + "_" + tema)}>↓ Editar DOCX</button>
               </div>
             </div>
             <div className="result-body">
@@ -1087,8 +1195,8 @@ useEffect(() => {
                 {providerAv && <span className="av-badge" title={diagAv || ""}>{providerAv === "gemini" ? "Gemini 2.5 Flash ✓" : providerAv === "groq-fallback" ? "⚠ Groq Fallback" : providerAv}</span>}
               </div>
               <div style={{display:"flex",gap:8}}>
-              <button className="av-pdf-btn" onClick={() => handlePrintAvaliacao({ ano: anoAv, tema: temaAv })}>↓ PDF</button>
-              <button className="docx-btn" onClick={() => handleDocx(resultAv, "Avaliacao_" + anoAv + "_" + temaAv)}>↓ Editar DOCX</button>
+              <button className="av-pdf-btn" onClick={() => handlePrintAvaliacao({ ano: anoAv, tema: temaAv, idioma })}>↓ PDF</button>
+              <button className="docx-btn" onClick={() => handleDocx(resultAv, "Avaliacao_" + (idioma === "espanhol" ? "Espanhol_" : "Ingles_") + anoAv + "_" + temaAv)}>↓ Editar DOCX</button>
             </div>
             </div>
             <div className="result-body">
