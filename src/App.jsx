@@ -260,6 +260,43 @@ Os critérios de avaliação devem corresponder diretamente aos 3 objetivos de a
 Use sempre avaliação formativa observacional, sem provas escritas.
 Exemplos de critérios: participação oral, acerto em jogo/dinâmica, uso correto da estrutura nas atividades, interação com colegas.
 
+RESTRIÇÃO 10 — PROTOCOLO DE QUALIDADE LINGUÍSTICA E PEDAGÓGICA:
+
+Antes de entregar o plano, faça uma revisão interna silenciosa de TODO o conteúdo. NÃO mostre esta revisão ao professor.
+
+1. PRECISÃO LINGUÍSTICA:
+   - Confira conjugação verbal, ortografia, acentuação, concordância, gênero, número e uso natural da língua.
+   - Todos os exemplos, frases, perguntas, respostas e atividades devem estar corretos no idioma selecionado.
+   - Não faça traduções literais do português quando elas produzirem uma construção artificial ou incorreta.
+
+2. COERÊNCIA PEDAGÓGICA:
+   - Todo exemplo e atividade deve estar relacionado ao tema e aos objetivos da aula.
+   - Não introduza estruturas gramaticais desnecessárias ao objetivo.
+   - Exercícios de completar lacunas devem ter resposta claramente determinável.
+
+3. ESPANHOL:
+   - Diferencie corretamente Pretérito Perfecto Compuesto e Pretérito Indefinido.
+   - Para Pretérito Perfecto Compuesto, prefira contextos como "hoy", "esta semana", "este año", "alguna vez", "nunca", "ya", "todavía no" e "últimamente", ou experiências sem período passado concluído especificado.
+   - Para períodos passados concluídos, como "ayer", "el año pasado" e "la semana pasada", use normalmente o Pretérito Indefinido, salvo quando houver explicação explícita de variação linguística.
+   - Se o conteúdo envolver Pretérito Perfecto Compuesto, confirme a conjugação de HABER: he, has, ha, hemos, habéis, han.
+   - Confira particípios regulares e irregulares.
+   - Não use "vosotros" automaticamente para estudantes brasileiros.
+   - Não trate uma variedade do espanhol como universal quando houver variação relevante entre países.
+
+4. INGLÊS:
+   - Confira tempos verbais, formação de perguntas e negativas, concordância, ortografia e uso natural do inglês.
+   - Evite traduções literais do português que produzam inglês artificial.
+
+5. CURRÍCULO:
+   - NÃO invente códigos BNCC, habilidades, documentos curriculares, autores, fontes ou referências.
+   - No Ensino Médio, EM13LGG deve ser tratado como habilidade da Área de Linguagens e suas Tecnologias.
+   - Para Espanhol, NÃO apresente EM13LGG403 como habilidade específica de Espanhol.
+   - Para Inglês, use EM13LGG403 somente quando o objetivo realmente envolver o inglês como língua de comunicação global.
+
+6. REVISÃO FINAL:
+   Antes de responder, confira silenciosamente:
+   idioma, série, nível, tema, exemplos, habilidades, objetivos, atividades, avaliação e referências.
+   Se encontrar qualquer erro linguístico, curricular, ambiguidade ou incoerência, corrija-o antes de entregar o resultado.
 ══════════════════════════════
 
 Crie o plano exatamente neste formato:
@@ -418,6 +455,23 @@ REGRAS GERAIS
 5. Varie os contextos e evite questões óbvias, repetitivas ou muito semelhantes entre si.
 6. Para ${nomeLingua}, respeite ortografia, acentuação, concordância e uso real da língua. NÃO misture estruturas de inglês e espanhol.
 ${espanhol ? "7. Valorize contextos culturais diversos do mundo hispanofalante e evite estereótipos culturais." : ""}
+7. REVISÃO LINGUÍSTICA OBRIGATÓRIA:
+   Antes de finalizar a avaliação, revise silenciosamente todas as questões, textos, alternativas, comandos e o gabarito.
+   Corrija qualquer erro de ortografia, acentuação, conjugação, concordância, tradução, lógica ou ambiguidade.
+   Cada questão objetiva deve possuir somente uma resposta claramente correta.
+   Se houver possibilidade de duas respostas corretas, reescreva a questão antes de entregar.
+
+${espanhol ? `8. REGRAS ESPECÍFICAS PARA ESPANHOL:
+   - Diferencie Pretérito Perfecto Compuesto e Pretérito Indefinido de acordo com o contexto.
+   - Para Pretérito Perfecto Compuesto, prefira "hoy", "esta semana", "este año", "alguna vez", "nunca", "ya", "todavía no" e "últimamente", ou experiências sem período passado concluído.
+   - Para "ayer", "el año pasado", "la semana pasada" e outros períodos concluídos, use normalmente Pretérito Indefinido, salvo explicação explícita de variação.
+   - Confira obrigatoriamente as formas de HABER: he, has, ha, hemos, habéis, han.
+   - Não invente códigos BNCC ou habilidades específicas de Espanhol.
+   - Não use EM13LGG403 como habilidade específica de Espanhol.
+   - Use espanhol natural e adequado ao nível da turma.` : `8. REGRAS ESPECÍFICAS PARA INGLÊS:
+   - Confira tempos verbais, formação de perguntas e negativas, concordância, ortografia e uso natural.
+   - Não faça traduções literais do português quando produzirem inglês artificial.
+   - Não invente códigos BNCC ou referências curriculares.`}
 
 ══════════════════════════════
 DISTRIBUIÇÃO OBRIGATÓRIA DAS ${qtdTotal} QUESTÕES
