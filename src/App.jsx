@@ -262,6 +262,14 @@ Exemplos de critérios: participação oral, acerto em jogo/dinâmica, uso corre
 
 RESTRIÇÃO 10 — PROTOCOLO DE QUALIDADE LINGUÍSTICA E PEDAGÓGICA:
 
+11. ZERO ALUCINAÇÃO CURRICULAR E BIBLIOGRÁFICA
+
+12. VERIFICAÇÃO FACTUAL DA GRAMÁTICA
+
+13. VARIEDADE PADRÃO DO ESPANHOL
+
+14. ADEQUAÇÃO AO ENSINO MÉDIO
+
 Antes de entregar o plano, faça uma revisão interna silenciosa de TODO o conteúdo. NÃO mostre esta revisão ao professor.
 
 1. PRECISÃO LINGUÍSTICA:
@@ -522,6 +530,11 @@ CHARADA/ENIGMA — regras obrigatórias:
 ✓ A resposta é SEMPRE uma palavra ou expressão em ${idiomaBase} relacionada ao tema.
 ✓ Formato: [charada em ${idiomaBase} simples]? ___________
 
+REGRA DE ECONOMIA DE ESPAÇO:
+Quando necessário para garantir que toda a avaliação e o gabarito sejam concluídos, mantenha os enunciados objetivos, as alternativas curtas e as respostas abertas concisas.
+NÃO corte o gabarito para economizar espaço.
+A prioridade é: completar todas as ${qtdTotal} questões + completar todas as ${qtdTotal} respostas do gabarito.
+
 ══════════════════════════════
 GABARITO
 ══════════════════════════════
@@ -602,7 +615,7 @@ async function callAvaliacao(params) {
         { role: "user", content: buildPromptAvaliacao(params.ano, params.tema, params.nivel, params.qtd, params.idioma) },
       ],
       temperature: 0.3,
-      max_tokens: 2500,
+      max_tokens: 4000,
     }),
   });
   const data = await response.json();
