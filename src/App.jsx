@@ -550,7 +550,7 @@ Nada mais. Sem 'REGRAS GERAIS', sem 'INSTRUÇÕES DETALHADAS', sem 'DISTRIBUIÇ�
 Essas seções são instruções para VOCÊ, não para o aluno. O aluno não pode vê-las.`;
 }
 
-async function fetchWithTimeout(url, opts = {}, timeout = 90000) {
+async function fetchWithTimeout(url, opts = {}, timeout = 180000) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {
@@ -592,7 +592,7 @@ async function callAPI(params) {
         { role: "user", content: buildPrompt(params.ano, params.tema, params.duracao, params.nivel, params.recursos, params.estado, params.idioma) },
       ],
       temperature: 0.65,
-      max_tokens: 2500,
+      max_tokens: 5000,
     }),
   });
   const data = await response.json();

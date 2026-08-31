@@ -33,7 +33,7 @@ export default async function handler(req, res) {
             contents: [{ role: 'user', parts: [{ text: userMsg }] }],
             generationConfig: {
               temperature: body.temperature ?? 0.3,
-              maxOutputTokens: body.max_tokens ?? 4000,
+              maxOutputTokens: body.max_tokens ?? 5000,
             },
           }),
         }
