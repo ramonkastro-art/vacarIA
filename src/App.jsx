@@ -43,7 +43,7 @@ function WelcomeBanner({ onClose }) {
           background:"rgba(180,83,9,.06)", borderRadius:10,
           padding:"10px 14px", marginBottom:18
         }}>
-          Uma iniciativa de um professor viciado em ajudar — feita com muito , raio-x
+          Uma iniciativa de um professor viciado em ajudar — feita com muito café , raio-x
           e vontade de facilitar a vida de quem está em sala de aula. ☕
         </p>
 
