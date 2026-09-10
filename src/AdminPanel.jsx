@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "./supabase";
 
-const ADMIN_PASSWORD = "V@c@R1A2026";
 const PROJECT = "vacaria";
 
 const PERIODS = {
@@ -87,14 +86,62 @@ function formatDate(date) {
 
 function labelEvent(eventName) {
   const labels = {
-    page_view: "Visualização de página",
-    plan_generated: "Plano de aula gerado",
-    evaluation_generated: "Avaliação gerada",
-    generation_error: "Erro de geração",
-    interaction: "Interação",
+    page_view: "Entrou / acessou a página",
+    plan_generated: "Gerou um plano de aula",
+    evaluation_generated: "Gerou uma avaliação",
+    generation_error: "Tentou gerar e ocorreu um erro",
+    interaction: "Usou um recurso / jogo",
   };
 
   return labels[eventName] || eventName || "Evento";
+}
+
+function eventDescription(event) {
+  if (event.event_name === "page_view") {
+    return event.page_path === "/"
+      ? "Página inicial do VacarIA"
+      : `Página: ${event.page_path || "não identificada"}`;
+  }
+
+  if (event.event_name === "plan_generated") {
+    return event.feature_used
+      ? `Recurso: ${event.feature_used}`
+      : "Recurso: Plano de Aula";
+  }
+
+  if (event.event_name === "evaluation_generated") {
+    return event.feature_used
+      ? `Recurso: ${event.feature_used}`
+      : "Recurso: Avaliação";
+  }
+
+  if (event.event_name === "interaction") {
+    return event.feature_used
+      ? `Recurso utilizado: ${event.feature_used}`
+      : event.page_path
+      ? `Página: ${event.page_path}`
+      : "Recurso não identificado";
+  }
+
+  if (event.event_name === "generation_error") {
+    return event.feature_used
+      ? `Recurso: ${event.feature_used}`
+      : "Falha durante uma geração";
+  }
+
+  return event.feature_used || event.page_path || "Sem detalhes adicionais";
+}
+
+function eventActionBadge(eventName) {
+  const badges = {
+    page_view: "ACESSO",
+    plan_generated: "PLANO",
+    evaluation_generated: "AVALIAÇÃO",
+    interaction: "RECURSO",
+    generation_error: "ERRO",
+  };
+
+  return badges[eventName] || "AÇÃO";
 }
 
 function labelDevice(value) {
@@ -122,6 +169,30 @@ function labelBrowser(value) {
   };
 
   return labels[value] || value;
+}
+
+function formatJourneyDateTime(date) {
+  if (!date) return "—";
+
+  return new Date(date).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function eventIcon(eventName) {
+  const icons = {
+    page_view: "👁️",
+    plan_generated: "📘",
+    evaluation_generated: "📝",
+    generation_error: "⚠️",
+    interaction: "🎮",
+  };
+
+  return icons[eventName] || "•";
 }
 
 function SectionTitle({ eyebrow, title, description }) {
@@ -191,8 +262,10 @@ function BarList({ items, labelKey, valueKey, total }) {
 
 export default function AdminPanel({ onClose }) {
   const [auth, setAuth] = useState(false);
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [erroSenha, setErroSenha] = useState(false);
+  const [erroSenha, setErroSenha] = useState("");
+  const [authLoading, setAuthLoading] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
@@ -207,6 +280,11 @@ export default function AdminPanel({ onClose }) {
   const [locations, setLocations] = useState([]);
   const [journey, setJourney] = useState([]);
   const [pages, setPages] = useState([]);
+
+  const [visitorJourney, setVisitorJourney] = useState([]);
+  const [journeySearch, setJourneySearch] = useState("");
+  const [journeyLoading, setJourneyLoading] = useState(false);
+  const [expandedVisitor, setExpandedVisitor] = useState(null);
 
   const [viewport, setViewport] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 1200,
@@ -223,9 +301,72 @@ export default function AdminPanel({ onClose }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+
+    async function checkAuth() {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (!mounted) return;
+
+      if (error) {
+        console.error("Erro ao verificar sessão administrativa:", error);
+        setAuth(false);
+        setErroSenha("Não foi possível verificar a sessão.");
+      } else {
+        setAuth(Boolean(data?.session));
+      }
+
+      setAuthLoading(false);
+    }
+
+    checkAuth();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!mounted) return;
+        setAuth(Boolean(session));
+      }
+    );
+
+    return () => {
+      mounted = false;
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
   const isMobile = viewport.width <= 640;
   const isTablet = viewport.width > 640 && viewport.width <= 900;
   const isCompact = viewport.width <= 900;
+
+  async function loadVisitorJourney(selectedPeriod = periodo, search = journeySearch) {
+    setJourneyLoading(true);
+
+    const { start, end } = getPeriodRange(selectedPeriod);
+
+    try {
+      const { data, error } = await supabase.rpc("analytics_visitor_journey", {
+        p_project: PROJECT,
+        p_start: start,
+        p_end: end,
+        p_search: search.trim() || null,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setVisitorJourney(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar jornada dos visitantes:", error);
+      setErro(
+        error?.message ||
+          "Não foi possível carregar a jornada dos visitantes."
+      );
+    } finally {
+      setJourneyLoading(false);
+    }
+  }
 
   async function loadAnalytics(selectedPeriod = periodo) {
     setLoading(true);
@@ -318,6 +459,9 @@ export default function AdminPanel({ onClose }) {
       setLocations(locationsResult.data || []);
       setJourney(journeyResult.data || []);
       setPages(pagesResult.data || []);
+
+      // A jornada individual é carregada separadamente para permitir busca.
+      loadVisitorJourney(selectedPeriod, journeySearch);
     } catch (error) {
       console.error("Erro ao carregar Analytics 2.0:", error);
       setErro(
@@ -329,14 +473,40 @@ export default function AdminPanel({ onClose }) {
     }
   }
 
-  function handleLogin() {
-    if (senha === ADMIN_PASSWORD) {
-      setAuth(true);
-      loadAnalytics("30d");
+  async function handleLogin() {
+    setErroSenha("");
+
+    if (!email.trim() || !senha) {
+      setErroSenha("Informe seu e-mail e sua senha.");
       return;
     }
 
-    setErroSenha(true);
+    setAuthLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: senha,
+    });
+
+    if (error) {
+      console.error("Erro no login administrativo:", error);
+      setErroSenha("E-mail ou senha inválidos.");
+      setAuthLoading(false);
+      return;
+    }
+
+    setSenha("");
+    setAuth(true);
+    setAuthLoading(false);
+    loadAnalytics("30d");
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    setAuth(false);
+    setEmail("");
+    setSenha("");
+    setErroSenha("");
   }
 
   function handlePeriodoChange(value) {
@@ -396,6 +566,47 @@ export default function AdminPanel({ onClose }) {
       browser_name: labelBrowser(item.browser_name),
     }));
   }, [browsers]);
+
+  const visitorGroups = useMemo(() => {
+    const groups = new Map();
+
+    visitorJourney.forEach((item) => {
+      const key = item.visitor_db_id || item.ip_address || `visitor-${groups.size}`;
+
+      if (!groups.has(key)) {
+        groups.set(key, {
+          id: key,
+          ip: item.ip_address || "IP não identificado",
+          cidade: item.cidade || "Desconhecida",
+          regiao: item.regiao || "Desconhecida",
+          pais: item.pais || "Desconhecido",
+          device: item.device_type || "unknown",
+          browser: item.browser_name || "unknown",
+          events: [],
+          sessions: new Set(),
+        });
+      }
+
+      const group = groups.get(key);
+      group.events.push(item);
+      if (item.session_db_id) {
+        group.sessions.add(item.session_db_id);
+      }
+    });
+
+    return Array.from(groups.values())
+      .map((group) => ({
+        ...group,
+        sessions: group.sessions.size,
+        firstEvent: group.events[0]?.event_created_at || null,
+        lastEvent:
+          group.events[group.events.length - 1]?.event_created_at || null,
+      }))
+      .sort((a, b) =>
+        new Date(b.lastEvent || 0).getTime() -
+        new Date(a.lastEvent || 0).getTime()
+      );
+  }, [visitorJourney]);
 
   const responsiveStyles = {
     overlay: isMobile
@@ -547,10 +758,58 @@ export default function AdminPanel({ onClose }) {
       ? { whiteSpace: "nowrap" }
       : {},
 
+    journeyToolbar: isCompact
+      ? { flexDirection: "column", alignItems: "stretch" }
+      : {},
+
+    journeySearch: isMobile
+      ? { width: "100%", minWidth: 0 }
+      : {},
+
+    journeySearchButton: isMobile
+      ? { width: "100%" }
+      : {},
+
+    visitorCard: isMobile
+      ? { padding: "12px" }
+      : {},
+
+    visitorMeta: isMobile
+      ? { gridTemplateColumns: "1fr", gap: "6px" }
+      : {},
+
+    visitorHeader: isMobile
+      ? { flexDirection: "column", alignItems: "stretch", gap: "10px" }
+      : {},
+
+    timelineRow: isMobile
+      ? { gridTemplateColumns: "64px 24px minmax(0, 1fr)", gap: "7px" }
+      : {},
+
+    timelineTime: isMobile
+      ? { fontSize: "0.65rem" }
+      : {},
+
+    timelineContent: isMobile
+      ? { minWidth: 0 }
+      : {},
+
     panelFooter: isCompact
       ? { flexDirection: "column", gap: "6px" }
       : {},
   };
+
+  if (authLoading && !auth) {
+    return (
+      <div style={{ ...styles.overlay, ...responsiveStyles.overlay }}>
+        <div style={{ ...styles.loginBox, ...responsiveStyles.loginBox }}>
+          <div style={styles.loginIcon}>🔐</div>
+          <h2 style={styles.loginTitle}>Analytics VacarIA</h2>
+          <p style={styles.loginSubtitle}>Verificando acesso administrativo...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!auth) {
     return (
@@ -565,12 +824,12 @@ export default function AdminPanel({ onClose }) {
           </p>
 
           <input
-            type="password"
-            placeholder="Digite a senha"
-            value={senha}
+            type="email"
+            placeholder="E-mail administrativo"
+            value={email}
             onChange={(event) => {
-              setSenha(event.target.value);
-              setErroSenha(false);
+              setEmail(event.target.value);
+              setErroSenha("");
             }}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
@@ -578,20 +837,39 @@ export default function AdminPanel({ onClose }) {
               }
             }}
             style={styles.input}
+            autoComplete="username"
             autoFocus
+          />
+
+          <input
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(event) => {
+              setSenha(event.target.value);
+              setErroSenha("");
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleLogin();
+              }
+            }}
+            style={styles.input}
+            autoComplete="current-password"
           />
 
           {erroSenha && (
             <p style={styles.erroSenha}>
-              Senha incorreta.
+              {erroSenha}
             </p>
           )}
 
           <button
             onClick={handleLogin}
             style={styles.btnLogin}
+            disabled={authLoading}
           >
-            Entrar no Analytics
+            {authLoading ? "Entrando..." : "Entrar no Analytics"}
           </button>
 
           <button
@@ -643,6 +921,14 @@ export default function AdminPanel({ onClose }) {
             >
               {loading ? "⟳" : "↻"}
               <span>Atualizar</span>
+            </button>
+
+            <button
+              onClick={handleLogout}
+              style={styles.btnLogout}
+              title="Sair da conta administrativa"
+            >
+              Sair
             </button>
 
             <button
@@ -1066,6 +1352,206 @@ export default function AdminPanel({ onClose }) {
             </section>
 
             {/* ================================================= */}
+            {/* JORNADA INDIVIDUAL */}
+            {/* ================================================= */}
+
+            <section style={styles.section}>
+              <div style={{ ...styles.panelCard, ...responsiveStyles.panelCard }}>
+                <div
+                  style={{
+                    ...styles.journeyHeader,
+                    ...responsiveStyles.visitorHeader,
+                  }}
+                >
+                  <SectionTitle
+                    eyebrow="JORNADA INDIVIDUAL"
+                    title="O que cada visitante fez?"
+                    description="Veja exatamente quando cada visitante entrou, o que acessou, quais recursos utilizou e o resultado de cada ação."
+                  />
+
+                  <div
+                    style={{
+                      ...styles.journeyToolbar,
+                      ...responsiveStyles.journeyToolbar,
+                    }}
+                  >
+                    <input
+                      type="search"
+                      value={journeySearch}
+                      onChange={(event) => setJourneySearch(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          loadVisitorJourney(periodo, journeySearch);
+                        }
+                      }}
+                      placeholder="Buscar IP, cidade, recurso ou evento..."
+                      style={{
+                        ...styles.journeySearch,
+                        ...responsiveStyles.journeySearch,
+                      }}
+                    />
+
+                    <button
+                      onClick={() => loadVisitorJourney(periodo, journeySearch)}
+                      disabled={journeyLoading}
+                      style={{
+                        ...styles.journeySearchButton,
+                        ...responsiveStyles.journeySearchButton,
+                      }}
+                    >
+                      {journeyLoading ? "Buscando..." : "Buscar"}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={styles.journeySummary}>
+                  <span>
+                    {formatNumber(visitorGroups.length)} visitantes encontrados
+                  </span>
+                  <span>
+                    {formatNumber(visitorJourney.length)} eventos carregados
+                  </span>
+                  {journeySearch.trim() && (
+                    <span>Busca: <strong>{journeySearch.trim()}</strong></span>
+                  )}
+                </div>
+
+                {journeyLoading && !visitorJourney.length ? (
+                  <div style={styles.empty}>Carregando jornadas...</div>
+                ) : visitorGroups.length ? (
+                  <div style={styles.visitorList}>
+                    {visitorGroups.slice(0, 100).map((visitor) => {
+                      const isExpanded = expandedVisitor === visitor.id;
+
+                      return (
+                        <div
+                          key={visitor.id}
+                          style={{
+                            ...styles.visitorCard,
+                            ...responsiveStyles.visitorCard,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedVisitor(isExpanded ? null : visitor.id)
+                            }
+                            style={styles.visitorButton}
+                          >
+                            <div
+                              style={{
+                                ...styles.visitorHeader,
+                                ...responsiveStyles.visitorHeader,
+                              }}
+                            >
+                              <div style={styles.visitorIdentity}>
+                                <div style={styles.visitorIp}>
+                                  <span style={styles.visitorLabel}>VISITANTE</span>
+                                  {visitor.ip}
+                                </div>
+
+                                <div style={styles.visitorLocation}>
+                                  📍 {visitor.cidade} · {visitor.regiao} · {visitor.pais}
+                                </div>
+                              </div>
+
+                              <div style={styles.visitorStats}>
+                                <span>{formatNumber(visitor.events.length)} ações</span>
+                                <span>{formatNumber(visitor.sessions)} sessões</span>
+                                <strong style={styles.visitorStatsStrong}>{isExpanded ? "Ocultar ▲" : "Ver jornada ▼"}</strong>
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                ...styles.visitorMeta,
+                                ...responsiveStyles.visitorMeta,
+                              }}
+                            >
+                              <span>💻 <b>Dispositivo:</b> {labelDevice(visitor.device)}</span>
+                              <span>🌐 <b>Navegador:</b> {labelBrowser(visitor.browser)}</span>
+                              <span>🕐 <b>Primeira ação:</b> {formatJourneyDateTime(visitor.firstEvent)}</span>
+                              <span>🕐 <b>Última ação:</b> {formatJourneyDateTime(visitor.lastEvent)}</span>
+                            </div>
+                          </button>
+
+                          {isExpanded && (
+                            <div style={styles.timeline}>
+                              {visitor.events.map((event, index) => (
+                                <div
+                                  key={event.event_id || `${visitor.id}-${index}`}
+                                  style={{
+                                    ...styles.timelineRow,
+                                    ...responsiveStyles.timelineRow,
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      ...styles.timelineTime,
+                                      ...responsiveStyles.timelineTime,
+                                    }}
+                                  >
+                                    {formatJourneyDateTime(event.event_created_at)}
+                                  </span>
+
+                                  <span style={styles.timelineIcon}>
+                                    {eventIcon(event.event_name)}
+                                  </span>
+
+                                  <div
+                                    style={{
+                                      ...styles.timelineContent,
+                                      ...responsiveStyles.timelineContent,
+                                    }}
+                                  >
+                                    <div style={styles.timelineActionLine}>
+                                      <span style={styles.timelineBadge}>
+                                        {eventActionBadge(event.event_name)}
+                                      </span>
+
+                                      <strong style={styles.timelineAction}>
+                                        {labelEvent(event.event_name)}
+                                      </strong>
+                                    </div>
+
+                                    <span style={styles.timelineDetail}>
+                                      {eventDescription(event)}
+                                    </span>
+
+                                    <small style={styles.timelineStatus}>
+                                      {event.success === true
+                                        ? "✓ Sucesso"
+                                        : event.success === false
+                                        ? "✕ Erro"
+                                        : "Evento registrado"}
+                                      {event.duration_ms
+                                        ? ` · duração ${formatDuration(event.duration_ms)}`
+                                        : ""}
+                                    </small>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {visitorGroups.length > 100 && (
+                      <div style={styles.journeyLimit}>
+                        Mostrando os 100 visitantes mais recentes. Use a busca para encontrar um visitante específico.
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={styles.empty}>
+                    Nenhum visitante encontrado neste período.
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* ================================================= */}
             {/* RODAPÉ DO PAINEL */}
             {/* ================================================= */}
 
@@ -1230,6 +1716,16 @@ const styles = {
     gap: "7px",
     background: "#111827",
     color: "#cbd5e1",
+    border: "1px solid #263244",
+    borderRadius: "9px",
+    padding: "9px 13px",
+    cursor: "pointer",
+    fontSize: "0.82rem",
+  },
+
+  btnLogout: {
+    background: "#111827",
+    color: "#94a3b8",
     border: "1px solid #263244",
     borderRadius: "9px",
     padding: "9px 13px",
@@ -1633,6 +2129,218 @@ const styles = {
     borderRadius: "10px",
     padding: "12px 14px",
     fontSize: "0.78rem",
+  },
+
+  journeyHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    gap: "18px",
+    marginBottom: "10px",
+  },
+
+  journeyToolbar: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    flexShrink: 0,
+  },
+
+  journeySearch: {
+    width: "300px",
+    minWidth: "220px",
+    padding: "9px 11px",
+    borderRadius: "9px",
+    border: "1px solid #263244",
+    background: "#070d19",
+    color: "#e2e8f0",
+    fontSize: "0.78rem",
+    outline: "none",
+    boxSizing: "border-box",
+  },
+
+  journeySearchButton: {
+    background: "#6c63ff",
+    color: "#fff",
+    border: "1px solid #6c63ff",
+    borderRadius: "9px",
+    padding: "9px 14px",
+    cursor: "pointer",
+    fontSize: "0.78rem",
+    fontWeight: 700,
+  },
+
+  journeySummary: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px 18px",
+    color: "#64748b",
+    fontSize: "0.72rem",
+    paddingBottom: "10px",
+    borderBottom: "1px solid #172235",
+  },
+
+  visitorList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    marginTop: "10px",
+  },
+
+  visitorCard: {
+    border: "1px solid #182336",
+    borderRadius: "11px",
+    background: "#080f1c",
+    overflow: "hidden",
+  },
+
+  visitorButton: {
+    display: "block",
+    width: "100%",
+    textAlign: "left",
+    background: "transparent",
+    color: "inherit",
+    border: "none",
+    padding: "13px 14px",
+    cursor: "pointer",
+  },
+
+  visitorHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "15px",
+  },
+
+  visitorIdentity: {
+    minWidth: 0,
+  },
+
+  visitorIp: {
+    color: "#f8fafc",
+    fontSize: "0.9rem",
+    fontWeight: 800,
+    wordBreak: "break-all",
+    display: "flex",
+    flexDirection: "column",
+    gap: "3px",
+  },
+
+  visitorLabel: {
+    color: "#818cf8",
+    fontSize: "0.58rem",
+    fontWeight: 800,
+    letterSpacing: "0.12em",
+  },
+
+  visitorLocation: {
+    color: "#94a3b8",
+    fontSize: "0.7rem",
+    marginTop: "4px",
+  },
+
+  visitorStats: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    color: "#94a3b8",
+    fontSize: "0.68rem",
+    whiteSpace: "nowrap",
+  },
+
+  visitorStatsStrong: {
+    color: "#818cf8",
+  },
+
+  visitorMeta: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+    gap: "8px 14px",
+    marginTop: "10px",
+    color: "#475569",
+    fontSize: "0.67rem",
+  },
+
+  timeline: {
+    borderTop: "1px solid #172235",
+    padding: "4px 14px 10px",
+    background: "#070d19",
+  },
+
+  timelineRow: {
+    display: "grid",
+    gridTemplateColumns: "110px 28px minmax(0, 1fr)",
+    alignItems: "start",
+    gap: "9px",
+    padding: "9px 0",
+    borderBottom: "1px solid #121d2d",
+  },
+
+  timelineTime: {
+    color: "#64748b",
+    fontSize: "0.68rem",
+    lineHeight: 1.35,
+  },
+
+  timelineIcon: {
+    fontSize: "0.82rem",
+    textAlign: "center",
+  },
+
+  timelineContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    minWidth: 0,
+    color: "#e2e8f0",
+  },
+
+  timelineActionLine: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "7px",
+  },
+
+  timelineBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "2px 6px",
+    borderRadius: "5px",
+    background: "rgba(129, 140, 248, 0.12)",
+    border: "1px solid rgba(129, 140, 248, 0.2)",
+    color: "#a5b4fc",
+    fontSize: "0.55rem",
+    fontWeight: 800,
+    letterSpacing: "0.06em",
+  },
+
+  timelineAction: {
+    color: "#f8fafc",
+    fontSize: "0.82rem",
+    lineHeight: 1.3,
+  },
+
+  timelineDetail: {
+    color: "#cbd5e1",
+    fontSize: "0.72rem",
+    lineHeight: 1.4,
+    wordBreak: "break-word",
+  },
+
+  timelineStatus: {
+    color: "#64748b",
+    fontSize: "0.65rem",
+  },
+
+  journeyLimit: {
+    color: "#64748b",
+    background: "#080f1c",
+    border: "1px solid #182336",
+    borderRadius: "9px",
+    padding: "10px",
+    fontSize: "0.7rem",
+    textAlign: "center",
   },
 
   panelFooter: {
